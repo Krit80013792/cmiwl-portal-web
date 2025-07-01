@@ -26,7 +26,7 @@ COPY --from=deps /app/node_modules ./node_modules
 ARG BUILDCOMMAND=build
 
 # Build the application and install production dependencies
-RUN npm run "$BUILDCOMMAND" && npm install --production --ignore-scripts --prefer-offline
+RUN npm run "$BUILDCOMMAND" && npm install --legacy-peer-deps --production --ignore-scripts --prefer-offline
 
 # Stage 3: Create a minimal runtime image
 FROM node:22-alpine AS runner
