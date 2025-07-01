@@ -9,8 +9,8 @@ WORKDIR /app
 # Copy only package files for dependency installation
 COPY package.json package-lock.json ./
 
-# Install dependencies without modifying lock file
-RUN npm install --frozen-lockfile
+# Install dependencies
+RUN npm install --legacy-peer-deps
 
 # Stage 2: Build the application
 FROM node:22-alpine AS builder
