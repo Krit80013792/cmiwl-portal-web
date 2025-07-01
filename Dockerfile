@@ -10,7 +10,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # Install dependencies without modifying lock file
-RUN npm ci
+#RUN npm install --frozen-lockfile
 
 # Stage 2: Build the application
 FROM node:22-alpine AS builder
