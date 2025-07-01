@@ -1,0 +1,26 @@
+@font-face {
+    font-family: 'Noto-Sans-Thai-Bold';
+    src: url('/assets/fontface/notosansthai-bold/NotoSansThai-Bold.eot');
+    src: url('/assets/fontface/notosansthai-bold/NotoSansThai-Bold.eot?') format('embedded-opentype'), url('/assets/fontface/notosansthai-bold/NotoSansThai-Bold.woff2') format('woff2'), url('/assets/fontface/notosansthai-bold/NotoSansThai-Bold.woff') format('woff'), url('/assets/fontface/notosansthai-bold/NotoSansThai-Bold.ttf') format('truetype'), url('/assets/fontface/notosansthai-bold/NotoSansThai-Bold.svg') format('svg');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap
+}
+
+@font-face {
+    font-family: 'Noto-Sans-Thai-Medium';
+    src: url('/assets/fontface/notosansthai-medium/NotoSansThai-Medium.eot');
+    src: url('/assets/fontface/notosansthai-medium/NotoSansThai-Medium.eot?') format('embedded-opentype'), url('/assets/fontface/notosansthai-medium/NotoSansThai-Medium.woff2') format('woff2'), url('/assets/fontface/notosansthai-medium/NotoSansThai-Medium.woff') format('woff'), url('/assets/fontface/notosansthai-medium/NotoSansThai-Medium.ttf') format('truetype'), url('/assets/fontface/notosansthai-medium/NotoSansThai-Medium.svg') format('svg');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap
+}
+
+@font-face {
+    font-family: 'Noto-Sans-Thai-Regular';
+    src: url('/assets/fontface/notosansthai-regular/NotoSansThai-Regular.eot');
+    src: url('/assets./fontface/notosansthai-regular/NotoSansThai-Regular.eot?') format('embedded-opentype'), url('/assets/fontface/notosansthai-regular/NotoSansThai-Regular.woff2') format('woff2'), url('/assets/fontface/notosansthai-regular/NotoSansThai-Regular.woff') format('woff'), url('/assets/fontface/notosansthai-regular/NotoSansThai-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap
+}

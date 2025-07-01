@@ -1,0 +1,34 @@
+# Node modules
+node_modules
+npm-debug.log
+yarn-error.log
+yarn.lock
+
+# Build output
+.next
+out
+
+# Local environment files
+.env
+.env.local
+.env.dev
+.env.development
+.env.test
+.env.uat
+.env.production
+.env.prd
+
+# Logs
+logs
+*.log
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Coverage directory used by testing tools
+coverage
+
+# Temporary files
+tmp
+temp

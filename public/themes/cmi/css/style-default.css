@@ -1,0 +1,113 @@
+:root {
+    --primary: #045ffc;
+    --bg-active: #f2f7ff
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary)
+}
+
+.btn-secondary {
+    background-color: #fff;
+    border-color: var(--primary);
+    color: var(--primary)
+}
+
+.btn-close:focus,
+.btn-close:active,
+.btn-close:active:focus {
+    box-shadow: none
+}
+
+.btn-check:focus+.btn-primary,
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active,
+.btn-primary:active:focus {
+    color: #fff;
+    background-color: var(--primary);
+    border-color: var(--primary);
+    box-shadow: none
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus,
+.btn-secondary:active {
+    background-color: #fff;
+    border-color: var(--primary);
+    color: var(--primary)
+}
+
+.payment-options .active {
+    border: solid 2px var(--primary);
+    background-color: var(--bg-active)
+}
+
+.choice-card.active {
+    box-shadow: inset 0 0 0 2px var(--primary);
+    background-color: var(--bg-active)
+}
+
+.car-brand .border-grey.active {
+    border: solid 1px var(--primary);
+    background-color: var(--bg-active)
+}
+
+.formMain .form-ddl .dropdown-item.active {
+    color: var(--primary);
+    background-color: #e2f1fc
+}
+
+.formMain .form-control[type="text"]:active,
+.formMain .form-control[type="text"]:focus,
+.formMain .form-control[type="text"]:focus-visible,
+.formMain .form-control[type="tel"]:active,
+.formMain .form-control[type="tel"]:focus,
+.formMain .form-control[type="tel"]:focus-visible,
+.formMain .form-control[type="password"]:active,
+.formMain .form-control[type="password"]:focus,
+.formMain .form-control[type="password"]:focus-visible,
+.formMain select.form-control:active,
+.formMain select.form-control:focus,
+.formMain select.form-control:focus-visible,
+.formMain textarea.form-control:active,
+.formMain textarea.form-control:focus,
+.formMain textarea.form-control:focus-visible,
+.formMain button.form-control:active,
+.formMain button.form-control:focus,
+.formMain button.form-control:focus-visible,
+.formMain input.form-select:active,
+.formMain input.form-select:focus,
+.formMain input.form-select:focus-visible {
+    box-shadow: inset 0 0 0 1px var(--primary)
+}
+
+.formMain .form-label:focus,
+.formMain .form-label:active {
+    color: var(--primary)
+}
+
+.form-group.active label {
+    color: var(--primary);
+    font-weight: 500
+}
+
+.form-group.active .form-control {
+    box-shadow: inset 0 0 0 1px var(--primary)
+}
+
+input[type="checkbox"]:checked {
+    background-color: var(--primary);
+    color: var(--primary)
+}
+
+.formMain .form-control:focus~.form-label,
+.select2-container--open~.form-label {
+    color: var(--primary);
+    font-weight: 500
+}
+
+input[type="radio"]:checked {
+    border: 5px solid var(--primary)
+}
