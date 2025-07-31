@@ -40,10 +40,10 @@ export async function POST(oReq: NextRequest) {
     const METHOD = 'POST';
     const ACTION = 'signin';
 
-    // const isValidApiKey = await validateApiKey(oReq);
-    // if (!isValidApiKey) {
-    //     return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
-    // }
+    const isValidApiKey = await validateApiKey(oReq);
+    if (!isValidApiKey) {
+        return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
+    }
 
     let body: any;
     try {
@@ -53,6 +53,7 @@ export async function POST(oReq: NextRequest) {
     }
 
     const deCryptedBodyData = await rsaDecrypt(body?.data);
+    console.log(deCryptedBodyData);
     if (!deCryptedBodyData.usr || !deCryptedBodyData.pw) {
         return new NextResponse(JSON.stringify({ message: `Invalid request data` }), { status: 400 });
     }
