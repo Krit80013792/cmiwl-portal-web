@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 import { validateApiKey, validateAuth } from './auth';
+import { decrypt } from '../utils/auth.crypto';
 
 /**
  * Middleware function to protect routes by requiring authentication.
@@ -23,4 +25,26 @@ export function AuthGuard(handler: (poReq: NextRequest) => Promise<NextResponse>
             return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 });
         }
     };
+};
+
+export async function authGuard() {
+    const cookie = cookies().get(`${process.env.APP_ENV}_cmiwl_cms_token`);
+
+    if (!cookie?.value) {
+        throw new Error('Unauthorized');
+    }
+
+    try {
+        const decrypted = await decrypt(cookie.value, process.env.PORTAL_API_KEY ?? '');
+        const user = JSON.parse(decrypted);
+
+        return {
+            user,
+            permissions: user.permissions || [],
+            roles: user.roles || [],
+        };
+    } catch (error) {
+        console.error(`Error AuthGuard :`, error);
+        throw new Error('Unauthorized');
+    }
 };

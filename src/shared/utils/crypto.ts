@@ -8,7 +8,7 @@ import forge from 'node-forge';
  */
 export async function rsaEncrypt(data: string): Promise<string | null> {
     try {
-        const envpublicKey = process.env.RSA_PUB_KEY ?? '';
+        const envpublicKey = process.env.PORTAL_RSA_PUB_KEY ?? '';
         const publicKey = forge.pki.publicKeyFromPem(envpublicKey);
         const encryptedData = publicKey.encrypt(JSON.stringify(data), 'RSA-OAEP');
         return Buffer.from(encryptedData, 'binary').toString('base64');
@@ -27,7 +27,7 @@ export async function rsaEncrypt(data: string): Promise<string | null> {
 export async function rsaDecrypt(encryptedData: string): Promise<any> {
     try {
         if (!encryptedData) return null;
-        const envprivateKey = process.env.RSA_PRI_KEY ?? '';
+        const envprivateKey = process.env.PORTAL_RSA_PRI_KEY ?? '';
         const privateKey = forge.pki.privateKeyFromPem(envprivateKey);
         const decodedData = Buffer.from(encryptedData, 'base64').toString('binary');
         const decrypted = privateKey.decrypt(decodedData, 'RSA-OAEP');

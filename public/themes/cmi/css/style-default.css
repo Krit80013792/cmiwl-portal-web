@@ -1,11 +1,32 @@
 :root {
     --primary: #045ffc;
-    --bg-active: #f2f7ff
+    --tidlor: #045ffc;
+    --hey: #13875d;
+    --tidloh: #f2b41c;
+    --bg-active: #f2f7ff;
+    --bg-tidlor-active: #f2f7ff;
+    --bg-hey-active: #dffaf0;
+    --bg-tidloh-active: #fff8e6;
 }
 
 .btn-primary {
     background-color: var(--primary);
     border-color: var(--primary)
+}
+
+.btn-tidlor {
+    background-color: var(--tidlor);
+    border-color: var(--tidlor)
+}
+
+.btn-hey {
+    background-color: var(--hey);
+    border-color: var(--hey)
+}
+
+.btn-tidloh {
+    background-color: var(--tidloh);
+    border-color: var(--tidloh)
 }
 
 .btn-secondary {
@@ -31,6 +52,39 @@
     box-shadow: none
 }
 
+.btn-tidlor,
+.btn-tidlor:hover,
+.btn-tidlor:focus,
+.btn-tidlor:active,
+.btn-tidlor:active:focus {
+    color: #fff;
+    background-color: var(--tidlor);
+    border-color: var(--tidlor);
+    box-shadow: none;
+}
+
+.btn-hey,
+.btn-hey:hover,
+.btn-hey:focus,
+.btn-hey:active,
+.btn-hey:active:focus {
+    color: #fff;
+    background-color: var(--hey);
+    border-color: var(--hey);
+    box-shadow: none;
+}
+
+.btn-tidloh,
+.btn-tidloh:hover,
+.btn-tidloh:focus,
+.btn-tidloh:active,
+.btn-tidloh:active:focus {
+    color: #fff;
+    background-color: var(--tidloh);
+    border-color: var(--tidloh);
+    box-shadow: none;
+}
+
 .btn-secondary:hover,
 .btn-secondary:focus,
 .btn-secondary:active {
@@ -42,6 +96,21 @@
 .payment-options .active {
     border: solid 2px var(--primary);
     background-color: var(--bg-active)
+}
+
+.tidlor-active {
+    border: solid 2px var(--tidlor);
+    background-color: var(--bg-tidlor-active)
+}
+
+.hey-active {
+    border: solid 2px var(--hey);
+    background-color: var(--bg-hey-active);
+}
+
+.tidloh-active {
+    border: solid 2px var(--tidloh);
+    background-color: var(--bg-tidloh-active);
 }
 
 .choice-card.active {

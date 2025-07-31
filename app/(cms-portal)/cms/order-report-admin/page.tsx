@@ -1,6 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import LoadingComponent from '@/layout/components/loading/LoadingComponent';
+import { Toast } from 'primereact/toast';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { Calendar } from 'primereact/calendar';
@@ -8,16 +10,16 @@ import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 
-const OrderReportAdmin = () => {
+const OrderReportAdminPage = () => {
+
+    const toast = useRef<Toast>(null);
 
     return (
         <div className="grid">
             <div className="col-12">
                 <div className="card">
-                    <h5>
-                        <i className="pi pi-table" style={{ fontSize: '2rem' }}></i>
-                        <strong> Order Report Admin</strong>
-                    </h5>
+                    <Toast ref={toast} />
+                    <h5><i className="pi pi-table" style={{ fontSize: '2rem' }}></i><strong> Order Report Admin</strong></h5>
                 </div>
 
                 <div className="card p-fluid">
@@ -135,4 +137,4 @@ const OrderReportAdmin = () => {
     );
 };
 
-export default OrderReportAdmin;
+export default OrderReportAdminPage;

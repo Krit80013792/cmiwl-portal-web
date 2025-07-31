@@ -2,7 +2,10 @@
 
 import React from 'react';
 import { Metadata } from 'next';
-import LoadingComponent from '@/cmi-layout/components/loading/LoadingComponent';
+
+import { UserGroupRepository } from '@/src/infrastructure/database/mongodb/repositories/UserGroupRepository';
+import { UserGroupService } from '@/src/application/services/UserGroupService';
+import { UserGroupDTO } from '@/src/application/dtos/UserGroupDTO';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,8 +16,21 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 };
 
+async function getData() {
+
+    const userGroupService = new UserGroupService(new UserGroupRepository());
+    
+    const data = await userGroupService.getUserGroups();
+    return data;
+}
+
 export default async function IntroChannel() {
 
+    const data = await getData();
+
+    console.log('User Groups Data:', data);
+    
+    const chn = 'btn btn-tidloh fs-6 d-flex justify-content-center align-items-center mx-auto continue-btn';
 
     return (
         <main>
@@ -37,7 +53,7 @@ export default async function IntroChannel() {
                                     <a title="เงื่อนไขและรายละเอียดความคุ้มครอง" className="fs-14 text-grey d-block" href="/th/coverage-tc" data-cf-modified-e9c163d6727633da1d0a186d-="">เงื่อนไขและรายละเอียดความคุ้มครอง</a>
                                     <div className="pb-4 pt-3">
                                         {/* onclick="if (!window.__cfRLUnblockHandlers) return false; PushGTMDefault('intro', 'click_button', 'to_select-vehicle')" */}
-                                        <a className="btn btn-primary fs-6 d-flex justify-content-center align-items-center mx-auto continue-btn" href="/th/VehicleCTP" data-cf-modified-e9c163d6727633da1d0a186d-=""><strong className="f-bd">ดำเนินการต่อ</strong><img className="img-fluid ms-6" alt="ดำเนินการต่อ" src="/assets/icon/next-white.png" width="20" height="20" /></a>
+                                        <a className={chn} href="/th/VehicleCTP" data-cf-modified-e9c163d6727633da1d0a186d-=""><strong className="f-bd">ดำเนินการต่อ</strong><img className="img-fluid ms-6" alt="ดำเนินการต่อ" src="/assets/icon/next-white.png" width="20" height="20" /></a>
                                     </div>
                                 </div>
                             </div>
@@ -53,7 +69,6 @@ export default async function IntroChannel() {
                     </div>
                 </div>
             </div>
-            
         </main>
     );
 };

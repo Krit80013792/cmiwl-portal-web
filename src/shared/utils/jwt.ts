@@ -7,7 +7,7 @@ import { SignJWT, JWTPayload, jwtVerify } from 'jose';
  * @returns {Promise<string>} The signed JWT as a string.
  */
 export async function createJWT(poPayload: JWTPayload): Promise<string> {
-    const secret = new TextEncoder().encode(process.env.API_KEY);
+    const secret = new TextEncoder().encode(process.env.PORTAL_API_KEY);
     const token = await new SignJWT({ ...poPayload, aud: process.env.BASE_URL })
         .setProtectedHeader({ alg: "HS256" })
         .setIssuedAt()
@@ -24,7 +24,7 @@ export async function createJWT(poPayload: JWTPayload): Promise<string> {
  */
 export async function verifyJWT(psToken: string): Promise<object | null> {
     try {
-        const secret = new TextEncoder().encode(process.env.API_KEY);
+        const secret = new TextEncoder().encode(process.env.PORTAL_API_KEY);
         const { payload } = await jwtVerify(psToken, secret, {
             audience: process.env.BASE_URL,
         });

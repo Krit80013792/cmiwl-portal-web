@@ -5,7 +5,6 @@ import 'primereact/resources/primereact.css';
 import 'primeflex/primeflex.css';
 import 'primeicons/primeicons.css';
 import '../../styles/layout/layout.scss';
-//import '../../styles/demo/Demos.scss';
 
 interface RootLayoutProps {
     readonly children: React.ReactNode;
@@ -13,7 +12,7 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
     return (
-        <html lang="en" suppressHydrationWarning style={{ fontSize: '12px' }}>
+        <html lang="en" suppressHydrationWarning style={{ fontSize: '11px' }}>
             <head>
                 <link id="theme-css" href={`/themes/lara-light-blue/theme.css`} rel="stylesheet"></link>
             </head>

@@ -10,7 +10,7 @@ import { LayoutContext } from './context/layoutcontext';
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { Toast } from 'primereact/toast';
-import { getCMSConfigAsync } from '@/src/shared/utils/config';
+import { config } from '@/src/shared/utils/config';
 import { signOut } from '@/services/client/auth.service';
 
 const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
@@ -33,7 +33,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     };
 
     const setConfAsync = async (): Promise<any> => {
-        const c = await getCMSConfigAsync();
+        const c = await config();
         const de = JSON.parse(Buffer.from(c, 'base64').toString('binary'));
         return de;
     };
@@ -42,7 +42,8 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
         const conf = await setConfAsync();
         const res = await signOut(conf);
         if (res.ok) {
-            router.push('/pw0wl');
+            const ath = Buffer.from(conf?.ath, 'base64').toString('binary');
+            router.push(ath);
         } else {
             toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to sign out', life: 5000 });
         }
@@ -63,16 +64,16 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
         <div className="layout-topbar">
             <Link href="/cms/main" className="layout-topbar-logo">
                 {/* <Image id="js-logo" className="logo" src="/images/logo.png" width={100} height={40} alt="areegator" priority /> */}
-                CMI
+                CMIWL
             </Link>
 
-            <button ref={menubuttonRef} type="button" className="p-link layout-menu-button layout-topbar-button" onClick={onMenuToggle}>
+            <a ref={menubuttonRef} type="button" className="p-link layout-menu-button layout-topbar-button" onClick={onMenuToggle}>
                 <i className="pi pi-bars" />
-            </button>
+            </a>
 
-            <button ref={topbarmenubuttonRef} type="button" className="p-link layout-topbar-menu-button layout-topbar-button" onClick={showProfileSidebar}>
+            <a ref={topbarmenubuttonRef} type="button" className="p-link layout-topbar-menu-button layout-topbar-button" onClick={showProfileSidebar}>
                 <i className="pi pi-ellipsis-v" />
-            </button>
+            </a>
 
             <div ref={topbarmenuRef} className={classNames('layout-topbar-menu', { 'layout-topbar-menu-mobile-active': layoutState.profileSidebarVisible })}>
                 <Link href="#" onClick={onSignOut}>

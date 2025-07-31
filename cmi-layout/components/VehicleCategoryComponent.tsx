@@ -15,7 +15,7 @@ const VehicleCategoryComponent = () => {
             {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selVehicleCate(this);" */}
             <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCategory_showVehicleCategory" className="row seatamount-select mb-4">
                 <div className='col-6 pe-2 mb-3  ' onClick={handleCarInformation}>
-                    <div className='px-12 py-2 rounded-4 choice-card h-100' data-index='23' data-cartype='1' data-text='รับจ้าง/ให้เช่า (รย.9)' data-price='2,041.56' >
+                    <div className='px-12 py-2 rounded-4 choice-card h-100 hey-active' data-index='23' data-cartype='1' data-text='รับจ้าง/ให้เช่า (รย.9)' data-price='2,041.56' >
                         <p className='mb-0 text-grey'>รับจ้าง/ให้เช่า (รย.9)</p>
                         <p className='mb-0 text-grey'><strong className='f-bd'>2,041.56 บาท/ปี</strong></p>
                     </div>

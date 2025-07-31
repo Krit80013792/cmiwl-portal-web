@@ -16,8 +16,16 @@ export class UserRepository implements IUserRepository {
         return await UsersEntity.findById(psId);
     };
 
+    async findByUsername(psUserName: string): Promise<IUser | null> {
+        return await UsersEntity.findOne({ bIsActive: true, sUserName: psUserName });
+    };
+
     async findByStatus(pbStatus: boolean): Promise<IUser[]> {
         return await UsersEntity.find({ bIsActive: pbStatus }).sort({ createdAt: -1 });
+    };
+
+    async verification(psUserName: string, psPassword: string): Promise<IUser | null> {
+        return await UsersEntity.findOne({ bIsActive: true, sUserName: psUserName, sPassword: psPassword });
     };
 
     async update(psId: string, poUser: Partial<IUser>): Promise<IUser | null> {

@@ -1,51 +1,153 @@
-import { md5Hash, rsaEncrypt, rsaDecrypt } from '@/src/shared/utils/crypto';
+//* app/api/v1/auth/signin/route.ts
+import { rsaDecrypt } from '@/src/shared/utils/crypto';
 import { validateApiKey } from '@/src/shared/middleware/auth';
 import { NextRequest, NextResponse } from 'next/server';
-import { createJWT } from '@/src/shared/utils/jwt';
+import { serializeRequest } from '@/src/shared/utils/serializeRequest';
+import { SafeUserDTO } from '@/src/application/dtos/UserDTO';
+import { UserService } from '../../../../../src/application/services/UserService';
+import { UserRepository } from '../../../../../src/infrastructure/database/mongodb/repositories/UserRepository';
+import { UserRoleService } from '@/src/application/services/UserRoleService';
+import { UserRoleRepository } from '@/src/infrastructure/database/mongodb/repositories/UserRoleRepository';
+import { ResourceService } from '@/src/application/services/ResourceService';
+import { ResourceRepository } from '@/src/infrastructure/database/mongodb/repositories/ResourceRepository';
+import { TxActivityLogger } from '@/src/shared/middleware/logging/TxActivityLogger';
+import { encrypt } from '@/src/shared/utils/auth.crypto';
+import { mapResourcesToMenu } from '@/src/shared/utils/mapResourcesToMenu';
 
-export async function POST(req: NextRequest) {
-    try {
-        const isValidApiKey = await validateApiKey(req);
-        if (!isValidApiKey) {
-            return new NextResponse(JSON.stringify({ message: 'Unauthorized' }), { status: 401 });
-        }
-        const body = await req.json();
-        const deCryptedBodyData = await rsaDecrypt(body.data);
-        const usrHash = await md5Hash(deCryptedBodyData.usr);
-        const pwHash = await md5Hash(deCryptedBodyData.pw);
-        const rootUsr = process.env.ROOT_USR;
-        const rootPw = process.env.ROOT_PW;
+let _userServiceInstance: UserService | null = null;
+async function UserServiceInstance(): Promise<UserService> {
+    _userServiceInstance ??= new UserService(new UserRepository());
+    return _userServiceInstance;
+};
 
-        if (usrHash === rootUsr && pwHash === rootPw) {
-            const response = NextResponse.json({ message: 'Credentials are valid!' });
-            const jwtToken = await createJWT({ role: await rsaEncrypt('Administrator') });
-            const token = (await rsaEncrypt(
-                JSON.stringify({
-                    author: process.env.BASE_URL,
-                    uag: req.headers.get('user-agent')
-                })
-            )) as string;
-            response.cookies.set(`${process.env.APP_ENV}_ag_token`, token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
-                maxAge: 14400, //* 4 hrs (4 * 60 * 60)
-                path: '/'
-            });
-            const access = Buffer.from(JSON.stringify({ token: jwtToken }), 'binary').toString('base64');
-            response.cookies.set(`${process.env.APP_ENV}_ag_access`, access, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'strict',
-                maxAge: 14400, //* 4 hrs (4 * 60 * 60)
-                path: '/'
-            });
-            return response;
-        } else {
-            return new NextResponse(JSON.stringify({ message: 'Invalid user data' }), { status: 404 });
-        }
-    } catch (error) {
-        console.error(`Error POST :`, error);
-        return new NextResponse(JSON.stringify({ message: 'Internal Server Error' }), { status: 500 });
+let _userRoleServiceInstance: UserRoleService | null = null;
+async function UserRoleServiceInstance(): Promise<UserRoleService> {
+    _userRoleServiceInstance ??= new UserRoleService(new UserRoleRepository());
+    return _userRoleServiceInstance;
+};
+
+let _resourceServiceInstance: ResourceService | null = null;
+async function ResourceServiceInstance(): Promise<ResourceService> {
+    _resourceServiceInstance ??= new ResourceService(new ResourceRepository());
+    return _resourceServiceInstance;
+};
+
+/**
+ * api/v1/auth/signin
+ */
+export async function POST(oReq: NextRequest) {
+    const ROUTE = 'api/v1/auth/signin';
+    const METHOD = 'POST';
+    const ACTION = 'signin';
+
+    const isValidApiKey = await validateApiKey(oReq);
+    if (!isValidApiKey) {
+        return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
     }
-}
+
+    let body: any;
+    try {
+        body = await oReq.json();
+    } catch {
+        return new NextResponse(JSON.stringify({ message: `Invalid request data` }), { status: 400 });
+    }
+
+    const deCryptedBodyData = await rsaDecrypt(body?.data);
+    if (!deCryptedBodyData.usr || !deCryptedBodyData.pw) {
+        return new NextResponse(JSON.stringify({ message: `Invalid request data` }), { status: 400 });
+    }
+
+    const reqLog = await serializeRequest(oReq, { ...body });
+
+    try {
+        //* Verify user credentials
+        const userService = await UserServiceInstance();
+        const user = await userService.verification(deCryptedBodyData?.usr, deCryptedBodyData?.pw);
+        //* Verify user role and resources
+        const userRoleId = user?.data?.userRoleId ?? '';
+        const userRoleService = await UserRoleServiceInstance();
+        const userRole = await userRoleService.getUserRoleById(userRoleId);
+
+        if (!user.data || !userRole.data) {
+
+            await TxActivityLogger.log({
+                sUserName: deCryptedBodyData?.usr,
+                sUserGroupName: '',
+                sUserRoleName: '',
+                sRoute: ROUTE,
+                sMethod: METHOD,
+                sAction: ACTION,
+                sStatus: 'failed',
+                sRequestMsg: JSON.stringify(reqLog),
+                sResponseMsg: JSON.stringify(user),
+                sChannel: 'CMS',
+            } as any);
+
+            return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
+        }
+
+        //* Get user resources for create menus
+        const resourceService = await ResourceServiceInstance();
+        const resources = await resourceService.getMultipleByResourceNames(userRole?.data?.resources);
+        const menus = mapResourcesToMenu(resources?.data || []);
+
+        const privateUserData = {
+            token: '',
+            userId: user?.data?.userId,
+            userName: user?.data?.userName,
+            userGroupName: user?.data?.userGroupName,
+            userRoleName: user?.data?.userRoleName,
+            permissions: userRole?.data?.userRolePermissions,
+            routes: userRole?.data?.resources,
+            resources: menus,
+            uag: oReq.headers.get('user-agent'),
+        };
+
+        const encryptedToken = await encrypt(JSON.stringify(privateUserData), process.env.PORTAL_API_KEY ?? '');
+
+        const response = new NextResponse(JSON.stringify({ message: `Success` }), { status: 200 });
+        response.cookies.set(`${process.env.APP_ENV}_cmiwl_cms_token`, encryptedToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 2 * 60 * 60,
+            path: '/',
+        });
+
+        const safeUser: SafeUserDTO = (({ password, ...rest }) => rest)(user?.data);
+
+        await TxActivityLogger.log({
+            sUserName: deCryptedBodyData?.usr,
+            sUserGroupName: user?.data?.userGroupName,
+            sUserRoleName: user?.data?.userRoleName,
+            sRoute: ROUTE,
+            sMethod: METHOD,
+            sAction: ACTION,
+            sStatus: 'success',
+            sRequestMsg: JSON.stringify(reqLog),
+            sResponseMsg: JSON.stringify(safeUser),
+            sChannel: 'CMS',
+        } as any);
+
+        return response;
+
+    } catch (error) {
+        const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
+        console.error(`Error POST :`, errorMsg);
+
+        await TxActivityLogger.log({
+            sUserName: deCryptedBodyData?.usr,
+            sUserGroupName: '',
+            sUserRoleName: '',
+            sRoute: ROUTE,
+            sMethod: METHOD,
+            sAction: ACTION,
+            sStatus: 'failed',
+            sRequestMsg: JSON.stringify(reqLog),
+            sResponseMsg: errorMsg,
+            sChannel: 'CMS',
+        } as any);
+
+        return new NextResponse(JSON.stringify({ message: `Internal Server Error` }), { status: 500 });
+    }
+};

@@ -9,7 +9,7 @@ const Layout = ({ children }: ChildContainerProps) => {
     const topbarRef = useRef<AppTopbarRef>(null);
 
     return (
-        <div className="page-areegator position-relative">
+        <div className="page-cmiwl position-relative">
             <AppTopbar ref={topbarRef} />
             {children}
             <AppFooter />

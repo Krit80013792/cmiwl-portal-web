@@ -10,7 +10,7 @@ import { LayoutContext } from '../../../layout/context/layoutcontext';
 import { InputText } from 'primereact/inputtext';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { classNames } from 'primereact/utils';
-import { getCMSConfigAsync } from '@/src/shared/utils/config';
+import { config } from '@/src/shared/utils/config';
 import { signIn } from '@/services/client/auth.service';
 import forge from 'node-forge';
 
@@ -24,10 +24,8 @@ const LoginPage = () => {
     const router = useRouter();
     const containerClassName = classNames('surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden', { 'p-input-filled': layoutConfig.inputStyle === 'filled' });
 
-    useEffect(() => {}, []);
-
     const setConfAsync = async (): Promise<any> => {
-        const c = await getCMSConfigAsync();
+        const c = await config();
         const de = JSON.parse(Buffer.from(c, 'base64').toString('binary'));
         return de;
     };
@@ -75,7 +73,10 @@ const LoginPage = () => {
                 >
                     <div className="w-full surface-card py-8 px-5 sm:px-8" style={{ borderRadius: '53px' }}>
                         <div className="text-center mb-5">
-                            <Image id="js-logo" className="logo" src="/images/" width={138} height={54} alt="cmi" priority />
+                            <Image id="js-logo" className="logo" src="/favicon.ico" width={48} height={48} alt="cmi" priority />
+                        </div>
+                        <div className="text-center mb-5">
+                            <strong>CMIWL</strong>
                         </div>
                         <form onSubmit={onAuthentication}>
                             <div>

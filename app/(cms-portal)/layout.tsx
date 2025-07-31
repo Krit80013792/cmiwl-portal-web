@@ -6,7 +6,6 @@ import 'primereact/resources/primereact.css';
 import 'primeflex/primeflex.css';
 import 'primeicons/primeicons.css';
 import '../../styles/layout/layout.scss';
-//import '../../styles/demo/Demos.scss';
 import Layout from '../../layout/layout';
 
 interface RootLayoutProps {
@@ -14,13 +13,13 @@ interface RootLayoutProps {
 }
 
 export const metadata: Metadata = {
-    title: 'ระบบเสนอขายประกันออนไลน์อารีเกเตอร์',
-    description: 'ระบบเสนอขายประกันออนไลน์ สมัครง่ายภายใน 5 นาที ฟรีไม่มีค่าใช้จ่าย ไม่ต้องมีคนค้ำ พร้อมให้เช็คเบี้ยประกันออนไลน์ตลอด 24 ชม. เพื่อโอกาสทางการขายที่มากขึ้นกว่าเดิม'
+    title: 'ต่อ พ.ร.บ. รถยนต์ออนไลน์ (ประกันภาคบังคับ) กับติดล้อ',
+    description: 'พ.ร.บ. รถยนต์ ต่อง่าย สะดวก รวดเร็วกับเว็บติดล้อ ประกันภัยภาคบังคับคุ้มครองทั้งคุณและบุคคลภายนอก ต่อพ.ร.บ. ออนไลน์รับกรมธรรม์อิเล็กทรอนิกส์ทันทีที่นี่'
 };
 
 export default function RootLayout({ children }: RootLayoutProps) {
     return (
-        <html lang="en" suppressHydrationWarning style={{ fontSize: '12px' }}>
+        <html lang="en" suppressHydrationWarning style={{ fontSize: '11px' }}>
             <head>
                 <link id="theme-css" href={`/themes/lara-light-blue/theme.css`} rel="stylesheet"></link>
             </head>

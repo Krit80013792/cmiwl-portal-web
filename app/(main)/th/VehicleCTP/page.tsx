@@ -2,7 +2,11 @@
 
 import React from 'react';
 import { Metadata } from 'next';
-import LoadingComponent from '@/cmi-layout/components/loading/LoadingComponent';
+
+import { UserGroupRepository } from '@/src/infrastructure/database/mongodb/repositories/UserGroupRepository';
+import { UserGroupService } from '@/src/application/services/UserGroupService';
+import { UserGroupDTO } from '@/src/application/dtos/UserGroupDTO';
+
 import VehicleListComponent from '@/cmi-layout/components/VehicleListComponent';
 
 export const dynamic = 'force-dynamic';
@@ -14,8 +18,17 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 };
 
+async function getData() {
+
+    const userGroupService = new UserGroupService(new UserGroupRepository());
+    
+    const data = await userGroupService.getUserGroups();
+    return data;
+}
+
 export default async function VehicleCTP() {
 
+    const data = await getData();
 
     return (
         <main>
@@ -40,8 +53,8 @@ export default async function VehicleCTP() {
                 <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarName" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarName" value="0" />
                 <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarTypeRenew" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarTypeRenew" value="0" />
                 <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdChannelText" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdChannelText" value="CXM" />
-                <input type="submit" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$btnSelVehicle" value="" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_btnSelVehicle" className="d-none" />
-                <input type="submit" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$btnSelRenew" value="" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_btnSelRenew" className="d-none" />
+                {/* <input type="submit" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$btnSelVehicle" value="" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_btnSelVehicle" className="d-none" /> */}
+                {/* <input type="submit" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$btnSelRenew" value="" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_btnSelRenew" className="d-none" /> */}
             </div>
 
             {/* <script type="2d7b21b358a016e2ff53c284-text/javascript">

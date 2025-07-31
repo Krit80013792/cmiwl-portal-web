@@ -31,7 +31,7 @@ export const validateApiKey = async (poReq: NextRequest): Promise<boolean> => {
 
     const hApiKey = poReq.headers.get('x-api-key') ?? '';
     const deApiKey = await rsaDecrypt(hApiKey);
-    const validApiKey = process.env.API_KEY;
+    const validApiKey = process.env.PORTAL_API_KEY;
     if (!deApiKey || deApiKey !== validApiKey) {
         return false;
     }

@@ -20,10 +20,10 @@ export const metadata: Metadata = {
         title: 'ต่อ พ.ร.บ. รถยนต์ออนไลน์ (ประกันภาคบังคับ) กับติดล้อ',
         description: 'พ.ร.บ. รถยนต์ ต่อง่าย สะดวก รวดเร็วกับเว็บติดล้อ ประกันภัยภาคบังคับคุ้มครองทั้งคุณและบุคคลภายนอก ต่อพ.ร.บ. ออนไลน์รับกรมธรรม์อิเล็กทรอนิกส์ทันทีที่นี่',
         type: 'website',
-        url: 'https://www.areegator.com/',
+        url: 'https://cmiwl.tidlortech.com/',
         images: [
             {
-                url: 'https://www.areegator.com/',
+                url: 'https://cmiwl.tidlortech.com/',
                 width: 1200,
                 height: 630
             }
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
         description: 'พ.ร.บ. รถยนต์ ต่อง่าย สะดวก รวดเร็วกับเว็บติดล้อ ประกันภัยภาคบังคับคุ้มครองทั้งคุณและบุคคลภายนอก ต่อพ.ร.บ. ออนไลน์รับกรมธรรม์อิเล็กทรอนิกส์ทันทีที่นี่',
         images: [
             {
-                url: 'https://www.areegator.com/',
+                url: 'https://cmiwl.tidlortech.com/',
                 width: 1200,
                 height: 630
             }
@@ -88,9 +88,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
                         })
                     }}
                 /> */}
-                <Script src="/custom/plugin/bootstrap/bootstrap.bundle.min.js" />
-                <Script src="/custom/plugin/jquery/jquery-3.4.1.min.js" />
-                <Script src="/custom/plugin/select2/js/select2.min.js" />
+                <Script src="/custom/plugin/jquery/jquery-3.4.1.min.js" strategy="beforeInteractive" />
+                <Script src="/custom/plugin/bootstrap/bootstrap.bundle.min.js" strategy="afterInteractive" />
+                <Script src="/custom/plugin/select2/js/select2.min.js" strategy="afterInteractive" />
             </body>
         </html>
     );
