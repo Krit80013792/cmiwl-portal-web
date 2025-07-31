@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useContext, useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import Image from 'next/image';
 import { Toast } from 'primereact/toast';
 import { Button } from 'primereact/button';
@@ -38,18 +38,22 @@ const LoginPage = () => {
             usr: usr,
             pw: pw
         };
-        const conf = await setConfAsync();
-        const pk = conf?.pk;
-        const dePk = Buffer.from(pk, 'base64').toString('binary');
-        const publicKey = forge.pki.publicKeyFromPem(dePk);
-        const encryptedData = publicKey.encrypt(JSON.stringify(authModel), 'RSA-OAEP');
-        const encrypted = Buffer.from(encryptedData, 'binary').toString('base64');
-        const res = await signIn(conf, encrypted);
-        if (res.ok) {
-            const cmsm = Buffer.from(conf?.cmsm, 'base64').toString('binary');
-            router.push(cmsm);
-        } else {
-            setLoading(false);
+        try {
+            const conf = await setConfAsync();
+            const pk = conf?.pk;
+            const dePk = Buffer.from(pk, 'base64').toString('binary');
+            const publicKey = forge.pki.publicKeyFromPem(dePk);
+            const encryptedData = publicKey.encrypt(JSON.stringify(authModel), 'RSA-OAEP');
+            const encrypted = Buffer.from(encryptedData, 'binary').toString('base64');
+            const res = await signIn(conf, encrypted);
+            if (res.ok) {
+                const cmsm = Buffer.from(conf?.cmsm, 'base64').toString('binary');
+                router.push(cmsm);
+            } else {
+                setLoading(false);
+                toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to authentication', life: 5000 });
+            }
+        } catch {
             toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to authentication', life: 5000 });
         }
     };

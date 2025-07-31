@@ -22,5 +22,5 @@ jobs:
     secrets: inherit
     with:
       imagename: ${{ needs.workflow_call_build.outputs.imgname }}
-      repository: tidlor-ins/cmi-deployment
-      domain: src/microservices/oncloud/portal-web
+      repository: tidlor-ins/cmiwl-deployment
+      domain: src/microservices/oncloud/cmiwl-portal-web
