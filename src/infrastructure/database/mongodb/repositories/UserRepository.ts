@@ -8,12 +8,12 @@ export class UserRepository implements IUserRepository {
         return await newUser.save();
     };
 
-    async findAll(): Promise<IUser[]> {
-        return await UsersEntity.find().sort({ createdAt: -1 });
+    async findAll(psUserId: string): Promise<IUser[]> {
+        return await UsersEntity.find({ sUserId: { $ne: psUserId } }).sort({ createdAt: -1 });
     };
 
     async findById(psId: string): Promise<IUser | null> {
-        return await UsersEntity.findById(psId);
+        return await UsersEntity.findOne({ bIsActive: true, sUserId: psId });
     };
 
     async findByUsername(psUserName: string): Promise<IUser | null> {
@@ -24,12 +24,32 @@ export class UserRepository implements IUserRepository {
         return await UsersEntity.find({ bIsActive: pbStatus }).sort({ createdAt: -1 });
     };
 
+    async findByUserGroupId(psUserGroupId: string): Promise<IUser[]> {
+        return await UsersEntity.find({ sUserGroupId: psUserGroupId });
+    };
+
+    async findByUserRoleId(psUserRoleId: string): Promise<IUser[]> {
+        return await UsersEntity.find({ sUserRoleId: psUserRoleId });
+    };
+
     async verification(psUserName: string, psPassword: string): Promise<IUser | null> {
         return await UsersEntity.findOne({ bIsActive: true, sUserName: psUserName, sPassword: psPassword });
     };
 
     async update(psId: string, poUser: Partial<IUser>): Promise<IUser | null> {
         return await UsersEntity.findByIdAndUpdate(psId, poUser, { new: true });
+    };
+
+    async updateUserGroupName(psUserGroupId: string, psUserGroupName: string) {
+        return await UsersEntity.updateMany(
+            { sUserGroupId: psUserGroupId },
+            { $set: { sUserGroupName: psUserGroupName } });
+    };
+
+    async updateUserRoleName(psUserRoleId: string, psUserRoleName: string) {
+        return await UsersEntity.updateMany(
+            { sUserRoleId: psUserRoleId },
+            { $set: { sUserRoleName: psUserRoleName } });
     };
 
     async deleteOne(psId: string): Promise<IUser | null> {

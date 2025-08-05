@@ -1,35 +1,33 @@
-//* app/api/v1/users/route.ts
+//* app/api/v1/user-groups/route.ts
 import { validateApiKey } from '@/src/shared/middleware/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { serializeRequest } from '@/src/shared/utils/serializeRequest';
-import { SafeUserDTO } from '@/src/application/dtos/UserDTO';
-import { UserService } from '../../../../src/application/services/UserService';
-import { UserRepository } from '../../../../src/infrastructure/database/mongodb/repositories/UserRepository';
+import { UserRepository } from '@/src/infrastructure/database/mongodb/repositories/UserRepository';
+import { UserGroupService } from '../../../../src/application/services/UserGroupService';
 import { UserGroupRepository } from '../../../../src/infrastructure/database/mongodb/repositories/UserGroupRepository';
-import { UserRoleRepository } from '../../../../src/infrastructure/database/mongodb/repositories/UserRoleRepository';
 import { permissionGuard } from '@/src/shared/middleware/permission.guard';
 import { authGuard } from '@/src/shared/middleware/auth.guard';
 import { TxActivityLogger } from '@/src/shared/middleware/logging/TxActivityLogger';
-import { CreateUserSchema, UpdateUserSchema } from '@/src/shared/utils/model.validator';
+import { CreateUserGroupSchema, UpdateUserGroupSchema } from '@/src/shared/utils/model.validator';
 
-let _userServiceInstance: UserService | null = null;
-async function UserServiceInstance(): Promise<UserService> {
-    _userServiceInstance ??= new UserService(new UserRepository(), new UserGroupRepository(), new UserRoleRepository());
-    return _userServiceInstance;
+let _userGroupServiceInstance: UserGroupService | null = null;
+async function UserGroupServiceInstance(): Promise<UserGroupService> {
+    _userGroupServiceInstance ??= new UserGroupService(new UserGroupRepository(), new UserRepository);
+    return _userGroupServiceInstance;
 };
 
 /**
- * api/v1/users/:POST Create user
+ * api/v1/user-groups/:POST Create user group
  */
 //* @(users:create)
 export async function POST(poReq: NextRequest) {
-    const ROUTE = 'api/v1/users';
+    const ROUTE = 'api/v1/user-groups';
     const METHOD = 'POST';
     const ACTION = 'create';
 
     const isValidApiKey = await validateApiKey(poReq);
     if (!isValidApiKey) {
-        return new NextResponse(JSON.stringify({ message: 'Unauthorized' }), { status: 401 });
+        return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
     }
 
     let user: any;
@@ -43,10 +41,10 @@ export async function POST(poReq: NextRequest) {
         return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
     }
 
-    let oParsedUser: any;
+    let oParsedUserGroup: any;
     try {
         const body = await poReq.json();
-        oParsedUser = CreateUserSchema.parse(body);
+        oParsedUserGroup = CreateUserGroupSchema.parse(body);
     } catch {
         return new NextResponse(JSON.stringify({ message: `Bad request` }), { status: 400 });
     }
@@ -54,11 +52,11 @@ export async function POST(poReq: NextRequest) {
     const reqLog = await serializeRequest(poReq, {});
 
     try {
-        const userService = await UserServiceInstance();
-        oParsedUser.createdBy = user?.userName;
-        oParsedUser.updatedBy = user?.userName;
-        const newUser = await userService.createUser(oParsedUser);
-        if (newUser?.statusCode !== 201) {
+        const userGroupService = await UserGroupServiceInstance();
+        oParsedUserGroup.createdBy = user?.userName;
+        oParsedUserGroup.updatedBy = user?.userName;
+        const newUserGroup = await userGroupService.createUserGroup(oParsedUserGroup);
+        if (newUserGroup?.statusCode !== 201) {
             await TxActivityLogger.log({
                 sUserName: user?.userName,
                 sUserGroupName: user?.userGroupName,
@@ -68,13 +66,11 @@ export async function POST(poReq: NextRequest) {
                 sAction: ACTION,
                 sStatus: 'failed',
                 sRequestMsg: JSON.stringify(reqLog),
-                sResponseMsg: JSON.stringify(newUser),
+                sResponseMsg: JSON.stringify(newUserGroup),
                 sChannel: 'CMS',
             } as any);
-            return new NextResponse(JSON.stringify({ message: newUser?.message }), { status: newUser?.statusCode });
+            return new NextResponse(JSON.stringify({ message: newUserGroup?.message }), { status: newUserGroup?.statusCode });
         }
-
-        const safeUser: Partial<SafeUserDTO> = newUser?.data ? (({ password, ...rest }) => rest)(newUser.data) : {};
 
         await TxActivityLogger.log({
             sUserName: user?.userName,
@@ -85,11 +81,11 @@ export async function POST(poReq: NextRequest) {
             sAction: ACTION,
             sStatus: 'success',
             sRequestMsg: JSON.stringify(reqLog),
-            sResponseMsg: JSON.stringify(safeUser),
+            sResponseMsg: JSON.stringify(newUserGroup?.data),
             sChannel: 'CMS',
         } as any);
 
-        return new NextResponse(JSON.stringify({ message: 'Success', data: safeUser }), { status: 201 });
+        return new NextResponse(JSON.stringify({ message: 'Success', data: newUserGroup?.data }), { status: 201 });
 
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
@@ -113,11 +109,11 @@ export async function POST(poReq: NextRequest) {
 };
 
 /**
- * api/v1/users/:GET Read user
+ * api/v1/user-groups/:GET Read user group
  */
 //* @(users:read)
 export async function GET(poReq: NextRequest) {
-    const ROUTE = 'api/v1/users';
+    const ROUTE = 'api/v1/user-groups';
     const METHOD = 'GET';
     const ACTION = 'read';
 
@@ -140,10 +136,8 @@ export async function GET(poReq: NextRequest) {
     const reqLog = await serializeRequest(poReq, {});
 
     try {
-        const userService = await UserServiceInstance();
-        const users = await userService.getUsers(user?.userId);
-
-        const safeUsers: SafeUserDTO[] = users?.data?.map(({ password, ...rest }) => rest) ?? [];
+        const userGroupService = await UserGroupServiceInstance();
+        const userGroups = await userGroupService.getUserGroups();
 
         await TxActivityLogger.log({
             sUserName: user?.userName,
@@ -154,11 +148,11 @@ export async function GET(poReq: NextRequest) {
             sAction: ACTION,
             sStatus: 'success',
             sRequestMsg: JSON.stringify(reqLog),
-            sResponseMsg: JSON.stringify(users?.message),
+            sResponseMsg: JSON.stringify(userGroups?.message),
             sChannel: 'CMS',
         } as any);
 
-        return new NextResponse(JSON.stringify({ message: 'Success', data: safeUsers }), { status: 200 });
+        return new NextResponse(JSON.stringify({ message: 'Success', data: userGroups?.data ?? [] }), { status: 200 });
 
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
@@ -182,11 +176,11 @@ export async function GET(poReq: NextRequest) {
 };
 
 /**
- * api/v1/users/:PATCH Update user
+ * api/v1/user-groups/:PATCH Update user group
  */
 //* @(users:update)
 export async function PATCH(poReq: NextRequest) {
-    const ROUTE = 'api/v1/users';
+    const ROUTE = 'api/v1/user-groups';
     const METHOD = 'PATCH';
     const ACTION = 'update';
 
@@ -206,12 +200,12 @@ export async function PATCH(poReq: NextRequest) {
         return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
     }
 
-    let oParsedUser: any;
+    let oParsedUserGroup: any;
     try {
         const body = await poReq.json();
         body.createdAt = new Date(body.createdAt);
         body.updatedAt = new Date(body.updatedAt);
-        oParsedUser = UpdateUserSchema.parse(body);
+        oParsedUserGroup = UpdateUserGroupSchema.parse(body);
     } catch {
         return new NextResponse(JSON.stringify({ message: `Bad request` }), { status: 400 });
     }
@@ -219,10 +213,10 @@ export async function PATCH(poReq: NextRequest) {
     const reqLog = await serializeRequest(poReq, {});
 
     try {
-        const userService = await UserServiceInstance();
-        oParsedUser.updatedBy = user?.userName;
-        const newUser = await userService.updateUser(oParsedUser?.id, oParsedUser);
-        if (newUser?.statusCode !== 201) {
+        const userGroupService = await UserGroupServiceInstance();
+        oParsedUserGroup.updatedBy = user?.userName;
+        const newUserGroup = await userGroupService.updateUserGroup(oParsedUserGroup?.id, oParsedUserGroup);
+        if (newUserGroup?.statusCode !== 201) {
             await TxActivityLogger.log({
                 sUserName: user?.userName,
                 sUserGroupName: user?.userGroupName,
@@ -232,13 +226,11 @@ export async function PATCH(poReq: NextRequest) {
                 sAction: ACTION,
                 sStatus: 'failed',
                 sRequestMsg: JSON.stringify(reqLog),
-                sResponseMsg: JSON.stringify(newUser),
+                sResponseMsg: JSON.stringify(newUserGroup),
                 sChannel: 'CMS',
             } as any);
-            return new NextResponse(JSON.stringify({ message: newUser?.message }), { status: newUser?.statusCode });
+            return new NextResponse(JSON.stringify({ message: newUserGroup?.message }), { status: newUserGroup?.statusCode });
         }
-
-        const safeUser: Partial<SafeUserDTO> = newUser?.data ? (({ password, ...rest }) => rest)(newUser.data) : {};
 
         await TxActivityLogger.log({
             sUserName: user?.userName,
@@ -249,11 +241,11 @@ export async function PATCH(poReq: NextRequest) {
             sAction: ACTION,
             sStatus: 'success',
             sRequestMsg: JSON.stringify(reqLog),
-            sResponseMsg: JSON.stringify(safeUser),
+            sResponseMsg: JSON.stringify(newUserGroup),
             sChannel: 'CMS',
         } as any);
 
-        return new NextResponse(JSON.stringify({ message: 'Success', data: safeUser }), { status: 200 });
+        return new NextResponse(JSON.stringify({ message: 'Success', data: newUserGroup?.data }), { status: 200 });
 
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
@@ -277,11 +269,11 @@ export async function PATCH(poReq: NextRequest) {
 };
 
 /**
- * api/v1/users/:DELETE Delete user
+ * api/v1/user-groups/:DELETE Delete user group
  */
 //* @(users:delete)
 export async function DELETE(poReq: NextRequest) {
-    const ROUTE = 'api/v1/users';
+    const ROUTE = 'api/v1/user-groups';
     const METHOD = 'DELETE';
     const ACTION = 'delete';
 
@@ -301,12 +293,12 @@ export async function DELETE(poReq: NextRequest) {
         return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
     }
 
-    let oParsedUser: any;
+    let oParsedUserGroup: any;
     try {
         const body = await poReq.json();
         body.createdAt = new Date(body.createdAt);
         body.updatedAt = new Date(body.updatedAt);
-        oParsedUser = UpdateUserSchema.parse(body);
+        oParsedUserGroup = UpdateUserGroupSchema.parse(body);
     } catch {
         return new NextResponse(JSON.stringify({ message: `Bad request` }), { status: 400 });
     }
@@ -314,10 +306,10 @@ export async function DELETE(poReq: NextRequest) {
     const reqLog = await serializeRequest(poReq, {});
 
     try {
-        const userService = await UserServiceInstance();
-        oParsedUser.updatedBy = user?.userName;
-        const userDeleted = await userService.deleteUser(oParsedUser?.id);
-        if (userDeleted?.statusCode !== 200) {
+        const userGroupService = await UserGroupServiceInstance();
+        oParsedUserGroup.updatedBy = user?.userName;
+        const userGroupDeleted = await userGroupService.deleteUserGroup(oParsedUserGroup?.id, oParsedUserGroup?.userGroupId);
+        if (userGroupDeleted?.statusCode !== 200) {
             await TxActivityLogger.log({
                 sUserName: user?.userName,
                 sUserGroupName: user?.userGroupName,
@@ -327,13 +319,11 @@ export async function DELETE(poReq: NextRequest) {
                 sAction: ACTION,
                 sStatus: 'failed',
                 sRequestMsg: JSON.stringify(reqLog),
-                sResponseMsg: JSON.stringify(userDeleted),
+                sResponseMsg: JSON.stringify(userGroupDeleted),
                 sChannel: 'CMS',
             } as any);
-            return new NextResponse(JSON.stringify({ message: userDeleted?.message }), { status: userDeleted?.statusCode });
+            return new NextResponse(JSON.stringify({ message: userGroupDeleted?.message }), { status: userGroupDeleted?.statusCode });
         }
-
-        const safeUser: Partial<SafeUserDTO> = userDeleted?.data ? (({ password, ...rest }) => rest)(userDeleted.data) : {};
 
         await TxActivityLogger.log({
             sUserName: user?.userName,
@@ -344,11 +334,11 @@ export async function DELETE(poReq: NextRequest) {
             sAction: ACTION,
             sStatus: 'success',
             sRequestMsg: JSON.stringify(reqLog),
-            sResponseMsg: JSON.stringify(safeUser),
+            sResponseMsg: JSON.stringify(userGroupDeleted),
             sChannel: 'CMS',
         } as any);
 
-        return new NextResponse(JSON.stringify({ message: 'Success', data: safeUser }), { status: 200 });
+        return new NextResponse(JSON.stringify({ message: 'Success', data: userGroupDeleted?.data }), { status: 200 });
 
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);

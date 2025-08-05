@@ -96,10 +96,10 @@ export class ResourceService {
         }
     };
 
-    async getResourceById(psId: string): Promise<BaseResponse<ResourceDTO | null>> {
+    async getResourceById(psResourceId: string): Promise<BaseResponse<ResourceDTO | null>> {
         try {
             await MongoDBConnectionService();
-            const oResource = await this.resourceRepository.findById(psId);
+            const oResource = await this.resourceRepository.findById(psResourceId);
             return {
                 statusCode: oResource ? 200 : 404,
                 message: oResource ? 'Resource found' : 'Resource not found',

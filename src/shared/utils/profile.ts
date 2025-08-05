@@ -27,6 +27,8 @@ export async function ApiRoute() {
         "au": Buffer.from('/api/v1/users', 'binary').toString('base64'),
         "aug": Buffer.from('/api/v1/user-groups', 'binary').toString('base64'),
         "aur": Buffer.from('/api/v1/user-roles', 'binary').toString('base64'),
+        "ar": Buffer.from('/api/v1/resources', 'binary').toString('base64'),
+        "aal": Buffer.from('/api/v1/activity-logs', 'binary').toString('base64'),
     };
     const b64 = Buffer.from(JSON.stringify(config), 'binary').toString('base64');
     return b64;

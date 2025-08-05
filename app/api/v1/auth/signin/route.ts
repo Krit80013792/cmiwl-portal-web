@@ -8,6 +8,7 @@ import { UserService } from '../../../../../src/application/services/UserService
 import { UserRepository } from '../../../../../src/infrastructure/database/mongodb/repositories/UserRepository';
 import { UserRoleService } from '@/src/application/services/UserRoleService';
 import { UserRoleRepository } from '@/src/infrastructure/database/mongodb/repositories/UserRoleRepository';
+import { UserGroupRepository } from '@/src/infrastructure/database/mongodb/repositories/UserGroupRepository';
 import { ResourceService } from '@/src/application/services/ResourceService';
 import { ResourceRepository } from '@/src/infrastructure/database/mongodb/repositories/ResourceRepository';
 import { TxActivityLogger } from '@/src/shared/middleware/logging/TxActivityLogger';
@@ -16,13 +17,13 @@ import { mapResourcesToMenu } from '@/src/shared/utils/mapResourcesToMenu';
 
 let _userServiceInstance: UserService | null = null;
 async function UserServiceInstance(): Promise<UserService> {
-    _userServiceInstance ??= new UserService(new UserRepository());
+    _userServiceInstance ??= new UserService(new UserRepository(), new UserGroupRepository, new UserRoleRepository);
     return _userServiceInstance;
 };
 
 let _userRoleServiceInstance: UserRoleService | null = null;
 async function UserRoleServiceInstance(): Promise<UserRoleService> {
-    _userRoleServiceInstance ??= new UserRoleService(new UserRoleRepository());
+    _userRoleServiceInstance ??= new UserRoleService(new UserRoleRepository(), new UserRepository(), new ResourceRepository());
     return _userRoleServiceInstance;
 };
 
@@ -39,8 +40,6 @@ export async function POST(oReq: NextRequest) {
     const ROUTE = 'api/v1/auth/signin';
     const METHOD = 'POST';
     const ACTION = 'signin';
-
-    console.log(process.env.PORTAL_RSA_PRI_KEY);
 
     const isValidApiKey = await validateApiKey(oReq);
     if (!isValidApiKey) {
@@ -93,6 +92,12 @@ export async function POST(oReq: NextRequest) {
         const resources = await resourceService.getMultipleByResourceNames(userRole?.data?.resources);
         const menus = mapResourcesToMenu(resources?.data || []);
 
+        const publicUserData = {
+            userName: user?.data?.userName,
+            perms: userRole?.data?.userRolePermissions,
+        };
+        const base64PublicUserData = Buffer.from(JSON.stringify(publicUserData), 'binary').toString('base64');
+
         const privateUserData = {
             token: '',
             userId: user?.data?.userId,
@@ -108,6 +113,15 @@ export async function POST(oReq: NextRequest) {
         const encryptedToken = await encrypt(JSON.stringify(privateUserData), process.env.PORTAL_API_KEY ?? '');
 
         const response = new NextResponse(JSON.stringify({ message: `Success` }), { status: 200 });
+        //* Set public cookie
+        response.cookies.set(`cmiwl_cms_me`, base64PublicUserData, {
+            httpOnly: false,
+            secure: false,
+            sameSite: 'strict',
+            maxAge: 2 * 60 * 60,
+            path: '/',
+        });
+        //* Set private cookie
         response.cookies.set(`${process.env.APP_ENV}_cmiwl_cms_token`, encryptedToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
@@ -135,7 +149,7 @@ export async function POST(oReq: NextRequest) {
 
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
-        console.error(`Error POST :`, errorMsg);
+        console.error(`Error ${METHOD} :`, errorMsg);
 
         await TxActivityLogger.log({
             sUserName: deCryptedBodyData?.usr,

@@ -146,13 +146,13 @@ export default async function MainPage() {
     // const resource: Partial<ResourceDTO> =
     // {
     //     resourceId: uuidv4(),
-    //     resourceOrder: 2,
-    //     resourceName: 'users',
+    //     resourceOrder: 3,
+    //     resourceName: 'activity-logs',
     //     resourcePolicy: 'protected',
-    //     resourceDescription: 'ผู้ใช้งาน',
-    //     resourceLabel: 'Users',
-    //     resourceIcon: 'pi pi-fw pi-users',
-    //     resourcePathTo: '/cms/users',
+    //     resourceDescription: 'cms activity logs',
+    //     resourceLabel: 'CMS Activity Logs',
+    //     resourceIcon: 'pi pi-fw pi-list',
+    //     resourcePathTo: '/cms/activity-logs',
     //     childrenItems: [],
     //     createdBy: 'CF305481',
     //     updatedBy: 'CF305481'

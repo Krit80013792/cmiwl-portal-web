@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { UserGroupsEntity } from '../../../../domain/entities/UserGroupsEntity';
 import { IUserGroup } from '../../../../domain/models/UserGroupModel';
 import { IUserGroupRepository } from '../../../../application/interfaces/IUserGroupRepository';
@@ -9,15 +10,21 @@ export class UserGroupRepository implements IUserGroupRepository {
     };
 
     async findAll(): Promise<IUserGroup[]> {
-        return await UserGroupsEntity.find().sort({ createdAt: -1 });
+        return await UserGroupsEntity.find().sort({ sUserGroupName: 1 });
     };
 
     async findById(psId: string): Promise<IUserGroup | null> {
-        return await UserGroupsEntity.findById(psId);
+        return await UserGroupsEntity.findOne({ sUserGroupId: psId });
     };
 
-    async findByUserGroupName(psUserGroupName: string): Promise<IUserGroup | null> {
-        return await UserGroupsEntity.findOne({ sUserGroupName: psUserGroupName });
+    async findByUserGroupName(psId: string, psUserGroupName: string): Promise<IUserGroup | null> {
+        const query: any = {
+            sUserGroupName: psUserGroupName,
+        };
+        if (psId && mongoose.Types.ObjectId.isValid(psId)) {
+            query._id = { $ne: new mongoose.Types.ObjectId(psId) };
+        }
+        return await UserGroupsEntity.findOne(query);
     };
 
     async update(psId: string, poUserGroup: Partial<IUserGroup>): Promise<IUserGroup | null> {

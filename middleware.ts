@@ -5,11 +5,14 @@ import { decrypt } from './src/shared/utils/auth.crypto';
 const protectedRoutes = [
     '/cms/main',
     '/cms/users',
+    '/cms/activity-logs',
     '/cms/configs',
 ];
 const publicRoutes = ['/pw0wl'];
 
 export default async function middleware(req: NextRequest) {
+    const resNext = NextResponse.next();
+
     const path = req.nextUrl.pathname;
 
     if (path === '/') {
@@ -26,6 +29,14 @@ export default async function middleware(req: NextRequest) {
     try {
         if (CMIWL_CMS_COOKIE) {
             session = JSON.parse(await decrypt(CMIWL_CMS_COOKIE.value, process.env.PORTAL_API_KEY ?? '') ?? '{}');
+            const newPayload = {
+                userName: session?.userName,
+                perms: session?.permissions,
+            };
+            const jsonStr = JSON.stringify(newPayload);
+            const base64 = Buffer.from(jsonStr, 'utf-8').toString('base64');
+            const encoded = encodeURIComponent(base64);
+            resNext.cookies.set('cmiwl_cms_me', encoded);
         }
     } catch (error) {
         console.error(`Error decrypting session cookie:`, error);
@@ -54,7 +65,7 @@ export default async function middleware(req: NextRequest) {
         }
     }
 
-    return NextResponse.next();
+    return resNext;
 }
 
 export const config = {

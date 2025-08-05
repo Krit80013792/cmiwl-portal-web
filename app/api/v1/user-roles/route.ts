@@ -1,35 +1,34 @@
-//* app/api/v1/users/route.ts
+//* app/api/v1/user-roles/route.ts
 import { validateApiKey } from '@/src/shared/middleware/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { serializeRequest } from '@/src/shared/utils/serializeRequest';
-import { SafeUserDTO } from '@/src/application/dtos/UserDTO';
-import { UserService } from '../../../../src/application/services/UserService';
-import { UserRepository } from '../../../../src/infrastructure/database/mongodb/repositories/UserRepository';
-import { UserGroupRepository } from '../../../../src/infrastructure/database/mongodb/repositories/UserGroupRepository';
+import { UserRepository } from '@/src/infrastructure/database/mongodb/repositories/UserRepository';
+import { UserRoleService } from '../../../../src/application/services/UserRoleService';
 import { UserRoleRepository } from '../../../../src/infrastructure/database/mongodb/repositories/UserRoleRepository';
+import { ResourceRepository } from '@/src/infrastructure/database/mongodb/repositories/ResourceRepository';
 import { permissionGuard } from '@/src/shared/middleware/permission.guard';
 import { authGuard } from '@/src/shared/middleware/auth.guard';
 import { TxActivityLogger } from '@/src/shared/middleware/logging/TxActivityLogger';
-import { CreateUserSchema, UpdateUserSchema } from '@/src/shared/utils/model.validator';
+import { CreateUserRoleSchema, UpdateUserRoleSchema } from '@/src/shared/utils/model.validator';
 
-let _userServiceInstance: UserService | null = null;
-async function UserServiceInstance(): Promise<UserService> {
-    _userServiceInstance ??= new UserService(new UserRepository(), new UserGroupRepository(), new UserRoleRepository());
-    return _userServiceInstance;
+let _userRoleServiceInstance: UserRoleService | null = null;
+async function UserRoleServiceInstance(): Promise<UserRoleService> {
+    _userRoleServiceInstance ??= new UserRoleService(new UserRoleRepository(), new UserRepository(), new ResourceRepository());
+    return _userRoleServiceInstance;
 };
 
 /**
- * api/v1/users/:POST Create user
+ * api/v1/user-roles/:POST Create user role
  */
 //* @(users:create)
 export async function POST(poReq: NextRequest) {
-    const ROUTE = 'api/v1/users';
+    const ROUTE = 'api/v1/user-roles';
     const METHOD = 'POST';
     const ACTION = 'create';
 
     const isValidApiKey = await validateApiKey(poReq);
     if (!isValidApiKey) {
-        return new NextResponse(JSON.stringify({ message: 'Unauthorized' }), { status: 401 });
+        return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
     }
 
     let user: any;
@@ -43,10 +42,10 @@ export async function POST(poReq: NextRequest) {
         return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
     }
 
-    let oParsedUser: any;
+    let oParsedUserRole: any;
     try {
         const body = await poReq.json();
-        oParsedUser = CreateUserSchema.parse(body);
+        oParsedUserRole = CreateUserRoleSchema.parse(body);
     } catch {
         return new NextResponse(JSON.stringify({ message: `Bad request` }), { status: 400 });
     }
@@ -54,11 +53,11 @@ export async function POST(poReq: NextRequest) {
     const reqLog = await serializeRequest(poReq, {});
 
     try {
-        const userService = await UserServiceInstance();
-        oParsedUser.createdBy = user?.userName;
-        oParsedUser.updatedBy = user?.userName;
-        const newUser = await userService.createUser(oParsedUser);
-        if (newUser?.statusCode !== 201) {
+        const userRoleService = await UserRoleServiceInstance();
+        oParsedUserRole.createdBy = user?.userName;
+        oParsedUserRole.updatedBy = user?.userName;
+        const newUserRole = await userRoleService.createUserRole(oParsedUserRole);
+        if (newUserRole?.statusCode !== 201) {
             await TxActivityLogger.log({
                 sUserName: user?.userName,
                 sUserGroupName: user?.userGroupName,
@@ -68,13 +67,11 @@ export async function POST(poReq: NextRequest) {
                 sAction: ACTION,
                 sStatus: 'failed',
                 sRequestMsg: JSON.stringify(reqLog),
-                sResponseMsg: JSON.stringify(newUser),
+                sResponseMsg: JSON.stringify(newUserRole),
                 sChannel: 'CMS',
             } as any);
-            return new NextResponse(JSON.stringify({ message: newUser?.message }), { status: newUser?.statusCode });
+            return new NextResponse(JSON.stringify({ message: newUserRole?.message }), { status: newUserRole?.statusCode });
         }
-
-        const safeUser: Partial<SafeUserDTO> = newUser?.data ? (({ password, ...rest }) => rest)(newUser.data) : {};
 
         await TxActivityLogger.log({
             sUserName: user?.userName,
@@ -85,11 +82,11 @@ export async function POST(poReq: NextRequest) {
             sAction: ACTION,
             sStatus: 'success',
             sRequestMsg: JSON.stringify(reqLog),
-            sResponseMsg: JSON.stringify(safeUser),
+            sResponseMsg: JSON.stringify(newUserRole?.data),
             sChannel: 'CMS',
         } as any);
 
-        return new NextResponse(JSON.stringify({ message: 'Success', data: safeUser }), { status: 201 });
+        return new NextResponse(JSON.stringify({ message: 'Success', data: newUserRole?.data }), { status: 201 });
 
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
@@ -113,15 +110,15 @@ export async function POST(poReq: NextRequest) {
 };
 
 /**
- * api/v1/users/:GET Read user
+ * api/v1/user-roles/:GET Read user role
  */
 //* @(users:read)
-export async function GET(poReq: NextRequest) {
-    const ROUTE = 'api/v1/users';
+export async function GET(oReq: NextRequest) {
+    const ROUTE = 'api/v1/user-roles';
     const METHOD = 'GET';
     const ACTION = 'read';
 
-    const isValidApiKey = await validateApiKey(poReq);
+    const isValidApiKey = await validateApiKey(oReq);
     if (!isValidApiKey) {
         return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
     }
@@ -137,13 +134,11 @@ export async function GET(poReq: NextRequest) {
         return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
     }
 
-    const reqLog = await serializeRequest(poReq, {});
+    const reqLog = await serializeRequest(oReq, {});
 
     try {
-        const userService = await UserServiceInstance();
-        const users = await userService.getUsers(user?.userId);
-
-        const safeUsers: SafeUserDTO[] = users?.data?.map(({ password, ...rest }) => rest) ?? [];
+        const userRoleService = await UserRoleServiceInstance();
+        const userRoles = await userRoleService.getUserRoles();
 
         await TxActivityLogger.log({
             sUserName: user?.userName,
@@ -154,11 +149,11 @@ export async function GET(poReq: NextRequest) {
             sAction: ACTION,
             sStatus: 'success',
             sRequestMsg: JSON.stringify(reqLog),
-            sResponseMsg: JSON.stringify(users?.message),
+            sResponseMsg: JSON.stringify(userRoles?.message),
             sChannel: 'CMS',
         } as any);
 
-        return new NextResponse(JSON.stringify({ message: 'Success', data: safeUsers }), { status: 200 });
+        return new NextResponse(JSON.stringify({ message: 'Success', data: userRoles?.data ?? [] }), { status: 200 });
 
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
@@ -182,11 +177,11 @@ export async function GET(poReq: NextRequest) {
 };
 
 /**
- * api/v1/users/:PATCH Update user
+ * api/v1/user-roles/:PATCH Update user role
  */
 //* @(users:update)
 export async function PATCH(poReq: NextRequest) {
-    const ROUTE = 'api/v1/users';
+    const ROUTE = 'api/v1/user-roles';
     const METHOD = 'PATCH';
     const ACTION = 'update';
 
@@ -206,12 +201,12 @@ export async function PATCH(poReq: NextRequest) {
         return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
     }
 
-    let oParsedUser: any;
+    let oParsedUserRole: any;
     try {
         const body = await poReq.json();
         body.createdAt = new Date(body.createdAt);
         body.updatedAt = new Date(body.updatedAt);
-        oParsedUser = UpdateUserSchema.parse(body);
+        oParsedUserRole = UpdateUserRoleSchema.parse(body);
     } catch {
         return new NextResponse(JSON.stringify({ message: `Bad request` }), { status: 400 });
     }
@@ -219,10 +214,10 @@ export async function PATCH(poReq: NextRequest) {
     const reqLog = await serializeRequest(poReq, {});
 
     try {
-        const userService = await UserServiceInstance();
-        oParsedUser.updatedBy = user?.userName;
-        const newUser = await userService.updateUser(oParsedUser?.id, oParsedUser);
-        if (newUser?.statusCode !== 201) {
+        const userRoleService = await UserRoleServiceInstance();
+        oParsedUserRole.updatedBy = user?.userName;
+        const newUserRole = await userRoleService.updateUserRole(oParsedUserRole?.id, oParsedUserRole);
+        if (newUserRole?.statusCode !== 201) {
             await TxActivityLogger.log({
                 sUserName: user?.userName,
                 sUserGroupName: user?.userGroupName,
@@ -232,13 +227,11 @@ export async function PATCH(poReq: NextRequest) {
                 sAction: ACTION,
                 sStatus: 'failed',
                 sRequestMsg: JSON.stringify(reqLog),
-                sResponseMsg: JSON.stringify(newUser),
+                sResponseMsg: JSON.stringify(newUserRole),
                 sChannel: 'CMS',
             } as any);
-            return new NextResponse(JSON.stringify({ message: newUser?.message }), { status: newUser?.statusCode });
+            return new NextResponse(JSON.stringify({ message: newUserRole?.message }), { status: newUserRole?.statusCode });
         }
-
-        const safeUser: Partial<SafeUserDTO> = newUser?.data ? (({ password, ...rest }) => rest)(newUser.data) : {};
 
         await TxActivityLogger.log({
             sUserName: user?.userName,
@@ -249,11 +242,11 @@ export async function PATCH(poReq: NextRequest) {
             sAction: ACTION,
             sStatus: 'success',
             sRequestMsg: JSON.stringify(reqLog),
-            sResponseMsg: JSON.stringify(safeUser),
+            sResponseMsg: JSON.stringify(newUserRole),
             sChannel: 'CMS',
         } as any);
 
-        return new NextResponse(JSON.stringify({ message: 'Success', data: safeUser }), { status: 200 });
+        return new NextResponse(JSON.stringify({ message: 'Success', data: newUserRole?.data }), { status: 200 });
 
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
@@ -277,11 +270,11 @@ export async function PATCH(poReq: NextRequest) {
 };
 
 /**
- * api/v1/users/:DELETE Delete user
+ * api/v1/user-roles/:DELETE Delete user role
  */
 //* @(users:delete)
 export async function DELETE(poReq: NextRequest) {
-    const ROUTE = 'api/v1/users';
+    const ROUTE = 'api/v1/user-roles';
     const METHOD = 'DELETE';
     const ACTION = 'delete';
 
@@ -301,12 +294,12 @@ export async function DELETE(poReq: NextRequest) {
         return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
     }
 
-    let oParsedUser: any;
+    let oParsedUserRole: any;
     try {
         const body = await poReq.json();
         body.createdAt = new Date(body.createdAt);
         body.updatedAt = new Date(body.updatedAt);
-        oParsedUser = UpdateUserSchema.parse(body);
+        oParsedUserRole = UpdateUserRoleSchema.parse(body);
     } catch {
         return new NextResponse(JSON.stringify({ message: `Bad request` }), { status: 400 });
     }
@@ -314,10 +307,10 @@ export async function DELETE(poReq: NextRequest) {
     const reqLog = await serializeRequest(poReq, {});
 
     try {
-        const userService = await UserServiceInstance();
-        oParsedUser.updatedBy = user?.userName;
-        const userDeleted = await userService.deleteUser(oParsedUser?.id);
-        if (userDeleted?.statusCode !== 200) {
+        const userRoleService = await UserRoleServiceInstance();
+        oParsedUserRole.updatedBy = user?.userName;
+        const userRoleDeleted = await userRoleService.deleteUserRole(oParsedUserRole?.id, oParsedUserRole?.userRoleId);
+        if (userRoleDeleted?.statusCode !== 200) {
             await TxActivityLogger.log({
                 sUserName: user?.userName,
                 sUserGroupName: user?.userGroupName,
@@ -327,13 +320,11 @@ export async function DELETE(poReq: NextRequest) {
                 sAction: ACTION,
                 sStatus: 'failed',
                 sRequestMsg: JSON.stringify(reqLog),
-                sResponseMsg: JSON.stringify(userDeleted),
+                sResponseMsg: JSON.stringify(userRoleDeleted),
                 sChannel: 'CMS',
             } as any);
-            return new NextResponse(JSON.stringify({ message: userDeleted?.message }), { status: userDeleted?.statusCode });
+            return new NextResponse(JSON.stringify({ message: userRoleDeleted?.message }), { status: userRoleDeleted?.statusCode });
         }
-
-        const safeUser: Partial<SafeUserDTO> = userDeleted?.data ? (({ password, ...rest }) => rest)(userDeleted.data) : {};
 
         await TxActivityLogger.log({
             sUserName: user?.userName,
@@ -344,11 +335,11 @@ export async function DELETE(poReq: NextRequest) {
             sAction: ACTION,
             sStatus: 'success',
             sRequestMsg: JSON.stringify(reqLog),
-            sResponseMsg: JSON.stringify(safeUser),
+            sResponseMsg: JSON.stringify(userRoleDeleted),
             sChannel: 'CMS',
         } as any);
 
-        return new NextResponse(JSON.stringify({ message: 'Success', data: safeUser }), { status: 200 });
+        return new NextResponse(JSON.stringify({ message: 'Success', data: userRoleDeleted?.data }), { status: 200 });
 
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);

@@ -1,4 +1,4 @@
-export interface ResourceDTO extends Document {
+export interface ResourceDTO {
     id: string; //* MongoDB ObjectId
     resourceId: string; //* uuid
     resourceOrder: number;

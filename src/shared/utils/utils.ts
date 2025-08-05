@@ -44,3 +44,10 @@ export function getThaiMonthShort(date: Date): string {
 export function getThaiYear(date: Date): number {
     return date.getFullYear() + 543;
 };
+
+export function formatDateToYMD(date: Date): string {
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day = `${date.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};

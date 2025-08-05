@@ -1,4 +1,4 @@
-export interface ConfigDTO extends Document {
+export interface ConfigDTO {
     id: string; //* MongoDB ObjectId
     configId: string; //* uuid
     configName: string;

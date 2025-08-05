@@ -20,15 +20,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function getData() {
 
-    const userGroupService = new UserGroupService(new UserGroupRepository());
+    // const userGroupService = new UserGroupService(new UserGroupRepository());
     
-    const data = await userGroupService.getUserGroups();
-    return data;
+    // const data = await userGroupService.getUserGroups();
+    // return data;
 }
 
 export default async function VehicleCTP() {
-
-    const data = await getData();
 
     return (
         <main>

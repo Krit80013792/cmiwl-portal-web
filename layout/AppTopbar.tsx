@@ -63,7 +63,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     return (
         <div className="layout-topbar">
             <Link href="/cms/main" className="layout-topbar-logo">
-                {/* <Image id="js-logo" className="logo" src="/images/logo.png" width={100} height={40} alt="areegator" priority /> */}
+                <Image id="js-logo" className="logo" src="/favicon.ico" width={48} height={48} alt="cmiwl" priority />
                 CMIWL
             </Link>
 
@@ -74,7 +74,6 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
             <a ref={topbarmenubuttonRef} type="button" className="p-link layout-topbar-menu-button layout-topbar-button" onClick={showProfileSidebar}>
                 <i className="pi pi-ellipsis-v" />
             </a>
-
             <div ref={topbarmenuRef} className={classNames('layout-topbar-menu', { 'layout-topbar-menu-mobile-active': layoutState.profileSidebarVisible })}>
                 <Link href="#" onClick={onSignOut}>
                     <button type="button" className="p-link layout-topbar-button">

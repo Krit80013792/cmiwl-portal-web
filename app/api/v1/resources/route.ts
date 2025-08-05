@@ -1,18 +1,27 @@
-//* app/api/v1/auth/signout/route.ts
-import { rsaEncrypt } from '@/src/shared/utils/crypto';
+//* app/api/v1/resources/route.ts
 import { validateApiKey } from '@/src/shared/middleware/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { serializeRequest } from '@/src/shared/utils/serializeRequest';
+import { ResourceService } from '../../../../src/application/services/ResourceService';
+import { ResourceRepository } from '../../../../src/infrastructure/database/mongodb/repositories/ResourceRepository';
+import { permissionGuard } from '@/src/shared/middleware/permission.guard';
 import { authGuard } from '@/src/shared/middleware/auth.guard';
 import { TxActivityLogger } from '@/src/shared/middleware/logging/TxActivityLogger';
 
+let _resourceServiceInstance: ResourceService | null = null;
+async function ResourceServiceInstance(): Promise<ResourceService> {
+    _resourceServiceInstance ??= new ResourceService(new ResourceRepository());
+    return _resourceServiceInstance;
+};
+
 /**
- * api/v1/auth/signout
+ * api/v1/resources/:GET Read resource
  */
-export async function POST(poReq: NextRequest) {
-    const ROUTE = 'api/v1/auth/signout';
-    const METHOD = 'POST';
-    const ACTION = 'signout';
+//* @(users:read)
+export async function GET(poReq: NextRequest) {
+    const ROUTE = 'api/v1/resources';
+    const METHOD = 'GET';
+    const ACTION = 'read';
 
     const isValidApiKey = await validateApiKey(poReq);
     if (!isValidApiKey) {
@@ -20,9 +29,12 @@ export async function POST(poReq: NextRequest) {
     }
 
     let user: any;
+    let permissions: any;
     try {
         const auth = await authGuard();
         user = auth?.user;
+        permissions = auth?.permissions;
+        permissionGuard(permissions, 'users:read');
     } catch {
         return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
     }
@@ -30,24 +42,8 @@ export async function POST(poReq: NextRequest) {
     const reqLog = await serializeRequest(poReq, {});
 
     try {
-        const response = NextResponse.json({ message: 'Credentials are valid!' });
-        const token = (await rsaEncrypt('signout')) as string;
-        response.cookies.set(`cmiwl_cms_me`, '', {
-            httpOnly: false,
-            secure: false,
-            sameSite: 'strict',
-            expires: new Date(0),
-            maxAge: 0,
-            path: '/',
-        });
-        response.cookies.set(`${process.env.APP_ENV}_cmiwl_cms_token`, token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            expires: new Date(0),
-            maxAge: 0,
-            path: '/'
-        });
+        const resourceService = await ResourceServiceInstance();
+        const resources = await resourceService.getResources();
 
         await TxActivityLogger.log({
             sUserName: user?.userName,
@@ -58,11 +54,12 @@ export async function POST(poReq: NextRequest) {
             sAction: ACTION,
             sStatus: 'success',
             sRequestMsg: JSON.stringify(reqLog),
-            sResponseMsg: JSON.stringify({}),
+            sResponseMsg: JSON.stringify(resources?.message),
             sChannel: 'CMS',
         } as any);
 
-        return response;
+        return new NextResponse(JSON.stringify({ message: 'Success', data: resources?.data }), { status: 200 });
+
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
         console.error(`Error ${METHOD} :`, errorMsg);

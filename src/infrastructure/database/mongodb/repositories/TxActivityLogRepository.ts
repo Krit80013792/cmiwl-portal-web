@@ -8,8 +8,11 @@ export class TxActivityLogRepository implements ITxActivityLogRepository {
         return await newTxLog.save();
     };
 
-    async findAll(): Promise<ITxActivityLog[]> {
-        return await TxActivityLogsEntity.find().sort({ createdAt: -1 });
+    async findAll(psStartDate: string): Promise<ITxActivityLog[]> {
+        const targetDate = new Date(psStartDate);
+        const startOfDay = new Date(targetDate.setUTCHours(0, 0, 0, 0));
+        const endOfDay = new Date(targetDate.setUTCHours(23, 59, 59, 999));
+        return await TxActivityLogsEntity.find({ createdAt: { $gte: startOfDay, $lte: endOfDay } }).sort({ createdAt: -1 });
     };
 
     async findByGroupName(psGroupName: string): Promise<ITxActivityLog[]> {

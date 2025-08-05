@@ -1,13 +1,21 @@
 //* src/application/services/UserRoleService.ts
 import { MongoDBConnectionService } from '../../infrastructure/database/mongodb/connection';
 import { IUserRoleRepository } from '../interfaces/IUserRoleRepository';
+import { IUserRepository } from '../interfaces/IUserRepository';
+import { IResourceRepository } from '../interfaces/IResourceRepository';
 import { IUserRole } from '../../domain/models/UserRoleModel';
 import { UserRoleDTO } from '../dtos/UserRoleDTO';
 import { BaseResponse } from '../../domain/common/BaseResponse';
+import { v4 as uuidv4 } from 'uuid';
+import { mapUserRolesPermissions } from '@/src/shared/utils/mapUserRolesPermissions';
 
 export class UserRoleService {
 
-    constructor(private readonly userRoleRepository: IUserRoleRepository) { }
+    constructor(
+        private readonly userRoleRepository: IUserRoleRepository,
+        private readonly userRepository: IUserRepository,
+        private readonly resourceRepository: IResourceRepository,
+    ) { }
 
     private mapToDTO(userRole: IUserRole): UserRoleDTO {
         return {
@@ -45,7 +53,7 @@ export class UserRoleService {
             await MongoDBConnectionService();
             const oUserRole = this.mapToDomain(poUserRole as UserRoleDTO);
 
-            const userRoleExists = await this.userRoleRepository.findByUserRoleName(oUserRole?.sUserRoleName);
+            const userRoleExists = await this.userRoleRepository.findByUserRoleName('', oUserRole?.sUserRoleName);
             if (userRoleExists) {
                 return {
                     statusCode: 409,
@@ -53,6 +61,25 @@ export class UserRoleService {
                     data: null,
                 };
             }
+
+            const resourceIds = poUserRole?.permissionsMap?.map(r => r.resourceId) ?? [];
+            const foundAll = await this.resourceRepository.findByIds(resourceIds);
+            if (!foundAll) {
+                return {
+                    statusCode: 404,
+                    message: 'Resources not found',
+                    data: null,
+                };
+            }
+
+            oUserRole.sUserRoleId = uuidv4(); //* Generate a new UUID for the userRoleId
+            oUserRole.arUserRolePermissions = [];
+            oUserRole.arResources = [];
+
+            const { arUserRolePermissions, arResources } = await mapUserRolesPermissions(poUserRole, this.resourceRepository);
+
+            oUserRole.arUserRolePermissions = arUserRolePermissions;
+            oUserRole.arResources = arResources;
 
             const oNewUserRole = await this.userRoleRepository.create(oUserRole);
             return {
@@ -115,7 +142,39 @@ export class UserRoleService {
         try {
             await MongoDBConnectionService();
             const oUserRole = this.mapToDomain(poUserRole as UserRoleDTO);
+
+            const userRoleExists = await this.userRoleRepository.findByUserRoleName(psId, oUserRole?.sUserRoleName);
+            if (userRoleExists) {
+                return {
+                    statusCode: 409,
+                    message: 'UserRole already exists',
+                    data: null,
+                };
+            }
+
+            const resourceIds = poUserRole?.permissionsMap?.map(r => r.resourceId) ?? [];
+            const foundAll = await this.resourceRepository.findByIds(resourceIds);
+            if (!foundAll) {
+                return {
+                    statusCode: 404,
+                    message: 'Resources not found',
+                    data: null,
+                };
+            }
+
+            oUserRole.arUserRolePermissions = [];
+            oUserRole.arResources = [];
+
+            const { arUserRolePermissions, arResources } = await mapUserRolesPermissions(poUserRole, this.resourceRepository);
+
+            oUserRole.arUserRolePermissions = arUserRolePermissions;
+            oUserRole.arResources = arResources;
+
             const oUpdatedUserRole = await this.userRoleRepository.update(psId, oUserRole);
+            if (oUpdatedUserRole) {
+                await this.userRepository.updateUserRoleName(oUpdatedUserRole?.sUserRoleId, oUpdatedUserRole?.sUserRoleName);
+            }
+
             return {
                 statusCode: oUpdatedUserRole ? 200 : 404,
                 message: oUpdatedUserRole ? 'UserRole updated' : 'UserRole not found',
@@ -132,9 +191,19 @@ export class UserRoleService {
     };
 
     //* @(users:delete)
-    async deleteUserRole(psId: string): Promise<BaseResponse<UserRoleDTO | null>> {
+    async deleteUserRole(psId: string, psUserRoleId: string): Promise<BaseResponse<UserRoleDTO | null>> {
         try {
             await MongoDBConnectionService();
+
+            const userRoleExists = await this.userRepository.findByUserRoleId(psUserRoleId);
+            if (userRoleExists.length > 0) {
+                return {
+                    statusCode: 409,
+                    message: 'UserRole is currently in use',
+                    data: null,
+                };
+            }
+
             const deletedUserRole = await this.userRoleRepository.deleteOne(psId);
             return {
                 statusCode: deletedUserRole ? 200 : 404,

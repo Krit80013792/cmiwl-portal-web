@@ -1,4 +1,4 @@
-export interface TxLogDTO {
+export interface TxActivityLogDTO {
     id: string; //* MongoDB ObjectId
     userName: string;
     userGroupName: string;

@@ -6,6 +6,7 @@ import { Toast } from 'primereact/toast';
 import { Badge } from 'primereact/badge';
 import { Button } from 'primereact/button';
 import { Column } from 'primereact/column';
+import { Checkbox } from 'primereact/checkbox';
 import { FilterMatchMode } from 'primereact/api';
 import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { Dropdown } from 'primereact/dropdown';
@@ -13,11 +14,16 @@ import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import { ApiRoute } from '@/src/shared/utils/profile';
-import { getUserById, createUser, updateUser, deleteUser, getUsers } from '@/services/client/users.service';
+import { createUser, updateUser, deleteUser, getUsers } from '@/services/client/users.service';
+import { createUserGroup, updateUserGroup, deleteUserGroup, getUserGroups } from '@/services/client/userGroups.service';
+import { createUserRole, updateUserRole, deleteUserRole, getUserRoles } from '@/services/client/userRoles.service';
+import { getResources } from '@/services/client/resources.service';
 import { UserDTO } from '@/src/application/dtos/UserDTO';
 import { UserGroupDTO } from '@/src/application/dtos/UserGroupDTO';
 import { UserRoleDTO } from '@/src/application/dtos/UserRoleDTO';
+import { ResourceDTO } from '@/src/application/dtos/ResourceDTO';
 import { convertDate } from '@/src/shared/utils/utils';
+import { clientCookie } from '@/src/shared/utils/clientCookie';
 
 const UsersPage = () => {
 
@@ -42,22 +48,76 @@ const UsersPage = () => {
         updatedAt: new Date,
     } as UserDTO;
 
+    const emptyUserGroup: UserGroupDTO = {
+        id: "",
+        userGroupId: "",
+        userGroupName: "",
+        createdBy: "",
+        updatedBy: "",
+        createdAt: new Date,
+        updatedAt: new Date,
+    } as UserGroupDTO;
+
+    const emptyUserRole: UserRoleDTO = {
+        id: "",
+        userRoleId: "",
+        userRoleName: "",
+        userRoleDescription: "",
+        userRolePermissions: [''],
+        resources: [''],
+        permissionsMap: [],
+        createdBy: "",
+        updatedBy: "",
+        createdAt: new Date,
+        updatedAt: new Date,
+    } as UserRoleDTO;
+
+    interface ResourcesPermissions {
+        resourceId: string;
+        resourceName: string;
+        permissions: {
+            create: boolean;
+            read: boolean;
+            update: boolean;
+            delete: boolean;
+        };
+    };
+
     const toast = useRef<Toast>(null);
-    const dt = useRef<DataTable<any>>(null);
+    const dtUsers = useRef<DataTable<any>>(null);
+    const dtUserGroups = useRef<DataTable<any>>(null);
+    const dtUserRoles = useRef<DataTable<any>>(null);
+    const [clientPerms, setClientPerms] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [users, setUsers] = useState<UserDTO[]>([]);
     const [userGroups, setUserGroups] = useState<UserGroupDTO[]>([]);
     const [userRoles, setUserRoles] = useState<UserRoleDTO[]>([]);
+    const [resourcesPermissions, setResourcesPermissions] = useState<any[]>([]);
     const [userDialog, setUserDialog] = useState(false);
-    const [deleteNewsDialog, setDeleteNewsDialog] = useState(false);
-    const [deleteNewssDialog, setDeleteNewssDialog] = useState(false);
+    const [userGroupDialog, setUserGroupDialog] = useState(false);
+    const [userRoleDialog, setUserRoleDialog] = useState(false);
+    const [deleteUserDialog, setDeleteUserDialog] = useState(false);
+    const [deleteUserGroupDialog, setDeleteUserGroupDialog] = useState(false);
+    const [deleteUserRoleDialog, setDeleteUserRoleDialog] = useState(false);
     const [user, setUser] = useState<UserDTO>(emptyUser);
+    const [userGroup, setUserGroup] = useState<UserGroupDTO>(emptyUserGroup);
+    const [userRole, setUserRole] = useState<UserRoleDTO>(emptyUserRole);
     const [selectedUsers, setSelectedUsers] = useState(null);
+    const [selectedUserGroups, setSelectedUserGroups] = useState(null);
+    const [selectedUserRoles, setSelectedUserRoles] = useState(null);
     const [submitted, setSubmitted] = useState(false);
-    const [filters, setFilters] = useState<DataTableFilterMeta>({
+    const [usersFilters, setUsersFilters] = useState<DataTableFilterMeta>({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
-    const [globalFilterValue, setGlobalFilterValue] = useState('');
+    const [globalFilterUsersValue, setGlobalFilterUsersValue] = useState('');
+    const [userGroupsFilters, setUserGroupsFilters] = useState<DataTableFilterMeta>({
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    });
+    const [globalFilterUserGroupsValue, setGlobalFilterUserGroupsValue] = useState('');
+    const [userRolesFilters, setUserRolesFilters] = useState<DataTableFilterMeta>({
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    });
+    const [globalFilterUserRolesValue, setGlobalFilterUserRolesValue] = useState('');
 
     const setApiRoute = async (): Promise<any> => {
         const c = await ApiRoute();
@@ -66,12 +126,21 @@ const UsersPage = () => {
     };
 
     useEffect(() => {
+        const cc = clientCookie();
+        setClientPerms(cc?.perms);
+
         setLoading(true);
         const getData = async () => {
             const route = await setApiRoute();
-            const res = await getUsers(route);
-            const usersData = await res.json();
+            const resUsers = await getUsers(route);
+            const usersData = await resUsers.json();
+            const resUserGroups = await getUserGroups(route);
+            const userGroupsData = await resUserGroups.json();
+            const resUserRoles = await getUserRoles(route);
+            const userRolesData = await resUserRoles.json();
             setUsers(usersData?.data);
+            setUserGroups(userGroupsData?.data);
+            setUserRoles(userRolesData?.data);
             setLoading(false);
         };
         getData();
@@ -83,184 +152,459 @@ const UsersPage = () => {
         setUserDialog(true);
     };
 
+    const openNewUserGroup = () => {
+        setUserGroup(emptyUserGroup);
+        setSubmitted(false);
+        setUserGroupDialog(true);
+    };
+
+    function mapResourcesToEmptyPermissions(resources: ResourceDTO[]): ResourcesPermissions[] {
+        try {
+            const recursive = (list: ResourceDTO[]): ResourcesPermissions[] => {
+                return list.flatMap((res) => {
+                    const item: ResourcesPermissions = {
+                        resourceId: res.resourceId,
+                        resourceName: res.resourceName,
+                        permissions: {
+                            create: false,
+                            read: false,
+                            update: false,
+                            delete: false
+                        }
+                    };
+
+                    const children = res.childrenItems?.length ? recursive(res.childrenItems) : [];
+                    return [item, ...children];
+                });
+            };
+            return recursive(resources);
+        } catch {
+            return [];
+        }
+    };
+
+    function mapRoleToPermissions(resourceDTOs: ResourceDTO[], role: { userRolePermissions: string[] }): ResourcesPermissions[] {
+        const permSet = new Set(role.userRolePermissions);
+        const recursive = (resources: ResourceDTO[]): ResourcesPermissions[] => {
+            return resources.flatMap((r) => {
+                const resourceName = r.resourceName;
+                const permissions: ResourcesPermissions['permissions'] = {
+                    create: permSet.has(`${resourceName}:create`),
+                    read: permSet.has(`${resourceName}:read`),
+                    update: permSet.has(`${resourceName}:update`),
+                    delete: permSet.has(`${resourceName}:delete`)
+                };
+                const currentItem: ResourcesPermissions = {
+                    resourceId: r.resourceId,
+                    resourceName: r.resourceName,
+                    permissions
+                };
+                const children = recursive(r.childrenItems || []);
+                return [currentItem, ...children];
+            });
+        };
+        return recursive(resourceDTOs);
+    };
+
+    const openNewUserRole = () => {
+        setLoading(true);
+        const getData = async () => {
+            const route = await setApiRoute();
+            const resResources = await getResources(route);
+            const resourcesData = await resResources.json();
+            setLoading(false);
+
+            setResourcesPermissions(mapResourcesToEmptyPermissions(resourcesData?.data));
+        };
+        getData();
+
+        setUserRole(emptyUserRole);
+        setSubmitted(false);
+        setUserRoleDialog(true);
+    };
+
     const hideUserDialog = () => {
         setSubmitted(false);
         setUserDialog(false);
     };
 
-    // const hideDeleteNewsDialog = () => {
-    //     setDeleteNewsDialog(false);
-    // };
+    const hideDeleteUserDialog = () => {
+        setDeleteUserDialog(false);
+    };
 
-    // const hideDeleteNewssDialog = () => {
-    //     setDeleteNewssDialog(false);
-    // };
+    const hideUserGroupDialog = () => {
+        setSubmitted(false);
+        setUserGroupDialog(false);
+    };
+
+    const hideDeleteUserGroupDialog = () => {
+        setDeleteUserGroupDialog(false);
+    };
+
+    const hideUserRoleDialog = () => {
+        setSubmitted(false);
+        setUserRoleDialog(false);
+    };
+
+    const hideDeleteUserRoleDialog = () => {
+        setDeleteUserRoleDialog(false);
+    };
 
     const saveUser = async (e: React.FormEvent) => {
         e.preventDefault();
         setSubmitted(false);
+        setLoading(true);
 
         const oUser = { ...user };
-        console.info(oUser);
-        if (!oUser.userName ||
-            !oUser.password ||
-            !oUser.userGroupId ||
-            !oUser.userRoleId) {
-            setSubmitted(true);
-            setUserDialog(true);
-            return;
+
+        if (oUser?.userId) {
+            if (!oUser.userGroupId ||
+                !oUser.userRoleId) {
+                setSubmitted(true);
+                setUserDialog(true);
+                setLoading(false);
+                return;
+            }
+            await handleUpdateUser(oUser);
+        } else {
+            if (!oUser.userName ||
+                !oUser.password ||
+                !oUser.userGroupId ||
+                !oUser.userRoleId) {
+                setSubmitted(true);
+                setUserDialog(true);
+                setLoading(false);
+                return;
+            }
+            await handleInsertUser(oUser);
         }
-
-        setLoading(true);
-        //setUserDialog(false);
-
-        // oNews.newsFullContent = sanitize(oNews.newsFullContent);
-        // oNews.newsFooterContent = sanitize(oNews.newsFooterContent);
-
-        // oNews.aListImages = [];
-        // setNews(oNews);
-
-        // if (oNews.newsId) {
-        //     await handleUpdateNews(oNews);
-        // } else {
-        //     await handleInsertNews(oNews);
-        // }
         setLoading(false);
     };
 
-    // const isValidImgType = () => {
-    //     const sFileTypeMain = fileMain[0]?.type.toString().toLowerCase();
-    //     const sFileTypeThumbnail = fileThumbnail[0]?.type.toString().toLowerCase();
-    //     if ((sFileTypeMain !== 'image/jpg' && sFileTypeMain !== 'image/jpeg') ||
-    //         (sFileTypeThumbnail !== 'image/jpg' && sFileTypeThumbnail !== 'image/jpeg')) {
-    //         return false;
-    //     }
-    //     return true;
-    // };
+    const saveUserGroup = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSubmitted(false);
+        setLoading(true);
 
-    // const handleUpdateNews = async (poNews: NewsDTO) => {
-    //     const sFileTypeThumbnail = fileThumbnail[0]?.type.toString().toLowerCase();
-    //     if (sFileTypeThumbnail) {
-    //         if (!isValidImgType()) {
-    //             toast.current?.show({ severity: 'warn', summary: 'Warning', detail: 'Only .jpg files are allowed', life: 5000 });
-    //             return;
-    //         }
-    //     }
+        const oUserGroup = { ...userGroup };
 
-    //     poNews.newsImageName = fileNameMain?.split('.')[0] ?? poNews.newsImageName;
-    //     poNews.newsImagePath = fileB64Main ?? poNews.newsImagePath;
-    //     poNews.newsImageThumbnailName = fileNameThumbnail?.split('.')[0] ?? poNews.newsImageThumbnailName;
-    //     poNews.newsImageThumbnailPath = fileB64Thumbnail ?? poNews.newsImageThumbnailPath;
+        if (oUserGroup?.userGroupId) {
+            if (!oUserGroup.userGroupName) {
+                setSubmitted(true);
+                setUserGroupDialog(true);
+                setLoading(false);
+                return;
+            }
+            await handleUpdateUserGroup(oUserGroup);
+        } else {
+            if (!oUserGroup.userGroupName) {
+                setSubmitted(true);
+                setUserGroupDialog(true);
+                setLoading(false);
+                return;
+            }
+            await handleInsertUserGroup(oUserGroup);
+        }
+        setLoading(false);
+    };
 
-    //     const conf = await setConfAsync();
-    //     const res = await updateNews(conf, poNews);
-    //     if (res.status === 409) {
-    //         const body = await res.json();
-    //         toast.current?.show({ severity: 'warn', summary: 'Warning', detail: body?.message, life: 5000 });
-    //         return;
-    //     }
-    //     if (res.ok) {
-    //         const conf = await setConfAsync();
-    //         const res = await getNewsByType(conf, 'type=news');
-    //         const dataNews = await res.json();
-    //         setNewss(dataNews?.data);
-    //         setNewsDialog(false);
-    //         setNews(emptyNews);
-    //         onCancelMainFile();
-    //         onCancelThumbnailFile();
-    //         toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'News Updated', life: 5000 });
-    //     } else {
-    //         toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to update News', life: 5000 });
-    //     }
-    // };
+    const saveUserRole = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSubmitted(false);
+        setLoading(true);
 
-    // const handleInsertNews = async (poNews: NewsDTO) => {
-    //     if (!isValidImgType()) {
-    //         toast.current?.show({ severity: 'warn', summary: 'Warning', detail: 'Only .jpg files are allowed', life: 5000 });
-    //         return;
-    //     }
-    //     if (!fileB64Thumbnail) {
-    //         toast.current?.show({ severity: 'warn', summary: 'Warning', detail: 'Please select News image', life: 5000 });
-    //         return;
-    //     }
+        const oUserRole = { ...userRole };
+        oUserRole.permissionsMap = resourcesPermissions;
 
-    //     poNews.newsImageName = fileNameMain?.split('.')[0] ?? poNews.newsImageName;
-    //     poNews.newsImagePath = fileB64Main ?? poNews.newsImagePath;
-    //     poNews.newsImageThumbnailName = fileNameThumbnail?.split('.')[0] ?? poNews.newsImageThumbnailName;
-    //     poNews.newsImageThumbnailPath = fileB64Thumbnail ?? poNews.newsImageThumbnailPath;
+        if (oUserRole?.userRoleId) {
+            if (!oUserRole.userRoleName) {
+                setSubmitted(true);
+                setUserRoleDialog(true);
+                setLoading(false);
+                return;
+            }
+            await handleUpdateUserRole(oUserRole);
+        } else {
+            if (!oUserRole.userRoleName) {
+                setSubmitted(true);
+                setUserRoleDialog(true);
+                setLoading(false);
+                return;
+            }
+            await handleInsertUserRole(oUserRole);
+        }
+        setLoading(false);
+    };
 
-    //     const conf = await setConfAsync();
-    //     const res = await createNews(conf, poNews);
-    //     if (res.status === 409) {
-    //         const body = await res.json();
-    //         toast.current?.show({ severity: 'warn', summary: 'Warning', detail: body?.message, life: 5000 });
-    //         return;
-    //     }
-    //     if (res.ok) {
-    //         const conf = await setConfAsync();
-    //         const res = await getNewsByType(conf, 'type=news');
-    //         const dataNews = await res.json();
-    //         setNewss(dataNews?.data);
-    //         setNewsDialog(false);
-    //         setNews(emptyNews);
-    //         onCancelMainFile();
-    //         onCancelThumbnailFile();
-    //         toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'News Created', life: 5000 });
-    //     } else {
-    //         toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to create News', life: 5000 });
-    //     }
-    // };
+    const handleUpdateUser = async (poUser: UserDTO) => {
+        const route = await setApiRoute();
+        const res = await updateUser(route, poUser);
+        if (res?.status === 409) {
+            const body = await res.json();
+            toast.current?.show({ severity: 'warn', summary: 'Warning', detail: body?.message, life: 5000 });
+            return;
+        }
+        if (res?.ok) {
+            const resUsers = await getUsers(route);
+            const usersData = await resUsers.json();
+            setUsers(usersData?.data);
+            setUserDialog(false);
+            setUser(emptyUser);
+            toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'User Updated', life: 5000 });
+        } else {
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to update User', life: 5000 });
+        }
+    };
 
-    // const editNews = (poNews: NewsDTO) => {
-    //     const transformedNews = {
-    //         ...poNews,
-    //         sPostDate: poNews.sPostDate ? new Date(poNews.sPostDate) : null,
-    //     };
+    const handleUpdateUserGroup = async (poUserGroup: UserGroupDTO) => {
+        const route = await setApiRoute();
+        const res = await updateUserGroup(route, poUserGroup);
+        if (res?.status === 409) {
+            const body = await res.json();
+            toast.current?.show({ severity: 'warn', summary: 'Warning', detail: body?.message, life: 5000 });
+            return;
+        }
+        if (res?.ok) {
+            const resUserGroups = await getUserGroups(route);
+            const userGroupsData = await resUserGroups.json();
+            setUserGroups(userGroupsData?.data);
+            setUserGroupDialog(false);
+            setUserGroup(emptyUserGroup);
 
-    //     setNews(transformedNews);
-    //     setNewsDialog(true);
-    // };
+            const resUsers = await getUsers(route);
+            const usersData = await resUsers.json();
+            setUsers(usersData?.data);
 
-    // const confirmDeleteNews = (poNews: NewsDTO) => {
-    //     setNews(poNews);
-    //     setDeleteNewsDialog(true);
-    // };
+            toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'User Group Updated', life: 5000 });
+        } else {
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to update User Group', life: 5000 });
+        }
+    };
 
-    // const handleDeleteNews = async () => {
-    //     const oNews = { ...news };
-    //     if (oNews.newsId) {
-    //         await toDeleteNews(oNews);
-    //     }
-    // };
+    const handleUpdateUserRole = async (poUserRole: UserRoleDTO) => {
+        const route = await setApiRoute();
+        const res = await updateUserRole(route, poUserRole);
+        if (res?.status === 409) {
+            const body = await res.json();
+            toast.current?.show({ severity: 'warn', summary: 'Warning', detail: body?.message, life: 5000 });
+            return;
+        }
+        if (res?.ok) {
+            const resUserRoles = await getUserRoles(route);
+            const userRolesData = await resUserRoles.json();
+            setUserRoles(userRolesData?.data);
+            setUserRoleDialog(false);
+            setUserRole(emptyUserRole);
 
-    // const confirmDeleteSelected = () => {
-    //     setDeleteNewssDialog(true);
-    // };
+            const resUsers = await getUsers(route);
+            const usersData = await resUsers.json();
+            setUsers(usersData?.data);
 
-    // const handleDeleteSelectedNewss = async () => {
-    //     if (selectedNewss) {
-    //         await toDeleteNews(selectedNewss);
-    //     }
-    // };
+            toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'User Role Updated', life: 5000 });
+        } else {
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to update User Role', life: 5000 });
+        }
+    };
 
-    // const toDeleteNews = async (paNews: any) => {
-    //     setDeleteNewsDialog(false);
-    //     setDeleteNewssDialog(false);
-    //     setLoading(true);
-    //     const conf = await setConfAsync();
-    //     const res = await deleteNews(conf, paNews);
-    //     if (res.ok) {
-    //         const res = await getNewsByType(conf, 'type=news');
-    //         const dataNews = await res.json();
-    //         setNewss(dataNews?.data);
-    //         setNews(emptyNews);
-    //         setSelectedNewss(null);
-    //         toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'News Deleted', life: 5000 });
-    //     } else {
-    //         toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to delete News', life: 5000 });
-    //     }
-    //     setLoading(false);
-    // };
+    const handleInsertUser = async (poUser: UserDTO) => {
+        const route = await setApiRoute();
+        const res = await createUser(route, poUser);
+        if (res?.status === 409) {
+            const body = await res.json();
+            toast.current?.show({ severity: 'warn', summary: 'Warning', detail: body?.message, life: 5000 });
+            return;
+        }
+        if (res?.ok) {
+            const resUsers = await getUsers(route);
+            const usersData = await resUsers.json();
+            setUsers(usersData?.data);
+            setUserDialog(false);
+            setUser(emptyUser);
+            toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'User Created', life: 5000 });
+        } else {
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to create User', life: 5000 });
+        }
+    };
+
+    const handleInsertUserGroup = async (poUserGroup: UserGroupDTO) => {
+        const route = await setApiRoute();
+        const res = await createUserGroup(route, poUserGroup);
+        if (res?.status === 409) {
+            const body = await res.json();
+            toast.current?.show({ severity: 'warn', summary: 'Warning', detail: body?.message, life: 5000 });
+            return;
+        }
+        if (res?.ok) {
+            const resUserGroups = await getUserGroups(route);
+            const userGroupsData = await resUserGroups.json();
+            setUserGroups(userGroupsData?.data);
+            setUserGroupDialog(false);
+            setUserGroup(emptyUserGroup);
+            toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'User Group Created', life: 5000 });
+        } else {
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to create User Group', life: 5000 });
+        }
+    };
+
+    const handleInsertUserRole = async (poUserRole: UserRoleDTO) => {
+        const route = await setApiRoute();
+        const res = await createUserRole(route, poUserRole);
+        if (res?.status === 409) {
+            const body = await res.json();
+            toast.current?.show({ severity: 'warn', summary: 'Warning', detail: body?.message, life: 5000 });
+            return;
+        }
+        if (res?.ok) {
+            const resUserRoles = await getUserRoles(route);
+            const userRolesData = await resUserRoles.json();
+            setUserRoles(userRolesData?.data);
+            setUserRoleDialog(false);
+            setUserRole(emptyUserRole);
+            toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'User Role Created', life: 5000 });
+        } else {
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to create User Role', life: 5000 });
+        }
+    };
+
+    const editUser = (poUser: UserDTO) => {
+        const transformedUser = {
+            ...poUser,
+        };
+
+        setUser(transformedUser);
+        setUserDialog(true);
+    };
+
+    const editUserGroup = (poUserGroup: UserGroupDTO) => {
+        const transformedUserGroup = {
+            ...poUserGroup,
+        };
+
+        setUserGroup(transformedUserGroup);
+        setUserGroupDialog(true);
+    };
+
+    const editUserRole = (poUserRole: UserRoleDTO) => {
+        const transformedUserRole = {
+            ...poUserRole,
+        };
+
+        setLoading(true);
+        const getData = async () => {
+            const route = await setApiRoute();
+            const resResources = await getResources(route);
+            const resourcesData = await resResources.json();
+            setLoading(false);
+
+            setResourcesPermissions(mapRoleToPermissions(resourcesData?.data, transformedUserRole));
+        };
+        getData();
+
+        setUserRole(transformedUserRole);
+        setUserRoleDialog(true);
+    };
+
+    const confirmDeleteUser = (poUser: UserDTO) => {
+        setUser(poUser);
+        setDeleteUserDialog(true);
+    };
+
+    const confirmDeleteUserGroup = (poUserGroup: UserGroupDTO) => {
+        setUserGroup(poUserGroup);
+        setDeleteUserGroupDialog(true);
+    };
+
+    const confirmDeleteUserRole = (poUserRole: UserRoleDTO) => {
+        setUserRole(poUserRole);
+        setDeleteUserRoleDialog(true);
+    };
+
+    const handleDeleteUser = async () => {
+        const oUser = { ...user };
+        if (oUser?.id) {
+            await toDeleteUser(oUser);
+        }
+    };
+
+    const handleDeleteUserGroup = async () => {
+        const oUserGroup = { ...userGroup };
+        if (oUserGroup?.id) {
+            await toDeleteUserGroup(oUserGroup);
+        }
+    };
+
+    const handleDeleteUserRole = async () => {
+        const oUserRole = { ...userRole };
+        if (oUserRole?.id) {
+            await toDeleteUserRole(oUserRole);
+        }
+    };
+
+    const toDeleteUser = async (paUser: any) => {
+        setDeleteUserDialog(false);
+        setLoading(true);
+        const route = await setApiRoute();
+        const res = await deleteUser(route, paUser);
+        if (res?.ok) {
+            const resUsers = await getUsers(route);
+            const usersData = await resUsers.json();
+            setUsers(usersData?.data);
+            setUser(emptyUser);
+            setSelectedUsers(null);
+            toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'User Deleted', life: 5000 });
+        } else {
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to delete User', life: 5000 });
+        }
+        setLoading(false);
+    };
+
+    const toDeleteUserGroup = async (paUserGroup: any) => {
+        setDeleteUserGroupDialog(false);
+        setLoading(true);
+        const route = await setApiRoute();
+        const res = await deleteUserGroup(route, paUserGroup);
+        if (res?.status === 409) {
+            const body = await res.json();
+            toast.current?.show({ severity: 'warn', summary: 'Warning', detail: body?.message, life: 5000 });
+            setLoading(false);
+            return;
+        }
+        if (res?.ok) {
+            const resUserGroups = await getUserGroups(route);
+            const userGroupsData = await resUserGroups.json();
+            setUserGroups(userGroupsData?.data);
+            setUserGroup(emptyUserGroup);
+            setSelectedUserGroups(null);
+            toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'User Group Deleted', life: 5000 });
+        } else {
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to delete User Group', life: 5000 });
+        }
+        setLoading(false);
+    };
+
+    const toDeleteUserRole = async (paUserRole: any) => {
+        setDeleteUserRoleDialog(false);
+        setLoading(true);
+        const route = await setApiRoute();
+        const res = await deleteUserRole(route, paUserRole);
+        if (res?.status === 409) {
+            const body = await res.json();
+            toast.current?.show({ severity: 'warn', summary: 'Warning', detail: body?.message, life: 5000 });
+            setLoading(false);
+            return;
+        }
+        if (res?.ok) {
+            const resUserRoles = await getUserRoles(route);
+            const userRolesData = await resUserRoles.json();
+            setUserRoles(userRolesData?.data);
+            setUserRole(emptyUserRole);
+            setSelectedUserRoles(null);
+            toast.current?.show({ severity: 'success', summary: 'Successful', detail: 'User Role Deleted', life: 5000 });
+        } else {
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to delete User Role', life: 5000 });
+        }
+        setLoading(false);
+    };
 
     const userNameBodyTemplate = (rowData: UserDTO) => {
         return (
@@ -285,6 +629,15 @@ const UsersPage = () => {
             <>
                 <span className="p-column-title">Role</span>
                 {rowData?.userRoleName}
+            </>
+        );
+    };
+
+    const userRoleDescriptionBodyTemplate = (rowData: UserRoleDTO) => {
+        return (
+            <>
+                <span className="p-column-title">Description</span>
+                {rowData?.userRoleDescription}
             </>
         );
     };
@@ -317,14 +670,44 @@ const UsersPage = () => {
         );
     };
 
-    // const actionBodyTemplate = (rowData: NewsDTO) => {
-    //     return (
-    //         <>
-    //             <Button icon="pi pi-pencil" rounded text severity="secondary" className="mr-2" onClick={() => editNews(rowData)} />
-    //             <Button icon="pi pi-trash" rounded text severity="danger" onClick={() => confirmDeleteNews(rowData)} />
-    //         </>
-    //     );
-    // };
+    const actionUsersBodyTemplate = (rowData: UserDTO) => {
+        return (
+            <>
+                {(clientPerms ?? []).includes('users:update') && (
+                    <Button icon="pi pi-pencil" rounded text severity="secondary" className="mr-2" onClick={() => editUser(rowData)} />
+                )}
+                {(clientPerms ?? []).includes('users:delete') && (
+                    <Button icon="pi pi-trash" rounded text severity="danger" onClick={() => confirmDeleteUser(rowData)} />
+                )}
+            </>
+        );
+    };
+
+    const actionUserGroupsBodyTemplate = (rowData: UserGroupDTO) => {
+        return (
+            <>
+                {(clientPerms ?? []).includes('users:update') && (
+                    <Button icon="pi pi-pencil" rounded text severity="secondary" className="mr-2" onClick={() => editUserGroup(rowData)} />
+                )}
+                {(clientPerms ?? []).includes('users:delete') && (
+                    <Button icon="pi pi-trash" rounded text severity="danger" onClick={() => confirmDeleteUserGroup(rowData)} />
+                )}
+            </>
+        );
+    };
+
+    const actionUserRolesBodyTemplate = (rowData: UserRoleDTO) => {
+        return (
+            <>
+                {(clientPerms ?? []).includes('users:update') && (
+                    <Button icon="pi pi-pencil" rounded text severity="secondary" className="mr-2" onClick={() => editUserRole(rowData)} />
+                )}
+                {(clientPerms ?? []).includes('users:delete') && (
+                    <Button icon="pi pi-trash" rounded text severity="danger" onClick={() => confirmDeleteUserRole(rowData)} />
+                )}
+            </>
+        );
+    };
 
     const userDialogFooter = (
         <>
@@ -333,19 +716,40 @@ const UsersPage = () => {
         </>
     );
 
-    // const deleteNewsDialogFooter = (
-    //     <>
-    //         <Button label="No" icon="pi pi-times" text onClick={hideDeleteNewsDialog} />
-    //         <Button label="Yes" icon="pi pi-check" text onClick={handleDeleteNews} />
-    //     </>
-    // );
+    const userGroupDialogFooter = (
+        <>
+            <Button label="Cancel" icon="pi pi-times" text onClick={hideUserGroupDialog} />
+            <Button label="Save" icon="pi pi-check" text onClick={saveUserGroup} />
+        </>
+    );
 
-    // const deleteNewssDialogFooter = (
-    //     <>
-    //         <Button label="No" icon="pi pi-times" text onClick={hideDeleteNewssDialog} />
-    //         <Button label="Yes" icon="pi pi-check" text onClick={handleDeleteSelectedNewss} />
-    //     </>
-    // );
+    const userRoleDialogFooter = (
+        <>
+            <Button label="Cancel" icon="pi pi-times" text onClick={hideUserRoleDialog} />
+            <Button label="Save" icon="pi pi-check" text onClick={saveUserRole} />
+        </>
+    );
+
+    const deleteUserDialogFooter = (
+        <>
+            <Button label="No" icon="pi pi-times" text onClick={hideDeleteUserDialog} />
+            <Button label="Yes" icon="pi pi-check" text onClick={handleDeleteUser} />
+        </>
+    );
+
+    const deleteUserGroupDialogFooter = (
+        <>
+            <Button label="No" icon="pi pi-times" text onClick={hideDeleteUserGroupDialog} />
+            <Button label="Yes" icon="pi pi-check" text onClick={handleDeleteUserGroup} />
+        </>
+    );
+
+    const deleteUserRoleDialogFooter = (
+        <>
+            <Button label="No" icon="pi pi-times" text onClick={hideDeleteUserRoleDialog} />
+            <Button label="Yes" icon="pi pi-check" text onClick={handleDeleteUserRole} />
+        </>
+    );
 
     const handleUserNameKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         const regex = /^[a-zA-Z0-9]*$/;
@@ -359,6 +763,27 @@ const UsersPage = () => {
         let oUser = { ...user };
         oUser.userName = sVal;
         setUser(oUser);
+    };
+
+    const onInputGroupNameChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, name: string) => {
+        const sVal = (e.target && e.target.value) || '';
+        let oUserGroup = { ...userGroup };
+        oUserGroup.userGroupName = sVal;
+        setUserGroup(oUserGroup);
+    };
+
+    const onInputRoleNameChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, name: string) => {
+        const sVal = (e.target && e.target.value) || '';
+        let oUserRole = { ...userRole };
+        oUserRole.userRoleName = sVal;
+        setUserRole(oUserRole);
+    };
+
+    const onInputRoleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, name: string) => {
+        const sVal = (e.target && e.target.value) || '';
+        let oUserRole = { ...userRole };
+        oUserRole.userRoleDescription = sVal;
+        setUserRole(oUserRole);
     };
 
     const onInputPasswordChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, name: string) => {
@@ -406,138 +831,265 @@ const UsersPage = () => {
         setUser(oUser);
     };
 
-    const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const onGlobalFilterUsersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
-        let _filters = { ...filters };
+        let _filters = { ...usersFilters };
         (_filters['global'] as any).value = value;
-        setFilters(_filters);
-        setGlobalFilterValue(value);
+        setUsersFilters(_filters);
+        setGlobalFilterUsersValue(value);
     };
 
-    const renderTableHeader = () => {
+    const renderUsersTableHeader = () => {
         return (
             <div className="flex justify-content-between">
                 <span className="p-input-icon-left">
-
+                    <strong>Manage Users</strong>
                 </span>
                 <span className="p-input-icon-right">
                     <i className="pi pi-search" />
-                    <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Search by Username" />
+                    <InputText value={globalFilterUsersValue} onChange={onGlobalFilterUsersChange} placeholder="Search by Username" />
                 </span>
             </div>
         );
     };
 
-    const tableHeader = renderTableHeader();
+    const usersTableHeader = renderUsersTableHeader();
+
+    const onGlobalFilterUserGroupsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        let _filters = { ...userGroupsFilters };
+        (_filters['global'] as any).value = value;
+        setUserGroupsFilters(_filters);
+        setGlobalFilterUserGroupsValue(value);
+    };
+
+    const renderUserGroupsTableHeader = () => {
+        return (
+            <div className="flex justify-content-between">
+                <span className="p-input-icon-left">
+                    {(clientPerms ?? []).includes('users:create') && (
+                        <Button label="New Group" icon="pi pi-plus" severity="secondary" className="mr-2" onClick={openNewUserGroup} />
+                    )}
+                </span>
+                <span className="p-input-icon-right">
+                    <i className="pi pi-search" />
+                    <InputText value={globalFilterUserGroupsValue} onChange={onGlobalFilterUserGroupsChange} placeholder="Search by Group name" />
+                </span>
+            </div>
+        );
+    };
+
+    const userGroupsTableHeader = renderUserGroupsTableHeader();
+
+    const onGlobalFilterUserRolesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        let _filters = { ...userRolesFilters };
+        (_filters['global'] as any).value = value;
+        setUserRolesFilters(_filters);
+        setGlobalFilterUserRolesValue(value);
+    };
+
+    const renderUserRolesTableHeader = () => {
+        return (
+            <div className="flex justify-content-between">
+                <span className="p-input-icon-left">
+                    {(clientPerms ?? []).includes('users:create') && (
+                        <Button label="New Role" icon="pi pi-plus" severity="secondary" className="mr-2" onClick={openNewUserRole} />
+                    )}
+                </span>
+                <span className="p-input-icon-right">
+                    <i className="pi pi-search" />
+                    <InputText value={globalFilterUserRolesValue} onChange={onGlobalFilterUserRolesChange} placeholder="Search by Role name" />
+                </span>
+            </div>
+        );
+    };
+
+    const userRolesTableHeader = renderUserRolesTableHeader();
+
+    const onPermissionChange = (rowIndex: number, perm: keyof any['permissions'], checked: boolean) => {
+        const updated = [...resourcesPermissions];
+        updated[rowIndex].permissions[perm] = checked;
+        setResourcesPermissions(updated);
+    };
+
+    const permissionCheckboxTemplate = (perm: keyof any['permissions']) => (rowData: any, { rowIndex }: { rowIndex: number }) => {
+        return (
+            <Checkbox
+                checked={rowData.permissions[perm]}
+                onChange={(e) => onPermissionChange(rowIndex, perm, e.checked!)}
+            />
+        );
+    };
 
     return (
-        <div className="grid">
-            <div className="col-12">
-                <div className="card">
-                    <Toast ref={toast} />
-                    <h5><i className="pi pi-users" style={{ fontSize: '2rem' }}></i><strong> Users</strong></h5>
-                </div>
-
-                {loading &&
-                    <LoadingComponent />
-                }
-
-                <div className="card">
-                    <div className="p-toolbar p-component mb-4">
-                        <div className="my-2">
-                            <Button label="New User" icon="pi pi-plus" severity="info" className="mr-2" onClick={openNewUser} />
-                            {/* <Button label="Delete" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedNewss || !(selectedNewss as any).length} /> */}
-                        </div>
+        <>
+            <div className="grid">
+                <div className="col-12">
+                    <div className="card">
+                        <Toast ref={toast} />
+                        <h5><i className="pi pi-users" style={{ fontSize: '2rem' }}></i><strong> Users</strong></h5>
                     </div>
-                    <Dialog visible={userDialog} style={{ width: '450px' }} header="User" modal maximizable className="p-fluid" footer={userDialogFooter} onHide={hideUserDialog}>
-                        <div className="field">
-                            <label htmlFor="username"><span style={{ color: "red" }}>*</span> Username </label>
-                            <InputText
-                                id="username"
-                                name="username"
-                                value={user?.userName}
-                                onKeyDown={handleUserNameKeyDown}
-                                onChange={(e) => onInputUserNameChange(e, 'value')}
-                                required
-                                className={classNames({
-                                    'p-invalid': submitted && !user.userName
-                                })}
-                            />
-                            {submitted && !user.userName && <small className="p-invalid">Username is required.</small>}
+
+                    {loading &&
+                        <LoadingComponent />
+                    }
+
+                    <div className="card">
+                        <div className="p-toolbar p-component mb-4">
+                            <div className="my-2">
+                                {(clientPerms ?? []).includes('users:create') && (
+                                    <Button label="New User" icon="pi pi-plus" severity="info" className="mr-2" onClick={openNewUser} />
+                                )}
+                            </div>
                         </div>
-                        <div className="field">
-                            <label htmlFor="password"><span style={{ color: "red" }}>*</span> Password </label>
-                            <div className="p-inputgroup flex-1">
-                                <InputText
-                                    id="password"
-                                    name="password"
-                                    value={user?.password}
-                                    onChange={(e) => onInputPasswordChange(e, 'value')}
+                        <Dialog visible={userDialog} style={{ width: '450px' }} header="User" modal maximizable className="p-fluid" footer={userDialogFooter} onHide={hideUserDialog}>
+
+                            {!user?.userId && (
+                                <>
+                                    <div className="field">
+                                        <label htmlFor="username"><span style={{ color: "red" }}>*</span> Username </label>
+                                        <InputText
+                                            id="username"
+                                            name="username"
+                                            value={user?.userName}
+                                            onKeyDown={handleUserNameKeyDown}
+                                            onChange={(e) => onInputUserNameChange(e, 'value')}
+                                            required
+                                            className={classNames({
+                                                'p-invalid': submitted && !user.userName
+                                            })}
+                                        />
+                                        {submitted && !user.userName && <small className="p-invalid">Username is required.</small>}
+                                    </div>
+                                    <div className="field">
+                                        <label htmlFor="password"><span style={{ color: "red" }}>*</span> Password </label>
+                                        <div className="p-inputgroup flex-1">
+                                            <InputText
+                                                id="password"
+                                                name="password"
+                                                value={user?.password}
+                                                onChange={(e) => onInputPasswordChange(e, 'value')}
+                                                required
+                                                className={classNames({
+                                                    'p-invalid': submitted && !user.password
+                                                })}
+                                            />
+                                            <Button icon="pi pi-replay" label="Random" severity="secondary" onClick={onRandomPw} />
+                                        </div>
+                                        {submitted && !user.password && <small className="p-invalid">Password is required.</small>}
+                                    </div>
+                                </>
+                            )}
+
+                            <div className="field">
+                                <label htmlFor="userGroup"><span style={{ color: "red" }}>*</span> Group </label>
+                                <Dropdown
+                                    inputId="userGroup"
+                                    value={user?.userGroupId}
+                                    onChange={(e) => onDropdownUserGroupChange(e)}
                                     required
                                     className={classNames({
-                                        'p-invalid': submitted && !user.password
+                                        'p-invalid': submitted && !user.userGroupId
                                     })}
+                                    options={
+                                        Array.isArray(userGroups)
+                                            ? userGroups.map(item => ({
+                                                label: item.userGroupName,
+                                                value: item.userGroupId,
+                                            }))
+                                            : []
+                                    }
+                                    placeholder="Select user group"
                                 />
-                                <Button icon="pi pi-replay" label="Random" severity="secondary" onClick={onRandomPw} />
+                                {submitted && !user.userGroupId && <small className="p-invalid">Group is required.</small>}
                             </div>
+                            <div className="field">
+                                <label htmlFor="userRole"><span style={{ color: "red" }}>*</span> Role </label>
+                                <Dropdown
+                                    inputId="userRole"
+                                    value={user?.userRoleId}
+                                    onChange={(e) => onDropdownUserRoleChange(e)}
+                                    required
+                                    className={classNames({
+                                        'p-invalid': submitted && !user.userRoleId
+                                    })}
+                                    options={
+                                        Array.isArray(userRoles)
+                                            ? userRoles.map(item => ({
+                                                label: item.userRoleName,
+                                                value: item.userRoleId,
+                                            }))
+                                            : []
+                                    }
+                                    placeholder="Select user role"
+                                />
+                                {submitted && !user.userRoleId && <small className="p-invalid">Role is required.</small>}
+                            </div>
+                            <div className="field">
+                                <label htmlFor="status"><span style={{ color: "red" }}>*</span> Status </label>
+                                <Dropdown
+                                    id="status"
+                                    value={user?.isActive}
+                                    onChange={(e) => onDropdownStatusChange(e)}
+                                    options={statusOptions}
+                                    placeholder="Select Status"
+                                />
+                            </div>
+                        </Dialog>
 
-                            {submitted && !user.password && <small className="p-invalid">Password is required.</small>}
-                        </div>
-                        <div className="field">
-                            <label htmlFor="userGroup"><span style={{ color: "red" }}>*</span> Group </label>
-                            <Dropdown
-                                inputId="userGroup"
-                                value={user?.userGroupId}
-                                onChange={(e) => onDropdownUserGroupChange(e)}
-                                options={userGroups}
-                                placeholder="Select user group"
-                            />
-                        </div>
-                        <div className="field">
-                            <label htmlFor="userRole"><span style={{ color: "red" }}>*</span> Role </label>
-                            <Dropdown
-                                inputId="userRole"
-                                value={user?.userRoleId}
-                                onChange={(e) => onDropdownUserRoleChange(e)}
-                                options={userRoles}
-                                placeholder="Select user role"
-                            />
-                        </div>
-                        <div className="field">
-                            <label htmlFor="status"><span style={{ color: "red" }}>*</span> Status </label>
-                            <Dropdown
-                                id="status"
-                                value={user?.isActive}
-                                onChange={(e) => onDropdownStatusChange(e)}
-                                options={statusOptions}
-                                placeholder="Select Status"
-                            />
-                        </div>
-                    </Dialog>
+                        <Dialog visible={deleteUserDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteUserDialogFooter} onHide={hideDeleteUserDialog}>
+                            <div className="flex align-items-center justify-content-center">
+                                <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+                                {user && (<span>Are you sure you want to delete <b>{user?.userName}</b>?</span>)}
+                            </div>
+                        </Dialog>
+                    </div>
 
-                    {/* <Dialog visible={deleteNewsDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteNewsDialogFooter} onHide={hideDeleteNewsDialog}>
-                        <div className="flex align-items-center justify-content-center">
-                            <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                            {news && (<span>Are you sure you want to delete <b>News</b>?</span>)}
+                    {!loading && users?.length > 0 && (
+                        <div className="card">
+                            <DataTable
+                                ref={dtUsers}
+                                value={users}
+                                selection={selectedUsers}
+                                onSelectionChange={(e) => setSelectedUsers(e.value)}
+                                dataKey="userId"
+                                paginator
+                                rows={20}
+                                rowsPerPageOptions={[5, 10, 20, 50, 100]}
+                                className="p-datatable-sm"
+                                scrollable
+                                scrollHeight="600px"
+                                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Users"
+                                loading={loading}
+                                filters={usersFilters}
+                                globalFilterFields={['userName', 'userGroupName', 'userRoleName']}
+                                emptyMessage="No Users found."
+                                header={usersTableHeader}
+                            >
+                                <Column header="Username" body={userNameBodyTemplate} field="userName" sortable></Column>
+                                <Column header="Group" body={userGroupNameBodyTemplate} field="userGroupName" sortable></Column>
+                                <Column header="Role" body={userRoleNameBodyTemplate} field="userRoleName" sortable></Column>
+                                <Column header="Create Date" body={createDateBodyTemplate} field="createdAt" sortable headerStyle={{ minWidth: '8rem' }}></Column>
+                                <Column header="Create By" body={createByBodyTemplate} field="createdBy" sortable headerStyle={{ minWidth: '8rem' }}></Column>
+                                <Column header="Status" body={statusBodyTemplate} field="isActive" sortable></Column>
+                                <Column body={actionUsersBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
+                            </DataTable>
                         </div>
-                    </Dialog> */}
-
-                    {/* <Dialog visible={deleteNewssDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteNewssDialogFooter} onHide={hideDeleteNewssDialog}>
-                        <div className="flex align-items-center justify-content-center">
-                            <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                            {news && <span>Are you sure you want to delete the selected News?</span>}
-                        </div>
-                    </Dialog> */}
+                    )}
                 </div>
+            </div>
 
-                {!loading && users?.length > 0 && (
+            <div className="grid">
+                <div className="col-12 md:col-6">
                     <div className="card">
                         <DataTable
-                            ref={dt}
-                            value={users}
-                            selection={selectedUsers}
-                            onSelectionChange={(e) => setSelectedUsers(e.value)}
-                            dataKey="userId"
+                            ref={dtUserGroups}
+                            value={userGroups}
+                            selection={selectedUserGroups}
+                            onSelectionChange={(e) => setSelectedUserGroups(e.value)}
+                            dataKey="userGroupId"
                             paginator
                             rows={20}
                             rowsPerPageOptions={[5, 10, 20, 50, 100]}
@@ -545,26 +1097,117 @@ const UsersPage = () => {
                             scrollable
                             scrollHeight="600px"
                             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Users"
-                            loading={loading}
-                            filters={filters}
-                            globalFilterFields={['userName', 'userGroupName', 'userRoleName']}
-                            emptyMessage="No Users found."
-                            header={tableHeader}
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} User Groups"
+                            filters={userGroupsFilters}
+                            globalFilterFields={['userGroupName']}
+                            emptyMessage="No User Groups found."
+                            header={userGroupsTableHeader}
                         >
-                            <Column selectionMode="multiple" headerStyle={{ width: '4rem' }}></Column>
-                            <Column header="Username" body={userNameBodyTemplate} field="userName" sortable></Column>
                             <Column header="Group" body={userGroupNameBodyTemplate} field="userGroupName" sortable></Column>
-                            <Column header="Role" body={userRoleNameBodyTemplate} field="userRoleName" sortable></Column>
                             <Column header="Create Date" body={createDateBodyTemplate} field="createdAt" sortable headerStyle={{ minWidth: '8rem' }}></Column>
                             <Column header="Create By" body={createByBodyTemplate} field="createdBy" sortable headerStyle={{ minWidth: '8rem' }}></Column>
-                            <Column header="Status" body={statusBodyTemplate} field="isActive" sortable></Column>
-                            {/* <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column> */}
+                            <Column body={actionUserGroupsBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                         </DataTable>
+
+                        <Dialog visible={userGroupDialog} style={{ width: '450px' }} header="Group" modal maximizable className="p-fluid" footer={userGroupDialogFooter} onHide={hideUserGroupDialog}>
+                            <div className="field">
+                                <label htmlFor="groupname"><span style={{ color: "red" }}>*</span> Group name </label>
+                                <InputText
+                                    id="groupname"
+                                    name="groupname"
+                                    value={userGroup?.userGroupName}
+                                    onChange={(e) => onInputGroupNameChange(e, 'value')}
+                                    required
+                                    className={classNames({
+                                        'p-invalid': submitted && !userGroup.userGroupName
+                                    })}
+                                />
+                                {submitted && !userGroup.userGroupName && <small className="p-invalid">Group name is required.</small>}
+                            </div>
+                        </Dialog>
+
+                        <Dialog visible={deleteUserGroupDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteUserGroupDialogFooter} onHide={hideDeleteUserGroupDialog}>
+                            <div className="flex align-items-center justify-content-center">
+                                <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+                                {userGroup && (<span>Are you sure you want to delete <b>{userGroup?.userGroupName}</b>?</span>)}
+                            </div>
+                        </Dialog>
                     </div>
-                )}
+                </div>
+                <div className="col-12 md:col-6">
+                    <div className="card">
+                        <DataTable
+                            ref={dtUserRoles}
+                            value={userRoles}
+                            selection={selectedUserRoles}
+                            onSelectionChange={(e) => setSelectedUserRoles(e.value)}
+                            dataKey="userRoleId"
+                            paginator
+                            rows={20}
+                            rowsPerPageOptions={[5, 10, 20, 50, 100]}
+                            className="p-datatable-sm"
+                            scrollable
+                            scrollHeight="600px"
+                            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} User Roles"
+                            filters={userRolesFilters}
+                            globalFilterFields={['userRoleName']}
+                            emptyMessage="No User Roles found."
+                            header={userRolesTableHeader}
+                        >
+                            <Column header="Role" body={userRoleNameBodyTemplate} field="userRoleName" sortable></Column>
+                            <Column header="Description" body={userRoleDescriptionBodyTemplate} field="userRoleDescription" sortable></Column>
+                            <Column header="Create Date" body={createDateBodyTemplate} field="createdAt" sortable headerStyle={{ minWidth: '8rem' }}></Column>
+                            <Column header="Create By" body={createByBodyTemplate} field="createdBy" sortable headerStyle={{ minWidth: '8rem' }}></Column>
+                            <Column body={actionUserRolesBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
+                        </DataTable>
+
+                        <Dialog visible={userRoleDialog} style={{ width: '900px' }} header="Role" modal maximizable className="p-fluid" footer={userRoleDialogFooter} onHide={hideUserRoleDialog}>
+                            <div className="field col-6">
+                                <label htmlFor="rolename"><span style={{ color: "red" }}>*</span> Role name </label>
+                                <InputText
+                                    id="rolename"
+                                    name="rolename"
+                                    value={userRole?.userRoleName}
+                                    onChange={(e) => onInputRoleNameChange(e, 'value')}
+                                    required
+                                    className={classNames({
+                                        'p-invalid': submitted && !userRole.userRoleName
+                                    })}
+                                />
+                                {submitted && !userRole.userRoleName && <small className="p-invalid">Role name is required.</small>}
+                            </div>
+                            <div className="field col-6">
+                                <label htmlFor="roledescription"> Role Description </label>
+                                <InputText
+                                    id="roledescription"
+                                    name="roledescription"
+                                    value={userRole?.userRoleDescription}
+                                    onChange={(e) => onInputRoleDescriptionChange(e, 'value')}
+                                />
+                            </div>
+                            <div className="field">
+                                <label htmlFor="roledescription"><span style={{ color: "red" }}>*</span> Permissions </label>
+                                <DataTable value={resourcesPermissions} dataKey="resourceId">
+                                    <Column field="resourceName" header="Resource" />
+                                    <Column header="Create" body={permissionCheckboxTemplate('create')} />
+                                    <Column header="Read" body={permissionCheckboxTemplate('read')} />
+                                    <Column header="Update" body={permissionCheckboxTemplate('update')} />
+                                    <Column header="Delete" body={permissionCheckboxTemplate('delete')} />
+                                </DataTable>
+                            </div>
+                        </Dialog>
+
+                        <Dialog visible={deleteUserRoleDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteUserRoleDialogFooter} onHide={hideDeleteUserRoleDialog}>
+                            <div className="flex align-items-center justify-content-center">
+                                <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
+                                {userRole && (<span>Are you sure you want to delete <b>{userRole?.userRoleName}</b>?</span>)}
+                            </div>
+                        </Dialog>
+                    </div>
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 

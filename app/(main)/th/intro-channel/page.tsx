@@ -18,17 +18,13 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function getData() {
 
-    const userGroupService = new UserGroupService(new UserGroupRepository());
+    // const userGroupService = new UserGroupService(new UserGroupRepository());
     
-    const data = await userGroupService.getUserGroups();
-    return data;
+    // const data = await userGroupService.getUserGroups();
+    // return data;
 }
 
 export default async function IntroChannel() {
-
-    const data = await getData();
-
-    console.log('User Groups Data:', data);
     
     const chn = 'btn btn-tidloh fs-6 d-flex justify-content-center align-items-center mx-auto continue-btn';
 

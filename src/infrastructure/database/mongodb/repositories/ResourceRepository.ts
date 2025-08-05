@@ -9,11 +9,23 @@ export class ResourceRepository implements IResourceRepository {
     };
 
     async findAll(): Promise<IResource[]> {
-        return await ResourcesEntity.find();
+        return await ResourcesEntity.find().sort({ nResourceOrder: 1 });
     };
 
-    async findById(psId: string): Promise<IResource | null> {
-        return await ResourcesEntity.findById(psId);
+    async findById(psResourceId: string): Promise<IResource | null> {
+        return await ResourcesEntity.findOne({ sResourceId: psResourceId });
+    };
+
+    async findByIds(psIds: any[]): Promise<boolean> {
+        const found = await ResourcesEntity.find({
+            sResourceId: { $in: psIds }
+        }).select('sResourceId');
+        const foundIds = new Set(found.map((r) => r.sResourceId));
+        const missing = psIds.filter(id => !foundIds.has(id));
+        if (missing.length > 0) {
+            return false
+        }
+        return true;
     };
 
     async findByResourceName(psName: string): Promise<IResource | null> {

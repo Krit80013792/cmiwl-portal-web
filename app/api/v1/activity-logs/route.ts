@@ -1,18 +1,27 @@
-//* app/api/v1/auth/signout/route.ts
-import { rsaEncrypt } from '@/src/shared/utils/crypto';
+//* app/api/v1/activity-logs/route.ts
 import { validateApiKey } from '@/src/shared/middleware/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { serializeRequest } from '@/src/shared/utils/serializeRequest';
+import { TxActivityLogService } from '../../../../src/application/services/TxActivityLogService';
+import { TxActivityLogRepository } from '../../../../src/infrastructure/database/mongodb/repositories/TxActivityLogRepository';
+import { permissionGuard } from '@/src/shared/middleware/permission.guard';
 import { authGuard } from '@/src/shared/middleware/auth.guard';
 import { TxActivityLogger } from '@/src/shared/middleware/logging/TxActivityLogger';
 
+let _txActivityLogServiceInstance: TxActivityLogService | null = null;
+async function TxActivityLogServiceInstance(): Promise<TxActivityLogService> {
+    _txActivityLogServiceInstance ??= new TxActivityLogService(new TxActivityLogRepository());
+    return _txActivityLogServiceInstance;
+};
+
 /**
- * api/v1/auth/signout
+ * api/v1/activity-logs/:GET Read activity-logs
  */
-export async function POST(poReq: NextRequest) {
-    const ROUTE = 'api/v1/auth/signout';
-    const METHOD = 'POST';
-    const ACTION = 'signout';
+//* @(activity-logs:read)
+export async function GET(poReq: NextRequest) {
+    const ROUTE = 'api/v1/activity-logs';
+    const METHOD = 'GET';
+    const ACTION = 'read';
 
     const isValidApiKey = await validateApiKey(poReq);
     if (!isValidApiKey) {
@@ -20,9 +29,12 @@ export async function POST(poReq: NextRequest) {
     }
 
     let user: any;
+    let permissions: any;
     try {
         const auth = await authGuard();
         user = auth?.user;
+        permissions = auth?.permissions;
+        permissionGuard(permissions, 'activity-logs:read');
     } catch {
         return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
     }
@@ -30,24 +42,12 @@ export async function POST(poReq: NextRequest) {
     const reqLog = await serializeRequest(poReq, {});
 
     try {
-        const response = NextResponse.json({ message: 'Credentials are valid!' });
-        const token = (await rsaEncrypt('signout')) as string;
-        response.cookies.set(`cmiwl_cms_me`, '', {
-            httpOnly: false,
-            secure: false,
-            sameSite: 'strict',
-            expires: new Date(0),
-            maxAge: 0,
-            path: '/',
-        });
-        response.cookies.set(`${process.env.APP_ENV}_cmiwl_cms_token`, token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
-            expires: new Date(0),
-            maxAge: 0,
-            path: '/'
-        });
+
+        const oUrl = new URL(poReq.url);
+        const sStartDate = oUrl.searchParams.get('startDate') ?? '';
+
+        const txActivityLogService = await TxActivityLogServiceInstance();
+        const logs = await txActivityLogService.getTxActivityLogs(sStartDate);
 
         await TxActivityLogger.log({
             sUserName: user?.userName,
@@ -58,11 +58,12 @@ export async function POST(poReq: NextRequest) {
             sAction: ACTION,
             sStatus: 'success',
             sRequestMsg: JSON.stringify(reqLog),
-            sResponseMsg: JSON.stringify({}),
+            sResponseMsg: JSON.stringify(logs?.message),
             sChannel: 'CMS',
         } as any);
 
-        return response;
+        return new NextResponse(JSON.stringify({ message: 'Success', data: logs?.data }), { status: 200 });
+
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
         console.error(`Error ${METHOD} :`, errorMsg);

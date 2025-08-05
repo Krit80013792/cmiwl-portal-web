@@ -1,15 +1,21 @@
 //* src/application/services/UserService.ts
 import { MongoDBConnectionService } from '../../infrastructure/database/mongodb/connection';
 import { IUserRepository } from '../interfaces/IUserRepository';
+import { IUserGroupRepository } from '../interfaces/IUserGroupRepository';
+import { IUserRoleRepository } from '../interfaces/IUserRoleRepository';
 import { IUser } from '../../domain/models/UserModel';
 import { UserDTO } from '../dtos/UserDTO';
 import { BaseResponse } from '../../domain/common/BaseResponse';
-import { TxActivityLogger } from '@/src/shared/middleware/logging/TxActivityLogger';
+import { v4 as uuidv4 } from 'uuid';
 import bcrypt from 'bcrypt';
 
 export class UserService {
 
-    constructor(private readonly userRepository: IUserRepository) { }
+    constructor(
+        private readonly userRepository: IUserRepository,
+        private readonly userGroupRepository: IUserGroupRepository,
+        private readonly userRoleRepository: IUserRoleRepository
+    ) { }
 
     private mapToDTO(user: IUser): UserDTO {
         return {
@@ -62,6 +68,31 @@ export class UserService {
                 };
             }
 
+            const userGroupExists = await this.userGroupRepository.findById(oUser?.sUserGroupId);
+            if (!userGroupExists) {
+                return {
+                    statusCode: 404,
+                    message: 'User Group doesn\'t exists',
+                    data: null,
+                };
+            }
+
+            const userRoleExists = await this.userRoleRepository.findById(oUser?.sUserRoleId);
+            if (!userRoleExists) {
+                return {
+                    statusCode: 404,
+                    message: 'User Role doesn\'t exists',
+                    data: null,
+                };
+            }
+
+            oUser.sUserId = uuidv4(); //* Generate a new UUID for the userId
+            oUser.sPassword = await bcrypt.hash(oUser.sPassword, 10); //* Hash the password before saving
+            oUser.sUserGroupId = userGroupExists?.sUserGroupId;
+            oUser.sUserGroupName = userGroupExists?.sUserGroupName;
+            oUser.sUserRoleId = userRoleExists?.sUserRoleId;
+            oUser.sUserRoleName = userRoleExists?.sUserRoleName;
+
             const oNewUser = await this.userRepository.create(oUser);
             return {
                 statusCode: 201,
@@ -79,10 +110,10 @@ export class UserService {
     };
 
     //* @(users:read)
-    async getUsers(): Promise<BaseResponse<UserDTO[] | null>> {
+    async getUsers(psUserId: string): Promise<BaseResponse<UserDTO[] | null>> {
         try {
             await MongoDBConnectionService();
-            const oUsers = await this.userRepository.findAll();
+            const oUsers = await this.userRepository.findAll(psUserId);
             return {
                 statusCode: oUsers ? 200 : 404,
                 message: oUsers ? 'Users found' : 'Users not found',
@@ -110,6 +141,26 @@ export class UserService {
             };
         } catch (error) {
             console.error(`Error getUserById:`, error);
+            return {
+                statusCode: 500,
+                message: 'Failed to get user',
+                data: null,
+            };
+        }
+    };
+
+    //* @(users:read)
+    async getUserByName(psName: string): Promise<BaseResponse<UserDTO | null>> {
+        try {
+            await MongoDBConnectionService();
+            const user = await this.userRepository.findByUsername(psName);
+            return {
+                statusCode: user ? 200 : 404,
+                message: user ? 'User found' : 'User not found',
+                data: user ? this.mapToDTO(user) : null,
+            };
+        } catch (error) {
+            console.error(`Error getUserByName:`, error);
             return {
                 statusCode: 500,
                 message: 'Failed to get user',
@@ -179,7 +230,41 @@ export class UserService {
         try {
             await MongoDBConnectionService();
             const oUser = this.mapToDomain(poUser as UserDTO);
-            const oUpdatedUser = await this.userRepository.update(psId, oUser);
+
+            const userExists = await this.userRepository.findById(oUser?.sUserId);
+            if (!userExists) {
+                return {
+                    statusCode: 409,
+                    message: 'User doesn\'t exists',
+                    data: null,
+                };
+            }
+
+            const userGroupExists = await this.userGroupRepository.findById(oUser?.sUserGroupId);
+            if (!userGroupExists) {
+                return {
+                    statusCode: 404,
+                    message: 'User Group doesn\'t exists',
+                    data: null,
+                };
+            }
+
+            const userRoleExists = await this.userRoleRepository.findById(oUser?.sUserRoleId);
+            if (!userRoleExists) {
+                return {
+                    statusCode: 404,
+                    message: 'User Role doesn\'t exists',
+                    data: null,
+                };
+            }
+
+            oUser.sUserGroupId = userGroupExists?.sUserGroupId;
+            oUser.sUserGroupName = userGroupExists?.sUserGroupName;
+            oUser.sUserRoleId = userRoleExists?.sUserRoleId;
+            oUser.sUserRoleName = userRoleExists?.sUserRoleName;
+            oUser.createdBy = userExists?.createdBy;
+
+            const oUpdatedUser = await this.userRepository.update(oUser?._id, oUser);
             return {
                 statusCode: oUpdatedUser ? 200 : 404,
                 message: oUpdatedUser ? 'User updated' : 'User not found',
@@ -214,4 +299,4 @@ export class UserService {
             };
         }
     };
-}
+};

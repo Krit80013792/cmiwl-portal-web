@@ -1,13 +1,18 @@
 //* src/application/services/UserGroupService.ts
 import { MongoDBConnectionService } from '../../infrastructure/database/mongodb/connection';
 import { IUserGroupRepository } from '../interfaces/IUserGroupRepository';
+import { IUserRepository } from '../interfaces/IUserRepository';
 import { IUserGroup } from '../../domain/models/UserGroupModel';
 import { UserGroupDTO } from '../dtos/UserGroupDTO';
 import { BaseResponse } from '../../domain/common/BaseResponse';
+import { v4 as uuidv4 } from 'uuid';
 
 export class UserGroupService {
 
-    constructor(private readonly userGroupRepository: IUserGroupRepository) { }
+    constructor(
+        private readonly userGroupRepository: IUserGroupRepository,
+        private readonly userRepository: IUserRepository
+    ) { }
 
     private mapToDTO(userGroup: IUserGroup): UserGroupDTO {
         return {
@@ -39,7 +44,7 @@ export class UserGroupService {
             await MongoDBConnectionService();
             const oUserGroup = this.mapToDomain(poUserGroup as UserGroupDTO);
 
-            const userGroupExists = await this.userGroupRepository.findByUserGroupName(oUserGroup?.sUserGroupName);
+            const userGroupExists = await this.userGroupRepository.findByUserGroupName('', oUserGroup?.sUserGroupName);
             if (userGroupExists) {
                 return {
                     statusCode: 409,
@@ -47,6 +52,8 @@ export class UserGroupService {
                     data: null,
                 };
             }
+
+            oUserGroup.sUserGroupId = uuidv4(); //* Generate a new UUID for the userGroupId
 
             const oNewUserGroup = await this.userGroupRepository.create(oUserGroup);
             return {
@@ -109,7 +116,21 @@ export class UserGroupService {
         try {
             await MongoDBConnectionService();
             const oUserGroup = this.mapToDomain(poUserGroup as UserGroupDTO);
+
+            const userGroupExists = await this.userGroupRepository.findByUserGroupName(psId, oUserGroup?.sUserGroupName);
+            if (userGroupExists) {
+                return {
+                    statusCode: 409,
+                    message: 'UserGroup already exists',
+                    data: null,
+                };
+            }
+
             const oUpdatedUserGroup = await this.userGroupRepository.update(psId, oUserGroup);
+            if (oUpdatedUserGroup) {
+                await this.userRepository.updateUserGroupName(oUpdatedUserGroup?.sUserGroupId, oUpdatedUserGroup?.sUserGroupName);
+            }
+
             return {
                 statusCode: oUpdatedUserGroup ? 200 : 404,
                 message: oUpdatedUserGroup ? 'UserGroup updated' : 'UserGroup not found',
@@ -126,9 +147,19 @@ export class UserGroupService {
     };
 
     //* @(users:delete)
-    async deleteUserGroup(psId: string): Promise<BaseResponse<UserGroupDTO | null>> {
+    async deleteUserGroup(psId: string, psUserGroupId: string): Promise<BaseResponse<UserGroupDTO | null>> {
         try {
             await MongoDBConnectionService();
+
+            const userGroupExists = await this.userRepository.findByUserGroupId(psUserGroupId);
+            if (userGroupExists.length > 0) {
+                return {
+                    statusCode: 409,
+                    message: 'UserGroup is currently in use',
+                    data: null,
+                };
+            }
+
             const deletedUserGroup = await this.userGroupRepository.deleteOne(psId);
             return {
                 statusCode: deletedUserGroup ? 200 : 404,
