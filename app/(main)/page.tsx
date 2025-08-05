@@ -146,13 +146,13 @@ export default async function MainPage() {
     // const resource: Partial<ResourceDTO> =
     // {
     //     resourceId: uuidv4(),
-    //     resourceOrder: 3,
-    //     resourceName: 'activity-logs',
+    //     resourceOrder: 7,
+    //     resourceName: 'order-report-channel',
     //     resourcePolicy: 'protected',
-    //     resourceDescription: 'cms activity logs',
-    //     resourceLabel: 'CMS Activity Logs',
-    //     resourceIcon: 'pi pi-fw pi-list',
-    //     resourcePathTo: '/cms/activity-logs',
+    //     resourceDescription: 'Order Report Channel',
+    //     resourceLabel: 'Order Report Channel',
+    //     resourceIcon: 'pi pi-fw pi-table',
+    //     resourcePathTo: '/cms/order-report-channel',
     //     childrenItems: [],
     //     createdBy: 'CF305481',
     //     updatedBy: 'CF305481'

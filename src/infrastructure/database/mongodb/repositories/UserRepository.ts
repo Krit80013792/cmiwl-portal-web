@@ -12,8 +12,8 @@ export class UserRepository implements IUserRepository {
         return await UsersEntity.find({ sUserId: { $ne: psUserId } }).sort({ createdAt: -1 });
     };
 
-    async findById(psId: string): Promise<IUser | null> {
-        return await UsersEntity.findOne({ bIsActive: true, sUserId: psId });
+    async findById(psUserId: string): Promise<IUser | null> {
+        return await UsersEntity.findOne({ sUserId: psUserId });
     };
 
     async findByUsername(psUserName: string): Promise<IUser | null> {

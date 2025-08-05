@@ -21,11 +21,13 @@ export async function mapUserRolesPermissions(
         const resource = await resourceRepository.findById(resourceId);
         if (!resource) continue;
 
-        arResources.push(resource.sResourceName);
         const { create, read, update, delete: del } = permissions ?? {};
 
         if (create) arUserRolePermissions.push(`${resource.sResourceName}:create`);
-        if (read) arUserRolePermissions.push(`${resource.sResourceName}:read`);
+        if (read) {
+            arUserRolePermissions.push(`${resource.sResourceName}:read`);
+            arResources.push(resource.sResourceName);
+        }
         if (update) arUserRolePermissions.push(`${resource.sResourceName}:update`);
         if (del) arUserRolePermissions.push(`${resource.sResourceName}:delete`);
     }

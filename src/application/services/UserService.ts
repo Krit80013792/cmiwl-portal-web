@@ -130,10 +130,10 @@ export class UserService {
     };
 
     //* @(users:read)
-    async getUserById(psId: string): Promise<BaseResponse<UserDTO | null>> {
+    async getUserById(psUserId: string): Promise<BaseResponse<UserDTO | null>> {
         try {
             await MongoDBConnectionService();
-            const user = await this.userRepository.findById(psId);
+            const user = await this.userRepository.findById(psUserId);
             return {
                 statusCode: user ? 200 : 404,
                 message: user ? 'User found' : 'User not found',

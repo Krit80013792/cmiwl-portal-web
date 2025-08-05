@@ -7,6 +7,9 @@ const protectedRoutes = [
     '/cms/users',
     '/cms/activity-logs',
     '/cms/configs',
+    '/cms/master-data',
+    '/cms/order-report-admin',
+    '/cms/order-report-channel',
 ];
 const publicRoutes = ['/pw0wl'];
 
