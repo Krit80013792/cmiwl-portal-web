@@ -145,19 +145,6 @@ export async function GET(poReq: NextRequest) {
 
         const safeUsers: SafeUserDTO[] = users?.data?.map(({ password, ...rest }) => rest) ?? [];
 
-        await TxActivityLogger.log({
-            sUserName: user?.userName,
-            sUserGroupName: user?.userGroupName,
-            sUserRoleName: user?.userRoleName,
-            sRoute: ROUTE,
-            sMethod: METHOD,
-            sAction: ACTION,
-            sStatus: 'success',
-            sRequestMsg: JSON.stringify(reqLog),
-            sResponseMsg: JSON.stringify(users?.message),
-            sChannel: 'CMS',
-        } as any);
-
         return new NextResponse(JSON.stringify({ message: 'Success', data: safeUsers }), { status: 200 });
 
     } catch (error) {
@@ -222,7 +209,7 @@ export async function PATCH(poReq: NextRequest) {
         const userService = await UserServiceInstance();
         oParsedUser.updatedBy = user?.userName;
         const newUser = await userService.updateUser(oParsedUser?.id, oParsedUser);
-        if (newUser?.statusCode !== 201) {
+        if (newUser?.statusCode !== 200) {
             await TxActivityLogger.log({
                 sUserName: user?.userName,
                 sUserGroupName: user?.userGroupName,

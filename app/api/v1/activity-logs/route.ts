@@ -45,24 +45,14 @@ export async function GET(poReq: NextRequest) {
 
         const oUrl = new URL(poReq.url);
         const sStartDate = oUrl.searchParams.get('startDate') ?? '';
+        const sEndDate = oUrl.searchParams.get('endDate') ?? '';
+        const sAction = oUrl.searchParams.get('action') ?? '';
 
         const txActivityLogService = await TxActivityLogServiceInstance();
-        const logs = await txActivityLogService.getTxActivityLogs(sStartDate);
+        const logs = await txActivityLogService.getTxActivityLogs(sStartDate, sEndDate, sAction);
+        const actions = await txActivityLogService.getActions();
 
-        await TxActivityLogger.log({
-            sUserName: user?.userName,
-            sUserGroupName: user?.userGroupName,
-            sUserRoleName: user?.userRoleName,
-            sRoute: ROUTE,
-            sMethod: METHOD,
-            sAction: ACTION,
-            sStatus: 'success',
-            sRequestMsg: JSON.stringify(reqLog),
-            sResponseMsg: JSON.stringify(logs?.message),
-            sChannel: 'CMS',
-        } as any);
-
-        return new NextResponse(JSON.stringify({ message: 'Success', data: logs?.data }), { status: 200 });
+        return new NextResponse(JSON.stringify({ message: 'Success', data: { logs: logs?.data, actions: actions?.data } }), { status: 200 });
 
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);

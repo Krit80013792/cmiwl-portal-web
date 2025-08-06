@@ -4,11 +4,27 @@ const userNameSchema = z.string().regex(/^[a-zA-Z0-9]+$/, {
     message: "Invalid Username format.",
 });
 
+const passwordSchema = z.string()
+    .min(8, 'Password must be at least 8 characters')
+    .max(15, 'Password must be at most 15 characters')
+    .refine((val) => /[A-Z]/.test(val), {
+        message: 'Password must contain at least one uppercase letter',
+    })
+    .refine((val) => /[a-z]/.test(val), {
+        message: 'Password must contain at least one lowercase letter',
+    })
+    .refine((val) => /[0-9]/.test(val), {
+        message: 'Password must contain at least one number',
+    })
+    .refine((val) => /[!@#$*\-_?]/.test(val), {
+        message: 'Password must contain at least one special character (!@#$*-_?)',
+    });
+
 export const UserSchema = z.object({
     id: z.string(),
     userId: z.string().optional(),
     userName: userNameSchema,
-    password: z.string().min(14),
+    password: passwordSchema,
     userGroupId: z.string().uuid(),
     userGroupName: z.string().optional(),
     userRoleId: z.string().uuid(),

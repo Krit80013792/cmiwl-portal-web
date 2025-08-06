@@ -45,10 +45,10 @@ export class TxActivityLogService {
         } as ITxActivityLog;
     };
 
-    async getTxActivityLogs(psStartDate: string): Promise<BaseResponse<TxActivityLogDTO[] | null>> {
+    async getTxActivityLogs(psStartDate: string, psEndDate: string, psAction: string): Promise<BaseResponse<TxActivityLogDTO[] | null>> {
         try {
             await MongoDBConnectionService();
-            const oTxActivityLogs = await this.txActivityLogRepository.findAll(psStartDate);
+            const oTxActivityLogs = await this.txActivityLogRepository.findAll(psStartDate, psEndDate, psAction);
             return {
                 statusCode: oTxActivityLogs ? 200 : 404,
                 message: oTxActivityLogs ? 'TxActivityLogs found' : 'TxActivityLogs not found',
@@ -59,6 +59,25 @@ export class TxActivityLogService {
             return {
                 statusCode: 500,
                 message: 'Failed to get TxActivityLogs',
+                data: null,
+            };
+        }
+    };
+
+    async getActions(): Promise<BaseResponse<any[] | null>> {
+        try {
+            await MongoDBConnectionService();
+            const oActions = await this.txActivityLogRepository.findActions();
+            return {
+                statusCode: oActions ? 200 : 404,
+                message: oActions ? 'Actions found' : 'Actions not found',
+                data: oActions,
+            };
+        } catch (error) {
+            console.error(`Error getActions :`, error);
+            return {
+                statusCode: 500,
+                message: 'Failed to get getActions',
                 data: null,
             };
         }

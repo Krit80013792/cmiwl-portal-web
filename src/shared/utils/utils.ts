@@ -1,3 +1,5 @@
+import { ResourceDTO } from '@/src/application/dtos/ResourceDTO';
+
 export function convertDate(paDate: Date) {
     try {
         const date = new Date(paDate);
@@ -50,4 +52,104 @@ export function formatDateToYMD(date: Date): string {
     const month = `${date.getMonth() + 1}`.padStart(2, '0');
     const day = `${date.getDate()}`.padStart(2, '0');
     return `${year}-${month}-${day}`;
+};
+
+interface ResourcesPermissions {
+    resourceId: string;
+    resourceName: string;
+    resourceDescription: string;
+    resourceLabel: string;
+    resourceIcon: string;
+    permissions: {
+        create: boolean;
+        read: boolean;
+        update: boolean;
+        delete: boolean;
+    };
+};
+
+export function generateRandomPw(length: number = 8): string {
+    const minLength = 8;
+    const maxLength = 15;
+    length = Math.max(minLength, Math.min(length, maxLength));
+
+    const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lower = 'abcdefghijklmnopqrstuvwxyz';
+    const digits = '0123456789';
+    const specials = '!@#$*-_?';
+    const allChars = upper + lower + digits + specials;
+
+    const getRandom = (chars: string) => chars[Math.floor(Math.random() * chars.length)];
+
+    let password = [
+        getRandom(upper),
+        getRandom(lower),
+        getRandom(digits),
+        getRandom(specials)
+    ];
+
+    while (password.length < length) {
+        password.push(getRandom(allChars));
+    }
+
+    for (let i = password.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [password[i], password[j]] = [password[j], password[i]];
+    }
+
+    return password.join('');
+};
+
+export function mapResourcesToEmptyPermissions(resources: ResourceDTO[]): ResourcesPermissions[] {
+    try {
+        const recursive = (list: ResourceDTO[]): ResourcesPermissions[] => {
+            return list.flatMap((res) => {
+                const item: ResourcesPermissions = {
+                    resourceId: res.resourceId,
+                    resourceName: res.resourceName,
+                    resourceDescription: res.resourceDescription,
+                    resourceLabel: res.resourceLabel,
+                    resourceIcon: res.resourceIcon,
+                    permissions: {
+                        create: false,
+                        read: false,
+                        update: false,
+                        delete: false
+                    }
+                };
+
+                const children = res.childrenItems?.length ? recursive(res.childrenItems) : [];
+                return [item, ...children];
+            });
+        };
+        return recursive(resources);
+    } catch {
+        return [];
+    }
+};
+
+export function mapRoleToPermissions(resourceDTOs: ResourceDTO[], role: { userRolePermissions: string[] }): ResourcesPermissions[] {
+    const permSet = new Set(role.userRolePermissions);
+    const recursive = (resources: ResourceDTO[]): ResourcesPermissions[] => {
+        return resources.flatMap((r) => {
+            const resourceName = r.resourceName;
+            const permissions: ResourcesPermissions['permissions'] = {
+                create: permSet.has(`${resourceName}:create`),
+                read: permSet.has(`${resourceName}:read`),
+                update: permSet.has(`${resourceName}:update`),
+                delete: permSet.has(`${resourceName}:delete`)
+            };
+            const currentItem: ResourcesPermissions = {
+                resourceId: r.resourceId,
+                resourceName: r.resourceName,
+                resourceDescription: r.resourceDescription,
+                resourceLabel: r.resourceLabel,
+                resourceIcon: r.resourceIcon,
+                permissions
+            };
+            const children = recursive(r.childrenItems || []);
+            return [currentItem, ...children];
+        });
+    };
+    return recursive(resourceDTOs);
 };

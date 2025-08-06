@@ -140,19 +140,6 @@ export async function GET(oReq: NextRequest) {
         const userRoleService = await UserRoleServiceInstance();
         const userRoles = await userRoleService.getUserRoles();
 
-        await TxActivityLogger.log({
-            sUserName: user?.userName,
-            sUserGroupName: user?.userGroupName,
-            sUserRoleName: user?.userRoleName,
-            sRoute: ROUTE,
-            sMethod: METHOD,
-            sAction: ACTION,
-            sStatus: 'success',
-            sRequestMsg: JSON.stringify(reqLog),
-            sResponseMsg: JSON.stringify(userRoles?.message),
-            sChannel: 'CMS',
-        } as any);
-
         return new NextResponse(JSON.stringify({ message: 'Success', data: userRoles?.data ?? [] }), { status: 200 });
 
     } catch (error) {
@@ -217,7 +204,7 @@ export async function PATCH(poReq: NextRequest) {
         const userRoleService = await UserRoleServiceInstance();
         oParsedUserRole.updatedBy = user?.userName;
         const newUserRole = await userRoleService.updateUserRole(oParsedUserRole?.id, oParsedUserRole);
-        if (newUserRole?.statusCode !== 201) {
+        if (newUserRole?.statusCode !== 200) {
             await TxActivityLogger.log({
                 sUserName: user?.userName,
                 sUserGroupName: user?.userGroupName,

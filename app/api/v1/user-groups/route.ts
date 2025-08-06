@@ -139,19 +139,6 @@ export async function GET(poReq: NextRequest) {
         const userGroupService = await UserGroupServiceInstance();
         const userGroups = await userGroupService.getUserGroups();
 
-        await TxActivityLogger.log({
-            sUserName: user?.userName,
-            sUserGroupName: user?.userGroupName,
-            sUserRoleName: user?.userRoleName,
-            sRoute: ROUTE,
-            sMethod: METHOD,
-            sAction: ACTION,
-            sStatus: 'success',
-            sRequestMsg: JSON.stringify(reqLog),
-            sResponseMsg: JSON.stringify(userGroups?.message),
-            sChannel: 'CMS',
-        } as any);
-
         return new NextResponse(JSON.stringify({ message: 'Success', data: userGroups?.data ?? [] }), { status: 200 });
 
     } catch (error) {
@@ -216,7 +203,7 @@ export async function PATCH(poReq: NextRequest) {
         const userGroupService = await UserGroupServiceInstance();
         oParsedUserGroup.updatedBy = user?.userName;
         const newUserGroup = await userGroupService.updateUserGroup(oParsedUserGroup?.id, oParsedUserGroup);
-        if (newUserGroup?.statusCode !== 201) {
+        if (newUserGroup?.statusCode !== 200) {
             await TxActivityLogger.log({
                 sUserName: user?.userName,
                 sUserGroupName: user?.userGroupName,

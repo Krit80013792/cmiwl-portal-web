@@ -45,19 +45,6 @@ export async function GET(poReq: NextRequest) {
         const resourceService = await ResourceServiceInstance();
         const resources = await resourceService.getResources();
 
-        await TxActivityLogger.log({
-            sUserName: user?.userName,
-            sUserGroupName: user?.userGroupName,
-            sUserRoleName: user?.userRoleName,
-            sRoute: ROUTE,
-            sMethod: METHOD,
-            sAction: ACTION,
-            sStatus: 'success',
-            sRequestMsg: JSON.stringify(reqLog),
-            sResponseMsg: JSON.stringify(resources?.message),
-            sChannel: 'CMS',
-        } as any);
-
         return new NextResponse(JSON.stringify({ message: 'Success', data: resources?.data }), { status: 200 });
 
     } catch (error) {

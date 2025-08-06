@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import LoadingComponent from '@/layout/components/loading/LoadingComponent';
 import { Toast } from 'primereact/toast';
 import { Badge } from 'primereact/badge';
+import { Dropdown } from 'primereact/dropdown';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { Calendar } from 'primereact/calendar';
@@ -24,7 +25,10 @@ const ActivityLogsPage = () => {
     const [clientPerms, setClientPerms] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [activityLogs, setActivityLogs] = useState<TxActivityLogDTO[]>([]);
-    const [filterDate, setFilterDate] = useState<Date>(new Date);
+    const [startDate, setStartDate] = useState<Date>(new Date);
+    const [endDate, setEndDate] = useState<Date>(new Date);
+    const [action, setAction] = useState<string>('');
+    const [actions, setActions] = useState<any[]>([]);
     const [detailDialog, setDetailDialog] = useState(false);
     const [detail, setDetail] = useState<any>();
     const [logsFilters, setLogsFilters] = useState<DataTableFilterMeta>({
@@ -38,6 +42,14 @@ const ActivityLogsPage = () => {
         return de;
     };
 
+    function onSetDropDownActions(activityLogsData: any) {
+        const actionOptions = activityLogsData?.data?.actions?.map((item: string) => ({
+            label: item,
+            value: item
+        }));
+        setActions(actionOptions);
+    };
+
     useEffect(() => {
         const cc = clientCookie();
         setClientPerms(cc?.perms);
@@ -45,10 +57,14 @@ const ActivityLogsPage = () => {
         setLoading(true);
         const getData = async () => {
             const route = await setApiRoute();
-            const startDate = formatDateToYMD(new Date);
-            const resActivityLogs = await getTxActivityLogs(route, `startDate=${startDate}`);
+            const sStartDate = formatDateToYMD(startDate);
+            const sEndDate = formatDateToYMD(endDate);
+            const resActivityLogs = await getTxActivityLogs(route, `startDate=${sStartDate}&endDate=${sEndDate}`);
             const activityLogsData = await resActivityLogs.json();
-            setActivityLogs(activityLogsData?.data);
+            setActivityLogs(activityLogsData?.data?.logs);
+
+            onSetDropDownActions(activityLogsData);
+
             setLoading(false);
         };
         getData();
@@ -99,19 +115,39 @@ const ActivityLogsPage = () => {
         );
     };
 
-    const onInputStartDateChange = (date: any) => {
-        if (!date) return;
-        setFilterDate(date?.value);
+    const onInputStartDateChange = (startDate: any) => {
+        if (!startDate) return;
+        setStartDate(startDate?.value);
+    };
+
+    const onInputEndDateChange = (endDate: any) => {
+        if (!endDate) return;
+        setEndDate(endDate?.value);
+    };
+
+    const onDropdownActionChange = (action: any) => {
+        if (!action) return;
+        setAction(action?.value);
+    };
+
+    const onResetClick = () => {
+        setStartDate(new Date);
+        setEndDate(new Date);
+        setAction('');
     };
 
     const onSearchClick = () => {
         setLoading(true);
         const getData = async () => {
             const route = await setApiRoute();
-            const startDate = formatDateToYMD(filterDate);
-            const resActivityLogs = await getTxActivityLogs(route, `startDate=${startDate}`);
+            const sStartDate = formatDateToYMD(startDate);
+            const sEndDate = formatDateToYMD(endDate);
+            const resActivityLogs = await getTxActivityLogs(route, `startDate=${sStartDate}&endDate=${sEndDate}&action=${action}`);
             const activityLogsData = await resActivityLogs.json();
-            setActivityLogs(activityLogsData?.data);
+            setActivityLogs(activityLogsData?.data?.logs);
+
+            onSetDropDownActions(activityLogsData);
+
             setLoading(false);
         };
         getData();
@@ -155,11 +191,11 @@ const ActivityLogsPage = () => {
 
                 <div className="card p-fluid">
                     <div className="field grid">
-                        <label htmlFor="requestdate" className="col-12 mb-2 md:col-2 md:mb-0"> Date: </label>
+                        <label htmlFor="startDate" className="col-12 mb-2 md:col-2 md:mb-0"> Start Date: </label>
                         <div className="col-12 md:col-3">
                             <Calendar
                                 inputId="startDate"
-                                value={filterDate}
+                                value={startDate}
                                 onChange={(e) => onInputStartDateChange(e)}
                                 dateFormat="yy-mm-dd"
                                 showIcon
@@ -167,11 +203,36 @@ const ActivityLogsPage = () => {
                         </div>
                     </div>
                     <div className="field grid">
+                        <label htmlFor="endDate" className="col-12 mb-2 md:col-2 md:mb-0"> End Date: </label>
+                        <div className="col-12 md:col-3">
+                            <Calendar
+                                inputId="endDate"
+                                value={endDate}
+                                onChange={(e) => onInputEndDateChange(e)}
+                                dateFormat="yy-mm-dd"
+                                showIcon
+                            />
+                        </div>
+                    </div>
+                    <div className="field grid">
+                        <label htmlFor="action" className="col-12 mb-2 md:col-2 md:mb-0"> Action: </label>
+                        <div className="col-12 md:col-6">
+                            <Dropdown
+                                inputId="action"
+                                value={action}
+                                onChange={(e) => onDropdownActionChange(e)}
+                                options={actions}
+                                placeholder="Select Action"
+                            />
+                        </div>
+                    </div>
+                    <br />
+                    <div className="field grid">
                         <div className="col-12 md:col-4">
 
                         </div>
                         <div className="col-12 md:col-2">
-                            <Button label="Reset" icon="pi pi-replay" severity="secondary" className="mr-2" />
+                            <Button label="Reset" icon="pi pi-replay" severity="secondary" className="mr-2" onClick={onResetClick} />
                         </div>
                         <div className="col-12 md:col-2">
                             <Button label="Search" icon="pi pi-search" severity="success" className="mr-2" onClick={onSearchClick} />

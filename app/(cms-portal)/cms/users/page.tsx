@@ -21,67 +21,11 @@ import { getResources } from '@/services/client/resources.service';
 import { UserDTO } from '@/src/application/dtos/UserDTO';
 import { UserGroupDTO } from '@/src/application/dtos/UserGroupDTO';
 import { UserRoleDTO } from '@/src/application/dtos/UserRoleDTO';
-import { ResourceDTO } from '@/src/application/dtos/ResourceDTO';
-import { convertDate } from '@/src/shared/utils/utils';
+import { convertDate, generateRandomPw, mapResourcesToEmptyPermissions, mapRoleToPermissions } from '@/src/shared/utils/utils';
 import { clientCookie } from '@/src/shared/utils/clientCookie';
+import { statusOptions, emptyUser, emptyUserGroup, emptyUserRole } from '@/src/shared/objects/shared.objs';
 
 const UsersPage = () => {
-
-    const statusOptions = [
-        { label: 'Active', value: true },
-        { label: 'Inactive', value: false },
-    ];
-
-    const emptyUser: UserDTO = {
-        id: "",
-        userId: "",
-        userName: "",
-        password: "",
-        userGroupId: "",
-        userGroupName: "",
-        userRoleId: "",
-        userRoleName: "",
-        isActive: true,
-        createdBy: "",
-        updatedBy: "",
-        createdAt: new Date,
-        updatedAt: new Date,
-    } as UserDTO;
-
-    const emptyUserGroup: UserGroupDTO = {
-        id: "",
-        userGroupId: "",
-        userGroupName: "",
-        createdBy: "",
-        updatedBy: "",
-        createdAt: new Date,
-        updatedAt: new Date,
-    } as UserGroupDTO;
-
-    const emptyUserRole: UserRoleDTO = {
-        id: "",
-        userRoleId: "",
-        userRoleName: "",
-        userRoleDescription: "",
-        userRolePermissions: [''],
-        resources: [''],
-        permissionsMap: [],
-        createdBy: "",
-        updatedBy: "",
-        createdAt: new Date,
-        updatedAt: new Date,
-    } as UserRoleDTO;
-
-    interface ResourcesPermissions {
-        resourceId: string;
-        resourceName: string;
-        permissions: {
-            create: boolean;
-            read: boolean;
-            update: boolean;
-            delete: boolean;
-        };
-    };
 
     const toast = useRef<Toast>(null);
     const dtUsers = useRef<DataTable<any>>(null);
@@ -118,6 +62,7 @@ const UsersPage = () => {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
     const [globalFilterUserRolesValue, setGlobalFilterUserRolesValue] = useState('');
+    const [password, setPassword] = useState('');
 
     const setApiRoute = async (): Promise<any> => {
         const c = await ApiRoute();
@@ -156,54 +101,6 @@ const UsersPage = () => {
         setUserGroup(emptyUserGroup);
         setSubmitted(false);
         setUserGroupDialog(true);
-    };
-
-    function mapResourcesToEmptyPermissions(resources: ResourceDTO[]): ResourcesPermissions[] {
-        try {
-            const recursive = (list: ResourceDTO[]): ResourcesPermissions[] => {
-                return list.flatMap((res) => {
-                    const item: ResourcesPermissions = {
-                        resourceId: res.resourceId,
-                        resourceName: res.resourceName,
-                        permissions: {
-                            create: false,
-                            read: false,
-                            update: false,
-                            delete: false
-                        }
-                    };
-
-                    const children = res.childrenItems?.length ? recursive(res.childrenItems) : [];
-                    return [item, ...children];
-                });
-            };
-            return recursive(resources);
-        } catch {
-            return [];
-        }
-    };
-
-    function mapRoleToPermissions(resourceDTOs: ResourceDTO[], role: { userRolePermissions: string[] }): ResourcesPermissions[] {
-        const permSet = new Set(role.userRolePermissions);
-        const recursive = (resources: ResourceDTO[]): ResourcesPermissions[] => {
-            return resources.flatMap((r) => {
-                const resourceName = r.resourceName;
-                const permissions: ResourcesPermissions['permissions'] = {
-                    create: permSet.has(`${resourceName}:create`),
-                    read: permSet.has(`${resourceName}:read`),
-                    update: permSet.has(`${resourceName}:update`),
-                    delete: permSet.has(`${resourceName}:delete`)
-                };
-                const currentItem: ResourcesPermissions = {
-                    resourceId: r.resourceId,
-                    resourceName: r.resourceName,
-                    permissions
-                };
-                const children = recursive(r.childrenItems || []);
-                return [currentItem, ...children];
-            });
-        };
-        return recursive(resourceDTOs);
     };
 
     const openNewUserRole = () => {
@@ -786,25 +683,29 @@ const UsersPage = () => {
         setUserRole(oUserRole);
     };
 
+    const validatePassword = (pw: string) => ({
+        hasUpper: /[A-Z]/.test(pw),
+        hasLower: /[a-z]/.test(pw),
+        hasNumber: /\d/.test(pw), //* 0-9
+        hasSpecial: /[!@#$*\-_?]/.test(pw),
+        isValidLength: pw.length >= 8 && pw.length <= 15,
+    });
+
+    const passwordRules = validatePassword(password);
+
+    const allValid = Object.values(passwordRules).every(Boolean);
+
     const onInputPasswordChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, name: string) => {
         const sVal = (e.target && e.target.value) || '';
+        setPassword(sVal);
         let oUser = { ...user };
         oUser.password = sVal;
         setUser(oUser);
     };
 
-    function generateRandomPw(length: number = 14): string {
-        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&';
-        let password = '';
-        for (let i = 0; i < length; i++) {
-            const randomIndex = Math.floor(Math.random() * chars.length);
-            password += chars[randomIndex];
-        }
-        return password;
-    };
-
     const onRandomPw = () => {
         const sPw = generateRandomPw();
+        setPassword(sPw);
         let oUser = { ...user };
         oUser.password = sPw;
         setUser(oUser);
@@ -977,7 +878,25 @@ const UsersPage = () => {
                                             />
                                             <Button icon="pi pi-replay" label="Random" severity="secondary" onClick={onRandomPw} />
                                         </div>
-                                        {submitted && !user.password && <small className="p-invalid">Password is required.</small>}
+                                        {submitted && !allValid && <small className="p-invalid">Password is invalid.</small>}
+
+                                        <ul style={{ listStyleType: 'none', padding: 0, marginTop: '0.5rem' }}>
+                                            <li style={{ color: passwordRules.hasUpper ? 'green' : 'red' }}>
+                                                {passwordRules.hasUpper ? '✔' : '✖'} ตัวอักษรพิมพ์ใหญ่ A-Z อย่างน้อย 1 ตัว
+                                            </li>
+                                            <li style={{ color: passwordRules.hasLower ? 'green' : 'red' }}>
+                                                {passwordRules.hasLower ? '✔' : '✖'} ตัวอักษรพิมพ์เล็ก a-z อย่างน้อย 1 ตัว
+                                            </li>
+                                            <li style={{ color: passwordRules.hasNumber ? 'green' : 'red' }}>
+                                                {passwordRules.hasNumber ? '✔' : '✖'} ตัวเลข 0-9 อย่างน้อย 1 ตัว
+                                            </li>
+                                            <li style={{ color: passwordRules.hasSpecial ? 'green' : 'red' }}>
+                                                {passwordRules.hasSpecial ? '✔' : '✖'} อักษรพิเศษ !@#$*-_? อย่างน้อย 1 ตัว
+                                            </li>
+                                            <li style={{ color: passwordRules.isValidLength ? 'green' : 'red' }}>
+                                                {passwordRules.isValidLength ? '✔' : '✖'} ความยาวไม่ต่ำกว่า 8 ตัวอักษร แต่ไม่เกิน 15 ตัวอักษร
+                                            </li>
+                                        </ul>
                                     </div>
                                 </>
                             )}
@@ -1186,10 +1105,11 @@ const UsersPage = () => {
                                     onChange={(e) => onInputRoleDescriptionChange(e, 'value')}
                                 />
                             </div>
-                            <div className="field">
-                                <label htmlFor="roledescription"><span style={{ color: "red" }}>*</span> Permissions </label>
+                            <div className="field col-12">
+                                <label htmlFor="roledescription"> Permissions </label>
                                 <DataTable value={resourcesPermissions} dataKey="resourceId">
-                                    <Column field="resourceName" header="Resource" />
+                                    <Column field="resourceLabel" header="Menu" />
+                                    <Column field="resourceDescription" header="Description" />
                                     <Column header="Create" body={permissionCheckboxTemplate('create')} />
                                     <Column header="Read" body={permissionCheckboxTemplate('read')} />
                                     <Column header="Update" body={permissionCheckboxTemplate('update')} />
