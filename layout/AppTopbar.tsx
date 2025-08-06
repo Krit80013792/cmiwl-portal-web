@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { classNames } from 'primereact/utils';
 import React, { forwardRef, useContext, useImperativeHandle, useRef, useState } from 'react';
+import LoadingComponent from '@/layout/components/loading/LoadingComponent';
 import Image from 'next/image';
 import { AppTopbarRef } from '@/types';
 import { LayoutContext } from './context/layoutcontext';
@@ -21,6 +22,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     const [confirmDialog, setConfirmDialog] = useState(false);
     const router = useRouter();
     const toast = useRef<Toast>(null);
+    const [loading, setLoading] = useState(false);
 
     useImperativeHandle(ref, () => ({
         menubutton: menubuttonRef.current,
@@ -39,9 +41,11 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     };
 
     const onConfirmSignOut = async () => {
+        setConfirmDialog(false);
+        setLoading(true);
         const conf = await setConfAsync();
         const res = await signOut(conf);
-        if (res.ok) {
+        if (res?.ok) {
             const ath = Buffer.from(conf?.ath, 'base64').toString('binary');
             router.push(ath);
         } else {
@@ -89,6 +93,10 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
                     <span>Are you sure you want to sign out?</span>
                 </div>
             </Dialog>
+
+            {loading &&
+                <LoadingComponent />
+            }
         </div>
     );
 });
