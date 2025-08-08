@@ -13,19 +13,6 @@ const protectedRoutes = [
 ];
 const publicRoutes = ['/pw0wl'];
 
-function removeCookiesReturnToSignIn(req: NextRequest, CMIWL_CMS_COOKIE_NAME: string) {
-    const response = NextResponse.redirect(new URL('/pw0wl', req.url));
-    response.cookies.set('cmiwl_cms_me', '', {
-        path: '/',
-        expires: new Date(0),
-    });
-    response.cookies.set(CMIWL_CMS_COOKIE_NAME, '', {
-        path: '/',
-        expires: new Date(0),
-    });
-    return response;
-};
-
 export default async function middleware(req: NextRequest) {
     const resNext = NextResponse.next();
 
@@ -61,7 +48,7 @@ export default async function middleware(req: NextRequest) {
     const usrAgent = req.headers.get('user-agent');
 
     if (isProtectedRoute && session?.uag !== usrAgent) {
-        removeCookiesReturnToSignIn(req, CMIWL_CMS_COOKIE_NAME);
+        return NextResponse.redirect(new URL('/pw0wl', req.url));
     }
 
     if (path === '/pw0wl' && session?.uag === usrAgent) {
@@ -72,8 +59,8 @@ export default async function middleware(req: NextRequest) {
     if (allowedPaths.length > 0) {
         const isAuthorized = allowedPaths.some((route: string) => path.endsWith(route));
         if (!isAuthorized && (path.startsWith('/pw0wl') || path.startsWith('/cms'))) {
-            if (path === '/cms/main') {
-                removeCookiesReturnToSignIn(req, CMIWL_CMS_COOKIE_NAME);
+            if (path.startsWith('/cms')) {
+                return NextResponse.redirect(new URL('/pw0wl', req.url));
             }
             return NextResponse.redirect(new URL('/cms/main', req.url));
         }

@@ -2,6 +2,9 @@
 
 import React from 'react';
 import { Metadata } from 'next';
+import { cookies } from 'next/headers';
+import { getIronSession } from 'iron-session';
+import { sessionOptions } from '@/src/shared/utils/session';
 
 import { UserGroupRepository } from '@/src/infrastructure/database/mongodb/repositories/UserGroupRepository';
 import { UserGroupService } from '@/src/application/services/UserGroupService';
@@ -19,14 +22,27 @@ export async function generateMetadata(): Promise<Metadata> {
 async function getData() {
 
     // const userGroupService = new UserGroupService(new UserGroupRepository());
-    
+
     // const data = await userGroupService.getUserGroups();
     // return data;
 }
 
 export default async function IntroChannel() {
-    
-    const chn = 'btn btn-tidloh fs-6 d-flex justify-content-center align-items-center mx-auto continue-btn';
+
+    const session = await getIronSession(cookies(), sessionOptions);
+    const sessionData = (session as any)?.usrData?.data;
+    const channel = sessionData?.prefill?.channel;
+
+    let chn = 'btn btn-tidlor fs-6 d-flex justify-content-center align-items-center mx-auto continue-btn';
+    if (channel) {
+        const channelName = channel?.channelName as string;
+        if (channelName.toLowerCase() === 'heygoody') {
+            chn = 'btn btn-hey fs-6 d-flex justify-content-center align-items-center mx-auto continue-btn';
+        }
+    }
+
+
+
 
     return (
         <main>

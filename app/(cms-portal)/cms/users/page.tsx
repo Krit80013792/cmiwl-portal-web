@@ -93,6 +93,7 @@ const UsersPage = () => {
 
     const openNewUser = () => {
         setUser(emptyUser);
+        setPassword('');
         setSubmitted(false);
         setUserDialog(true);
     };
@@ -167,7 +168,8 @@ const UsersPage = () => {
             if (!oUser.userName ||
                 !oUser.password ||
                 !oUser.userGroupId ||
-                !oUser.userRoleId) {
+                !oUser.userRoleId ||
+                !allValidPw) {
                 setSubmitted(true);
                 setUserDialog(true);
                 setLoading(false);
@@ -693,7 +695,7 @@ const UsersPage = () => {
 
     const passwordRules = validatePassword(password);
 
-    const allValid = Object.values(passwordRules).every(Boolean);
+    const allValidPw = Object.values(passwordRules).every(Boolean);
 
     const onInputPasswordChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, name: string) => {
         const sVal = (e.target && e.target.value) || '';
@@ -878,7 +880,7 @@ const UsersPage = () => {
                                             />
                                             <Button icon="pi pi-replay" label="Random" severity="secondary" onClick={onRandomPw} />
                                         </div>
-                                        {submitted && !allValid && <small className="p-invalid">Password is invalid.</small>}
+                                        {submitted && !allValidPw && <small className="p-invalid">Password is invalid.</small>}
 
                                         <ul style={{ listStyleType: 'none', padding: 0, marginTop: '0.5rem' }}>
                                             <li style={{ color: passwordRules.hasUpper ? 'green' : 'red' }}>

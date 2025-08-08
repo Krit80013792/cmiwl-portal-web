@@ -1,9 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 
 import React from 'react';
-import Image from 'next/image';
 import { Metadata } from 'next';
-import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
+import { getIronSession } from 'iron-session';
+import { sessionOptions } from '@/src/shared/utils/session';
+import InsurerListComponent from '@/cmi-layout/components/InsurerListComponent';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +18,10 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Insurers() {
 
+    const session = await getIronSession(cookies(), sessionOptions);
+    const sessionData = (session as any)?.usrData?.data;
+    const channel = sessionData?.prefill?.channel;
+
     return (
         <main>
             <div className="container pt-48">
@@ -26,9 +32,7 @@ export default async function Insurers() {
                 </div>
             </div>
             <div className="container pb-20"></div>
-            <div className="container pb-20">
-                <input type="submit" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VIBError$btnHomePage" value="VIB" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VIBError_btnHomePage" className="btn btn-primary fs-6 d-flex justify-content-center align-items-center mx-auto mb-0" />
-            </div>
+            <InsurerListComponent />
         </main>
     );
 }

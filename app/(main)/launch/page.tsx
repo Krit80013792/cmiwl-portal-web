@@ -1,57 +1,54 @@
 //* app/(main)/launch/page.tsx
 /* eslint-disable @next/next/no-img-element */
-import React from 'react';
-import { Metadata } from 'next';
-import { redirect } from 'next/navigation';
-import { ITxActivityLog } from '@/src/domain/models/TxActivityLogModel';
-import { TxActivityLogger } from '@/src/shared/middleware/logging/TxActivityLogger';
-import bcrypt from 'bcrypt';
-import { v4 as uuidv4 } from 'uuid';
+'use client';
+import React, { useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import LoadingComponent from '@/cmi-layout/components/loading/LoadingComponent';
 
-export const dynamic = 'force-dynamic';
+const LaunchPage = () => {
 
-type Props = {
-    searchParams?: {
-        ck?: string;
-        token?: string;
-    };
-};
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
-export async function generateMetadata(): Promise<Metadata> {
-    return {
-        title: 'ต่อ พ.ร.บ. รถยนต์ออนไลน์ (ประกันภาคบังคับ) กับติดล้อ',
-        description: 'พ.ร.บ. รถยนต์ ต่อง่าย สะดวก รวดเร็วกับเว็บติดล้อ ประกันภัยภาคบังคับคุ้มครองทั้งคุณและบุคคลภายนอก ต่อพ.ร.บ. ออนไลน์รับกรมธรรม์อิเล็กทรอนิกส์ทันทีที่นี่'
-    };
-}
+    useEffect(() => {
+        const ck = searchParams.get('ck');
+        const token = searchParams.get('token');
 
-export default async function LaunchPage({ searchParams }: Props) {
-    const ck = searchParams?.ck ?? '';
-    const token = searchParams?.token ?? '';
+        if (!ck || !token) {
+            return;
+        }
 
-    // await TxLogger.log({
-    //     id: '',
-    //     sUserName: '',
-    //     sUserGroupName: '',
-    //     sUserRoleName: '',
-    //     sRoute: '/launch',
-    //     sMethod: 'GET',
-    //     sAction: 'launch',
-    //     sStatus: 'success',
-    //     sRequestMsg: `/launch?ck=${ck}&token=${token}`,
-    //     sResponseMsg: '',
-    //     sChannel: 'CXM',
-    //     createdAt: new Date(),
-    //     updatedAt: new Date()
-    // } as ITxLog);
+        setLoading(true);
 
-    if (ck && token) {
-        return redirect('/th/intro-channel');
-    }
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/v1/launch', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ ck, token }),
+                });
+
+                if (res?.ok) {
+                    router.push('/th/Insurers');
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
+    }, [searchParams]);
 
     return (
         <main>
-            <p>ck: {ck}</p>
-            <p>token: {token}</p>
+            {loading &&
+                <LoadingComponent />
+            }
         </main>
     );
 };
+
+export default LaunchPage;
