@@ -34,8 +34,9 @@ const LaunchPage = () => {
                 if (res?.ok) {
                     router.push('/th/Insurers');
                 }
-            } catch (error) {
-                console.error('Error fetching data:', error);
+                setLoading(false);
+            } catch {
+                console.error('Error fetching data.');
             }
         };
 

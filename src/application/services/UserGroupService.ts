@@ -128,6 +128,7 @@ export class UserGroupService {
 
             const oUpdatedUserGroup = await this.userGroupRepository.update(psId, oUserGroup);
             if (oUpdatedUserGroup) {
+                //* Update user group name in users if it has changed
                 await this.userRepository.updateUserGroupName(oUpdatedUserGroup?.sUserGroupId, oUpdatedUserGroup?.sUserGroupName);
             }
 

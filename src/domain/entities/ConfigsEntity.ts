@@ -4,8 +4,8 @@ import { IConfig } from '../models/ConfigModel';
 const ConfigsSchema: Schema = new Schema(
     {
         sConfigId: { type: String, required: true, unique: true }, //* uuid
-        sConfigName: { type: String, required: true },
-        sConfigKey: { type: String, required: true },
+        sConfigName: { type: String, required: false },
+        sConfigKey: { type: String, required: false },
         sConfigValue: { type: String, required: true },
         sConfigDescription: { type: String, required: false, default: '' },
         sConfigByChannel: { type: String, required: true },

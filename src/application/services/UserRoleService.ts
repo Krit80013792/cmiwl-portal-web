@@ -172,6 +172,7 @@ export class UserRoleService {
 
             const oUpdatedUserRole = await this.userRoleRepository.update(psId, oUserRole);
             if (oUpdatedUserRole) {
+                //* Update user role name in users if it has changed
                 await this.userRepository.updateUserRoleName(oUpdatedUserRole?.sUserRoleId, oUpdatedUserRole?.sUserRoleName);
             }
 

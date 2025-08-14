@@ -88,7 +88,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                         })
                     }}
                 /> */}
-                <Script src="/custom/plugin/jquery/jquery-3.4.1.min.js" strategy="beforeInteractive" />
+                <Script src="/custom/plugin/jquery/jquery.min.js" strategy="beforeInteractive" />
                 <Script src="/custom/plugin/bootstrap/bootstrap.bundle.min.js" strategy="afterInteractive" />
                 <Script src="/custom/plugin/select2/js/select2.min.js" strategy="afterInteractive" />
             </body>

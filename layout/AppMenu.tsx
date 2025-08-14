@@ -5,10 +5,12 @@ import AppMenuitem from './AppMenuitem';
 import { MenuProvider } from './context/menucontext';
 import { AppMenuItem } from '@/types';
 import { Menus } from '@/src/shared/utils/profile';
+import { clientCookie } from '@/src/shared/utils/clientCookie';
 
 const AppMenu = () => {
 
     const [menus, setMenus] = useState<AppMenuItem[]>([]);
+    const [userName, setUserName] = useState<string>('');
 
     const getMenus = async (): Promise<any> => {
         const m = await Menus();
@@ -17,6 +19,9 @@ const AppMenu = () => {
     };
 
     useEffect(() => {
+        const cc = clientCookie();
+        setUserName(cc?.userName ?? 'Guest');
+
         const getData = async () => {
             const menus = await getMenus();
             setMenus(menus);
@@ -26,6 +31,9 @@ const AppMenu = () => {
 
     return (
         <MenuProvider>
+            <br /><br />
+            <i className="pi pi-user mr-2" style={{ fontSize: '2.5rem' }}></i><strong>{userName}</strong>
+            <br /><br />
             <ul className="layout-menu">
                 {menus.map((item, i) => {
                     return !item?.seperator ? <AppMenuitem item={item} root={true} index={i} key={item.label} /> : <li className="menu-separator"></li>;

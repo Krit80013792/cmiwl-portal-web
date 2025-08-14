@@ -83,3 +83,22 @@ export const CreateUserRoleSchema = UserRoleSchema.omit({ id: true, createdAt: t
 export const UpdateUserRoleSchema = UserRoleSchema.partial().extend({
     userRoleId: z.string().min(1, "User Role ID is required")
 });
+
+export const ConfigSchema = z.object({
+    id: z.string(),
+    configId: z.string().optional(),
+    configName: z.string().optional(),
+    configKey: z.string().optional(),
+    configValue: z.string().optional(),
+    configDescription: z.string().optional(),
+    configByChannel: z.string().optional(),
+    createdBy: z.string(),
+    createdAt: z.date().optional(),
+    updatedAt: z.date().optional(),
+});
+
+export const CreateConfigSchema = ConfigSchema.omit({ id: true, createdAt: true, updatedAt: true });
+
+export const UpdateConfigSchema = ConfigSchema.partial().extend({
+    configId: z.string().min(1, "Config ID is required")
+});

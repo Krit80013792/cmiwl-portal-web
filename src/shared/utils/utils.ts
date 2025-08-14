@@ -153,3 +153,23 @@ export function mapRoleToPermissions(resourceDTOs: ResourceDTO[], role: { userRo
     };
     return recursive(resourceDTOs);
 };
+
+export function isValidJpegBase64(data: string): boolean {
+    const regex = /^data:image\/jpeg;base64,[A-Za-z0-9+/]+={0,2}$/;
+    if (!regex.test(data)) return false;
+
+    try {
+        const base64Data = data.replace(/^data:image\/jpeg;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+
+        return (
+            buffer.length > 4 &&
+            buffer[0] === 0xFF &&
+            buffer[1] === 0xD8 &&
+            buffer[buffer.length - 2] === 0xFF &&
+            buffer[buffer.length - 1] === 0xD9
+        );
+    } catch {
+        return false;
+    }
+};

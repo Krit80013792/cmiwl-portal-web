@@ -16,6 +16,14 @@ export class ConfigRepository implements IConfigRepository {
         return await ConfigsEntity.findById(psId);
     };
 
+    async findByConfigName(psName: string): Promise<IConfig | null> {
+        return await ConfigsEntity.findOne({ sConfigName: psName });
+    };
+
+    async findByChannelCode(psCode: string): Promise<IConfig[]> {
+        return await ConfigsEntity.find({ sConfigByChannel: psCode });
+    };
+
     async update(psId: string, poConfig: Partial<IConfig>): Promise<IConfig | null> {
         return await ConfigsEntity.findByIdAndUpdate(psId, poConfig, { new: true });
     };

@@ -6,9 +6,9 @@ export async function createTxActivityLog(paConf: any, poTxActivityLog: TxActivi
     return await httpClient(sEndpoint, HttpMethod.POST, paConf, poTxActivityLog);
 };
 
-export async function getTxActivityLogs(paConf: any, psStartDate: string): Promise<Response> {
+export async function getTxActivityLogs(paConf: any, psConditions: string): Promise<Response> {
     const sEndpoint = Buffer.from(paConf?.aal, 'base64').toString('binary');
-    return await httpClient(sEndpoint, HttpMethod.GET, paConf, null, psStartDate);
+    return await httpClient(sEndpoint, HttpMethod.GET, paConf, null, psConditions);
 };
 
 export async function getTxActivityLogById(paConf: any, psType: string): Promise<Response> {
