@@ -11,9 +11,24 @@ const InsurerListComponent = () => {
     };
 
     return (
-        <div className="container pb-20" onClick={handleIntroChannel}>
-            <input type="submit" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VIBError$btnHomePage" value="VIB" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VIBError_btnHomePage" className="btn btn-primary fs-6 d-flex justify-content-center align-items-center mx-auto mb-0" />
-        </div>
+        <>
+            <div className="container pb-20" onClick={handleIntroChannel}>
+                <img
+                    src="/cmisite/media/assets/insurers/viriyah.png"
+                    alt="viriyah"
+                    className="img-fluid d-block mx-auto mb-4"
+                    style={{ maxWidth: '60%', height: 'auto' }}
+                />
+            </div>
+            <div className="container pb-20" onClick={handleIntroChannel}>
+                <img
+                    src="/cmisite/media/assets/insurers/ergo.png"
+                    alt="ergo"
+                    className="img-fluid d-block mx-auto mb-4"
+                    style={{ maxWidth: '60%', height: 'auto' }}
+                />
+            </div>
+        </>
     );
 };
 
