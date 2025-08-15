@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap');
 
+:root {
+    --primary: #045ffc;
+    --bg-active: #f2f7ff;
+}
+
 body {
     font-family: 'Noto Sans Thai', sans-serif;
     color: #1d1d1d;
@@ -1287,8 +1292,8 @@ input[type="radio"] {
 }
 
 #vidHelperModal .nav-tabs .nav-link.active {
-    border: solid 2px #045ffc !important;
-    background-color: #f2f7ff !important
+    border: solid 2px var(--primary) !important;
+    background-color: var(--bg-active) !important
 }
 
 .cvv-modal .modal-dialog {

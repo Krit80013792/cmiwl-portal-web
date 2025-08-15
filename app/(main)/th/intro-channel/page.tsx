@@ -45,7 +45,11 @@ export default async function IntroChannel() {
 
 
     return (
-        <main>
+        <main
+            style={{
+                ['--primary' as any]: '#f2b41c',
+                ['--bg-active' as any]: '#fff8e6'
+            }}>
             <div className="bg-white">
                 <div className="bg-building pt-4">
                     <div className="container-md ">
@@ -65,7 +69,7 @@ export default async function IntroChannel() {
                                     <a title="เงื่อนไขและรายละเอียดความคุ้มครอง" className="fs-14 text-grey d-block" href="/th/coverage-tc" data-cf-modified-e9c163d6727633da1d0a186d-="">เงื่อนไขและรายละเอียดความคุ้มครอง</a>
                                     <div className="pb-4 pt-3">
                                         {/* onclick="if (!window.__cfRLUnblockHandlers) return false; PushGTMDefault('intro', 'click_button', 'to_select-vehicle')" */}
-                                        <a className={chn} href="/th/VehicleCTP" data-cf-modified-e9c163d6727633da1d0a186d-=""><strong className="f-bd">ดำเนินการต่อ</strong><img className="img-fluid ms-6" alt="ดำเนินการต่อ" src="/assets/icon/next-white.png" width="20" height="20" /></a>
+                                        <a className="btn btn-primary fs-6 d-flex justify-content-center align-items-center mx-auto continue-btn" href="/th/VehicleCTP" data-cf-modified-e9c163d6727633da1d0a186d-=""><strong className="f-bd">ดำเนินการต่อ</strong><img className="img-fluid ms-6" alt="ดำเนินการต่อ" src="/assets/icon/next-white.png" width="20" height="20" /></a>
                                     </div>
                                 </div>
                             </div>

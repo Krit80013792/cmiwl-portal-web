@@ -1,4 +1,4 @@
-//* app/api/v1/master/channel/route.ts
+//* app/api/v1/master-data/channel/route.ts
 import { validateApiKey } from '@/src/shared/middleware/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { serializeRequest } from '@/src/shared/utils/serializeRequest';
@@ -16,11 +16,11 @@ async function MasterChannelServiceInstance(): Promise<MasterChannelService> {
 };
 
 /**
- * api/v1/master/channel/:GET Read master channel
+ * api/v1/master-data/channels/:GET Read master channels
  */
 //* @(master-data:read)
 export async function GET(poReq: NextRequest) {
-    const ROUTE = 'api/v1/master/channel';
+    const ROUTE = 'api/v1/master-data/channels';
     const METHOD = 'GET';
     const ACTION = 'read';
 

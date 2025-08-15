@@ -9,7 +9,7 @@ export async function POST(oReq: NextRequest) {
         const session = await getIronSession(cookies(), sessionOptions);
 
         const { ck, token } = await oReq.json();
-        
+
         if (!ck || !token) {
             return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
         }
@@ -30,6 +30,18 @@ export async function POST(oReq: NextRequest) {
         if (!res.ok) {
             return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 });
         }
+
+
+        const resCarColor = await fetch("https://cmiwl-dev.tidlortech.com/api/master-data/v1/car-color", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${data?.data?.jwt}`,
+            },
+        });
+        const carColorData = await resCarColor.json();
+        console.log(carColorData?.data);
+        
 
         (session as any).usrData = data;
         await session.save();

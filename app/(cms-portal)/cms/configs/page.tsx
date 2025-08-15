@@ -13,7 +13,7 @@ import { InputText } from 'primereact/inputtext';
 import { Image } from 'primereact/image';
 import { classNames } from 'primereact/utils';
 import { ApiRoute } from '@/src/shared/utils/profile';
-import { getMasterChannels } from '@/services/client/master.service';
+import { getMasterDataByEndpoint } from '@/services/client/master-data.service';
 import { createConfig, updateConfig, getConfigs } from '@/services/client/configs.service';
 import { MasterChannelDTO } from '@/src/application/dtos/MasterChannelDTO';
 import { ConfigDTO } from '@/src/application/dtos/ConfigDTO';
@@ -74,7 +74,7 @@ const ConfigsPage = () => {
         setLoading(true);
         const getData = async () => {
             const route = await setApiRoute();
-            const resChannels = await getMasterChannels(route);
+            const resChannels = await getMasterDataByEndpoint(route, route?.amd, 'channels');
             const channelsData = await resChannels.json();
             setChannels(channelsData?.data);
             setLoading(false);

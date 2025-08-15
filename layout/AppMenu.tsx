@@ -31,9 +31,12 @@ const AppMenu = () => {
 
     return (
         <MenuProvider>
-            <br /><br />
-            <i className="pi pi-user mr-2" style={{ fontSize: '2.5rem' }}></i><strong>{userName}</strong>
-            <br /><br />
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                <i className="pi pi-user mr-2" style={{ fontSize: '2.5rem' }}></i><br /><br />
+                <strong>{userName}</strong>
+            </div>
+            <br />
+
             <ul className="layout-menu">
                 {menus.map((item, i) => {
                     return !item?.seperator ? <AppMenuitem item={item} root={true} index={i} key={item.label} /> : <li className="menu-separator"></li>;

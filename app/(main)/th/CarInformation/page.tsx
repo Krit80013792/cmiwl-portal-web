@@ -2,6 +2,9 @@
 
 import React from 'react';
 import { Metadata } from 'next';
+import { cookies } from 'next/headers';
+import { getIronSession } from 'iron-session';
+import { sessionOptions } from '@/src/shared/utils/session';
 import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
@@ -13,11 +16,40 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 }
 
+async function getCarColor(token: string) {
+    try {
+        //TODO: Change this to env
+        const res = await fetch("https://cmiwl-dev.tidlortech.com/api/master-data/v1/car-color", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+        });
+        if (res?.status === 401) {
+            // redirect
+        }
+        const carColorData = await res.json();
+        return carColorData?.data ?? [];
+    } catch {
+
+    }
+};
+
 export default async function CarInformation() {
 
+    const session = await getIronSession(cookies(), sessionOptions);
+    const sessionData = (session as any)?.usrData?.data;
+    const token = sessionData?.jwt;
+
+    const carColor = await getCarColor(token);
 
     return (
-        <main>
+        <main
+            style={{
+                ['--primary' as any]: '#f2b41c',
+                ['--bg-active' as any]: '#fff8e6'
+            }}>
 
             {/* <!--------- dropdown select2 --------->
 <!-- <link href="/CMSPages/GetResource.ashx?stylesheetname=custom-select2&=v1.3" type="text/css" rel="stylesheet" /> -->
@@ -232,84 +264,17 @@ export default async function CarInformation() {
 
                         </div>
                         <div className="form-group mb-12 carcolor">
-                            <select name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlCarColor" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlCarColor" className="js-ddlSelect form-control">
+                            <select
+                                name="carColorId"
+                                id="carColorId"
+                                //defaultValue={carInfo.carColorId}
+                                className="js-ddlSelect form-control">
                                 <option value="">เลือกสีรถ</option>
-                                <option value="2">เขียว</option>
-                                <option value="38">เขียว เทา</option>
-                                <option value="59">เขียว เหลือง</option>
-                                <option value="71">เขียว แดง</option>
-                                <option value="31">เขียว ขาว</option>
-                                <option value="47">เขียว ดำ</option>
-                                <option value="41">เขียว ม่วง</option>
-                                <option value="7">เทา</option>
-                                <option value="34">เทา เหลือง</option>
-                                <option value="65">เทา เหลือง แดง</option>
-                                <option value="23">เทา ดำ</option>
-                                <option value="61">เทา ฟ้า เหลือง</option>
-                                <option value="43">เทา ส้ม</option>
-                                <option value="14">เหลือง</option>
-                                <option value="55">เหลือง แดง</option>
-                                <option value="50">เหลือง ดำ</option>
-                                <option value="66">เหลือง ส้ม</option>
-                                <option value="5">แดง</option>
-                                <option value="26">แดง เทา</option>
-                                <option value="35">แดง ดำ</option>
-                                <option value="29">แดง น้ำตาล</option>
-                                <option value="1">ขาว</option>
-                                <option value="44">ขาว เขียว เหลือง</option>
-                                <option value="58">ขาว เขียว แดง</option>
-                                <option value="75">ขาว เทา</option>
-                                <option value="42">ขาว เทา น้ำเงิน</option>
-                                <option value="51">ขาว เหลือง</option>
-                                <option value="18">ขาว แดง</option>
-                                <option value="33">ขาว แดง เหลือง</option>
-                                <option value="20">ขาว แดง หลายสี</option>
-                                <option value="32">ขาว ชมพู</option>
-                                <option value="25">ขาว ชมพู น้ำเงิน</option>
-                                <option value="24">ขาว ดำ</option>
-                                <option value="27">ขาว น้ำเงิน</option>
-                                <option value="46">ขาว น้ำตาล</option>
-                                <option value="30">ขาว ฟ้า</option>
-                                <option value="72">ขาว ฟ้า ส้ม</option>
-                                <option value="52">ขาว ม่วง</option>
-                                <option value="64">ขาว ส้ม</option>
-                                <option value="28">ขาว ส้ม เทา</option>
-                                <option value="57">ขาว ส้ม ดำ</option>
-                                <option value="17">ขาวมุก</option>
-                                <option value="3">ชมพู</option>
-                                <option value="63">ชมพู เทา</option>
-                                <option value="56">ชมพู ดำ</option>
-                                <option value="4">ดำ</option>
-                                <option value="19">ดำ ขาว เหลือง</option>
-                                <option value="6">ทอง</option>
-                                <option value="9">น้ำเงิน</option>
-                                <option value="22">น้ำเงิน เทา</option>
-                                <option value="48">น้ำเงิน เหลือง</option>
-                                <option value="36">น้ำเงิน ดำ</option>
-                                <option value="8">น้ำตาล</option>
-                                <option value="53">น้ำตาล เทา</option>
-                                <option value="39">น้ำตาล ดำ</option>
-                                <option value="10">บรอนซ์</option>
-                                <option value="15">บรอนซ์เงิน</option>
-                                <option value="16">บรอนซ์ทอง</option>
-                                <option value="11">ฟ้า</option>
-                                <option value="60">ฟ้า เขียว ขาว</option>
-                                <option value="40">ฟ้า เทา</option>
-                                <option value="70">ฟ้า เหลือง</option>
-                                <option value="49">ฟ้า แดง</option>
-                                <option value="62">ฟ้า ดำ</option>
-                                <option value="74">ฟ้า น้ำเงิน เหลือง</option>
-                                <option value="45">ฟ้า ม่วง</option>
-                                <option value="12">ม่วง</option>
-                                <option value="69">ม่วง ขาว ชมพู</option>
-                                <option value="68">ม่วง ชมพู</option>
-                                <option value="54">ม่วง ดำ</option>
-                                <option value="13">ส้ม</option>
-                                <option value="67">ส้ม ขาว น้ำเงิน</option>
-                                <option value="37">ส้ม ดำ</option>
-                                <option value="21">หลายสี</option>
-                                <option value="73">อื่นๆ</option>
-
+                                {carColor?.map((color: any) => (
+                                    <option key={color.carColorId} value={color.carColorId}>
+                                        {color.carColorNameTh}
+                                    </option>
+                                ))}
                             </select>
                             <label className="form-label">สีรถ</label>
                             <div className="feedback">กรุณาเลือก</div>

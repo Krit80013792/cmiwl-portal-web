@@ -12,6 +12,7 @@ import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { Dropdown } from 'primereact/dropdown';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
+import { Tooltip } from 'primereact/tooltip';
 import { classNames } from 'primereact/utils';
 import { ApiRoute } from '@/src/shared/utils/profile';
 import { createUser, updateUser, deleteUser, getUsers } from '@/services/client/users.service';
@@ -1112,11 +1113,45 @@ const UsersPage = () => {
                                 <DataTable value={resourcesPermissions} dataKey="resourceId">
                                     <Column field="resourceLabel" header="Menu" />
                                     <Column field="resourceDescription" header="Description" />
-                                    <Column header="Create" body={permissionCheckboxTemplate('create')} />
-                                    <Column header="Read" body={permissionCheckboxTemplate('read')} />
-                                    <Column header="Update" body={permissionCheckboxTemplate('update')} />
-                                    <Column header="Delete" body={permissionCheckboxTemplate('delete')} />
+
+                                    <Column
+                                        header={
+                                            <span id="create-header" className="flex items-center gap-1 cursor-pointer">
+                                                Create <i className="pi pi-question-circle text-sm text-gray-500" />
+                                            </span>
+                                        }
+                                        body={permissionCheckboxTemplate('create')}
+                                    />
+                                    <Column
+                                        header={
+                                            <span id="read-header" className="flex items-center gap-1 cursor-pointer">
+                                                Read <i className="pi pi-question-circle text-sm text-gray-500" />
+                                            </span>
+                                        }
+                                        body={permissionCheckboxTemplate('read')}
+                                    />
+                                    <Column
+                                        header={
+                                            <span id="update-header" className="flex items-center gap-1 cursor-pointer">
+                                                Update <i className="pi pi-question-circle text-sm text-gray-500" />
+                                            </span>
+                                        }
+                                        body={permissionCheckboxTemplate('update')}
+                                    />
+                                    <Column
+                                        header={
+                                            <span id="delete-header" className="flex items-center gap-1 cursor-pointer">
+                                                Delete <i className="pi pi-question-circle text-sm text-gray-500" />
+                                            </span>
+                                        }
+                                        body={permissionCheckboxTemplate('delete')}
+                                    />
                                 </DataTable>
+
+                                <Tooltip target="#create-header" content="สร้างข้อมูลใหม่" position='top' />
+                                <Tooltip target="#read-header" content="การเข้าถึงหน้าแสดงผล และดูข้อมูล" position='top' />
+                                <Tooltip target="#update-header" content="แก้ไขข้อมูล" position='top' />
+                                <Tooltip target="#delete-header" content="ลบข้อมูล" position='top' />
                             </div>
                         </Dialog>
 
