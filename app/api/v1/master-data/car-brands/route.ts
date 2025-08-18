@@ -1,26 +1,25 @@
-//* app/api/v1/master-data/channels/route.ts
+//* app/api/v1/master-data/car-brands/route.ts
 import { validateApiKey } from '@/src/shared/middleware/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { serializeRequest } from '@/src/shared/utils/serializeRequest';
-import { SafeMasterChannelDTO } from '@/src/application/dtos/MasterChannelDTO';
-import { MasterChannelService } from '../../../../../src/application/services/MasterChannelService';
-import { MasterChannelRepository } from '../../../../../src/infrastructure/database/mongodb/repositories/MasterChannelRepository';
+import { MasterCarBrandService } from '../../../../../src/application/services/MasterCarBrandService';
+import { MasterCarBrandRepository } from '../../../../../src/infrastructure/database/mongodb/repositories/MasterCarBrandRepository';
 import { permissionGuard } from '@/src/shared/middleware/permission.guard';
 import { authGuard } from '@/src/shared/middleware/auth.guard';
 import { TxActivityLogger } from '@/src/shared/middleware/logging/TxActivityLogger';
 
-let _masterChannelServiceInstance: MasterChannelService | null = null;
-async function MasterChannelServiceInstance(): Promise<MasterChannelService> {
-    _masterChannelServiceInstance ??= new MasterChannelService(new MasterChannelRepository());
-    return _masterChannelServiceInstance;
+let _masterCarBrandServiceInstance: MasterCarBrandService | null = null;
+async function MasterCarBrandServiceInstance(): Promise<MasterCarBrandService> {
+    _masterCarBrandServiceInstance ??= new MasterCarBrandService(new MasterCarBrandRepository());
+    return _masterCarBrandServiceInstance;
 };
 
 /**
- * api/v1/master-data/channels/:GET Read master channels
+ * api/v1/master-data/car-brands/:GET Read master car-brands
  */
 //* @(master-data:read)
 export async function GET(poReq: NextRequest) {
-    const ROUTE = 'api/v1/master-data/channels';
+    const ROUTE = 'api/v1/master-data/car-brands';
     const METHOD = 'GET';
     const ACTION = 'read';
 
@@ -43,12 +42,10 @@ export async function GET(poReq: NextRequest) {
     const reqLog = await serializeRequest(poReq, {});
 
     try {
-        const masterChannelService = await MasterChannelServiceInstance();
-        const masterChannels = await masterChannelService.getMasterChannels();
+        const masterCarBrandService = await MasterCarBrandServiceInstance();
+        const masterCarBrands = await masterCarBrandService.getMasterCarBrands();
 
-        const safeMasterChannels: SafeMasterChannelDTO[] = masterChannels?.data?.map(({ ck, ...rest }) => rest) ?? [];
-
-        return new NextResponse(JSON.stringify({ message: 'Success', data: safeMasterChannels }), { status: 200 });
+        return new NextResponse(JSON.stringify({ message: 'Success', data: masterCarBrands?.data }), { status: 200 });
 
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);

@@ -18,22 +18,32 @@ const MasterDataPage = () => {
         {
             name: 'car-brands', label: 'Car Brands',
             columns: [
-                { field: 'brand', header: 'Brand' },
-                { field: 'country', header: 'Country' }
+                { field: 'carBrandId', header: 'Brand Id' },
+                { field: 'carBrandName', header: 'Brand Name' },
+                { field: 'carTypeKey', header: 'Type Key' },
+                { field: 'insurerCode', header: 'Insurer Code' },
+                { field: 'createDate', header: 'Create Date' },
+                { field: 'createBy', header: 'Create By' },
             ]
         },
         {
             name: 'car-brands-ranking', label: 'Car Brands Ranking',
             columns: [
-                { field: 'brand', header: 'Brand' },
-                { field: 'rank', header: 'Rank' }
+                { field: 'carBrandID', header: 'Brand Id' },
+                { field: 'carBrandName', header: 'Brand Name' },
+                { field: 'ranking', header: 'Ranking' },
+                { field: 'channel', header: 'Channel' },
+                { field: 'imagePath', header: 'Img Path' },
             ]
         },
         {
             name: 'car-colors', label: 'Car Colors',
             columns: [
-                { field: 'color', header: 'Color' },
-                { field: 'hex', header: 'Hex Code' }
+                { field: 'carColorId', header: 'Color Id' },
+                { field: 'carColorNameTh', header: 'Color Name Th' },
+                { field: 'carColorNameEn', header: 'Color Name En' },
+                { field: 'createDate', header: 'Create Date' },
+                { field: 'createBy', header: 'Create By' },
             ]
         },
         {
@@ -46,36 +56,68 @@ const MasterDataPage = () => {
         {
             name: 'compulsory-groups', label: 'Compulsory Groups',
             columns: [
-                { field: 'group', header: 'Group' },
-                { field: 'description', header: 'Description' }
+                { field: 'displayName', header: 'Name' },
+                { field: 'categoryGroup', header: 'Group' },
+                { field: 'categoryText', header: 'Text' },
+                { field: 'categoryImgText', header: 'Img Text' },
+                { field: 'categoryImgPath', header: 'Img Path' },
+                { field: 'channel', header: 'Channel' },
             ]
         },
         {
             name: 'compulsory-rates', label: 'Compulsory Rates',
             columns: [
-                { field: 'rate', header: 'Rate' },
-                { field: 'description', header: 'Description' }
+                { field: 'channel', header: 'Channel' },
+                { field: 'carType', header: 'Car Type' },
+                { field: 'carTypeName', header: 'Type Name' },
+                { field: 'cmiCarTypeCode', header: 'Type Code' },
+                { field: 'cmiCarTypeName', header: 'Type Name' },
+                { field: 'cmiCarTypeRoryor', header: 'Type Roryor' },
+                { field: 'cmiSubCarTypeCode', header: 'Sub Car Type Code' },
+                { field: 'typeOfUseCode', header: 'Use Code' },
+                { field: 'typeOfUseDetail', header: 'Detail' },
+                { field: 'cmiCategorySubType', header: 'Sub Type' },
+                { field: 'cmiSubCarTypeDetail', header: 'Sub Car Type Detail' },
+                { field: 'min', header: 'Min' },
+                { field: 'max', header: 'Max' },
+                { field: 'isEvType', header: 'Is EV Type' },
+                { field: 'cmiCoverage', header: 'Coverage' },
+                { field: 'displayDetail', header: 'Detail' },
+                { field: 'bodyType', header: 'Body Type' },
+                { field: 'useOfMotor', header: 'Use of Motor' },
+                { field: 'createDate', header: 'Create Date' },
+                { field: 'createBy', header: 'Create By' },
             ]
         },
         {
             name: 'compulsory-types', label: 'Compulsory Types',
             columns: [
-                { field: 'type', header: 'Type' },
-                { field: 'description', header: 'Description' }
+                { field: 'displayName', header: 'Name' },
+                { field: 'carTypeKey', header: 'Type Key' },
+                { field: 'categoryGroup', header: 'Group' },
+                { field: 'channel', header: 'Channel' },
+                { field: 'itemOrder', header: 'Item Order' },
+                { field: 'imagePath', header: 'Img Path' },
             ]
         },
         {
             name: 'insurers', label: 'Insurers',
             columns: [
-                { field: 'name', header: 'Name' },
-                { field: 'license', header: 'License No.' }
+                { field: 'insurerFullName', header: 'Full Name' },
+                { field: 'insurerShortName', header: 'Short Name' },
+                { field: 'insurerCode', header: 'Code' },
+                { field: 'insurerImgPath', header: 'Img Path' },
+                { field: 'channel', header: 'Channel' },
             ]
         },
         {
             name: 'prefix', label: 'Prefix',
             columns: [
-                { field: 'prefix', header: 'Prefix' },
-                { field: 'gender', header: 'Gender' }
+                { field: 'codeName', header: 'Code Name' },
+                { field: 'prefixNameTH', header: 'Prefix Name TH' },
+                { field: 'prefixNameEN', header: 'Prefix Name EN' },
+                { field: 'itemOrder', header: 'Item Order' },
+                { field: 'channel', header: 'Channel' },
             ]
         }
     ];

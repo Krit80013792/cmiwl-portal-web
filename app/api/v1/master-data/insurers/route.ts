@@ -1,26 +1,25 @@
-//* app/api/v1/master-data/channels/route.ts
+//* app/api/v1/master-data/insurers/route.ts
 import { validateApiKey } from '@/src/shared/middleware/auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { serializeRequest } from '@/src/shared/utils/serializeRequest';
-import { SafeMasterChannelDTO } from '@/src/application/dtos/MasterChannelDTO';
-import { MasterChannelService } from '../../../../../src/application/services/MasterChannelService';
-import { MasterChannelRepository } from '../../../../../src/infrastructure/database/mongodb/repositories/MasterChannelRepository';
+import { MasterInsurerService } from '../../../../../src/application/services/MasterInsurerService';
+import { MasterInsurerRepository } from '../../../../../src/infrastructure/database/mongodb/repositories/MasterInsurerRepository';
 import { permissionGuard } from '@/src/shared/middleware/permission.guard';
 import { authGuard } from '@/src/shared/middleware/auth.guard';
 import { TxActivityLogger } from '@/src/shared/middleware/logging/TxActivityLogger';
 
-let _masterChannelServiceInstance: MasterChannelService | null = null;
-async function MasterChannelServiceInstance(): Promise<MasterChannelService> {
-    _masterChannelServiceInstance ??= new MasterChannelService(new MasterChannelRepository());
-    return _masterChannelServiceInstance;
+let _masterInsurerServiceInstance: MasterInsurerService | null = null;
+async function MasterInsurerServiceInstance(): Promise<MasterInsurerService> {
+    _masterInsurerServiceInstance ??= new MasterInsurerService(new MasterInsurerRepository());
+    return _masterInsurerServiceInstance;
 };
 
 /**
- * api/v1/master-data/channels/:GET Read master channels
+ * api/v1/master-data/insurers/:GET Read master insurers
  */
 //* @(master-data:read)
 export async function GET(poReq: NextRequest) {
-    const ROUTE = 'api/v1/master-data/channels';
+    const ROUTE = 'api/v1/master-data/insurers';
     const METHOD = 'GET';
     const ACTION = 'read';
 
@@ -43,12 +42,10 @@ export async function GET(poReq: NextRequest) {
     const reqLog = await serializeRequest(poReq, {});
 
     try {
-        const masterChannelService = await MasterChannelServiceInstance();
-        const masterChannels = await masterChannelService.getMasterChannels();
+        const masterInsurerService = await MasterInsurerServiceInstance();
+        const masterInsurers = await masterInsurerService.getMasterInsurers();
 
-        const safeMasterChannels: SafeMasterChannelDTO[] = masterChannels?.data?.map(({ ck, ...rest }) => rest) ?? [];
-
-        return new NextResponse(JSON.stringify({ message: 'Success', data: safeMasterChannels }), { status: 200 });
+        return new NextResponse(JSON.stringify({ message: 'Success', data: masterInsurers?.data }), { status: 200 });
 
     } catch (error) {
         const errorMsg = error instanceof Error ? error.message : JSON.stringify(error);
