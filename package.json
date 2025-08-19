@@ -22,6 +22,7 @@
     "dompurify": "^3.2.6",
     "elastic-apm-node": "^4.13.0",
     "fs": "^0.0.1-security",
+    "ioredis": "^5.7.0",
     "iron-session": "^8.0.4",
     "isomorphic-dompurify": "^2.26.0",
     "jose": "^6.0.12",

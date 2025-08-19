@@ -2,12 +2,15 @@
 
 import React from 'react';
 import { Metadata } from 'next';
-
+import { cookies } from 'next/headers';
+import { getIronSession } from 'iron-session';
+import { sessionOptions } from '@/src/shared/utils/session';
 import { UserGroupRepository } from '@/src/infrastructure/database/mongodb/repositories/UserGroupRepository';
 import { UserGroupService } from '@/src/application/services/UserGroupService';
 import { UserGroupDTO } from '@/src/application/dtos/UserGroupDTO';
 
 import VehicleListComponent from '@/cmi-layout/components/VehicleListComponent';
+import redis from '@/src/shared/utils/redis';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,15 +21,49 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 };
 
-async function getData() {
+async function getCompulsoryTypes(token: string) {
+    const cacheKey = "HEY:CompulsoryTypes";
+    //* Fecth from Redis cache first
+    try {
+        const cached = await redis.get(cacheKey);
+        if (cached) {
+            console.info("Cache hit for CompulsoryTypes");
+            return JSON.parse(cached);
+        }
+    } catch (e) {
+        console.warn("Redis unavailable, fallback to API:", e);
+    }
+    //* If not found in cache, fetch from API
+    try {
+        //TODO: Change this to env
+        const res = await fetch("https://cmiwl-dev.tidlortech.com/api/master-data/v1/compulsory-type", {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
+        });
+        if (res?.status === 401) {
+            // redirect
+        }
+        const resData = await res.json();
 
-    // const userGroupService = new UserGroupService(new UserGroupRepository());
-    
-    // const data = await userGroupService.getUserGroups();
-    // return data;
-}
+        console.info("Fetched CompulsoryTypes from API");
+        return resData?.data ?? [];
+    } catch (e) {
+        console.warn("API unavailable:", e);
+        return [];
+    }
+};
 
 export default async function VehicleCTP() {
+
+    const session = await getIronSession(cookies(), sessionOptions);
+    const sessionData = (session as any)?.usrData?.data;
+    const token = sessionData?.jwt;
+
+    const data = await getCompulsoryTypes(token);
+    console.log(data);
 
     return (
         <main>
