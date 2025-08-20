@@ -3,8 +3,10 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 
-const VehicleListComponent = () => {
+const VehicleListComponent = (poCompulsoryTypes: any) => {
     const router = useRouter();
+
+    console.log(poCompulsoryTypes);
 
     const handleVehicleCategory = (e: React.MouseEvent<HTMLDivElement>) => {
         router.push(`/th/VehicleCategory`);

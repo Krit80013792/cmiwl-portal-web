@@ -47,8 +47,8 @@ export default async function IntroChannel() {
     return (
         <main
             style={{
-                ['--primary' as any]: '#f2b41c',
-                ['--bg-active' as any]: '#fff8e6'
+                ['--primary' as string]: '#f2b41c',
+                ['--bg-active' as string]: '#fff8e6'
             }}>
             <div className="bg-white">
                 <div className="bg-building pt-4">

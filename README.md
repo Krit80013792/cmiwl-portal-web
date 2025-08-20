@@ -94,3 +94,69 @@ To learn more about, take a look at the following resources:
 
 ## Project architecture diagram
 
+
+```mermaid
+graph TD
+
+    25["MongoDB<br>Database"]
+    8["User<br>External Actor"]
+
+    subgraph 1["Backend API System<br>Next.js API Routes"]
+        16["API Routes<br>Next.js API Routes"]
+        22["Infrastructure Layer<br>MongoDB"]
+
+        subgraph 2["Shared Utilities and Middleware<br>TypeScript"]
+            23["Middleware<br>TypeScript"]
+            24["Utilities<br>TypeScript"]
+        end
+
+        subgraph 3["Domain Layer<br>TypeScript"]
+            20["Entities<br>TypeScript"]
+            21["Models<br>TypeScript"]
+        end
+
+        subgraph 4["Application Layer<br>TypeScript"]
+            17["DTOs<br>TypeScript"]
+            18["Interfaces<br>TypeScript"]
+            19["Services<br>TypeScript"]
+        end
+
+        %% Relations
+        16 -->|orchestrates| 4
+        16 -->|uses| 23
+        16 -->|uses| 24
+        4 -->|accesses| 22
+        4 -->|uses| 24
+        4 -->|uses| 3
+        3 -->|defines| 20
+        3 -->|defines| 21
+        4 -->|defines| 17
+        4 -->|implements| 18
+    end
+
+    subgraph 5["Frontend System<br>Next.js"]
+        14["Client-side Services<br>TypeScript"]
+        15["Static Assets<br>Web Server"]
+
+        subgraph 6["Layout Components<br>React"]
+            12["Primary Layout System<br>React"]
+            13["CMI Layout System<br>React"]
+        end
+
+        subgraph 7["UI Pages and Routes<br>Next.js Pages"]
+            10["CMS Portal Pages<br>Next.js Pages"]
+            11["Main Application Pages<br>Next.js Pages"]
+            9["Authentication Pages<br>Next.js Pages"]
+        end
+
+        %% Relations
+        7 -->|uses| 6
+        7 -->|uses| 14
+        7 -->|serves| 15
+    end
+
+    %% Top-level relations
+    8 -->|interacts with| 5
+    5 -->|makes API calls to| 1
+    1 -->|persists data in| 25
+```

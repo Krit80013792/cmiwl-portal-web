@@ -5,9 +5,6 @@ import { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { getIronSession } from 'iron-session';
 import { sessionOptions } from '@/src/shared/utils/session';
-import { UserGroupRepository } from '@/src/infrastructure/database/mongodb/repositories/UserGroupRepository';
-import { UserGroupService } from '@/src/application/services/UserGroupService';
-import { UserGroupDTO } from '@/src/application/dtos/UserGroupDTO';
 
 import VehicleListComponent from '@/cmi-layout/components/VehicleListComponent';
 import redis from '@/src/shared/utils/redis';
@@ -21,14 +18,25 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 };
 
-async function getCompulsoryTypes(token: string) {
-    const cacheKey = "HEY:CompulsoryTypes";
+interface BaseResponse {
+    message: string;
+    data: any;
+    from: string;
+};
+
+async function getCompulsoryTypes(psToken: string, psChannelCode: string): Promise<BaseResponse> {
+    const cacheKey = `${psChannelCode}:CompulsoryTypes`;
     //* Fecth from Redis cache first
     try {
         const cached = await redis.get(cacheKey);
         if (cached) {
             console.info("Cache hit for CompulsoryTypes");
-            return JSON.parse(cached);
+
+            return {
+                message: 'success',
+                data: JSON.parse(cached),
+                from: 'cache'
+            };
         }
     } catch (e) {
         console.warn("Redis unavailable, fallback to API:", e);
@@ -40,19 +48,28 @@ async function getCompulsoryTypes(token: string) {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,
+                "Authorization": `Bearer ${psToken}`,
             },
         });
         if (res?.status === 401) {
-            // redirect
+            //TODO: redirect
         }
         const resData = await res.json();
 
         console.info("Fetched CompulsoryTypes from API");
-        return resData?.data ?? [];
+
+        return {
+            message: 'success',
+            data: resData?.data ?? [],
+            from: 'db'
+        };
     } catch (e) {
         console.warn("API unavailable:", e);
-        return [];
+        return {
+            message: 'failed',
+            data: [],
+            from: ''
+        };
     }
 };
 
@@ -61,9 +78,11 @@ export default async function VehicleCTP() {
     const session = await getIronSession(cookies(), sessionOptions);
     const sessionData = (session as any)?.usrData?.data;
     const token = sessionData?.jwt;
-
-    const data = await getCompulsoryTypes(token);
-    console.log(data);
+    const channel = sessionData?.prefill?.channel;
+    const typeOfData = sessionData?.prefill?.typeOfData;
+    console.log(typeOfData)
+    const resData = await getCompulsoryTypes(token, channel?.channelCode);
+    console.log(resData?.data?.compulsoryTypes);
 
     return (
         <main>
@@ -74,23 +93,69 @@ export default async function VehicleCTP() {
                     <p id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_lbHeaderBar" className="text-center mb-0 w-100 fs-18 f-bd">พ.ร.บ.</p>
                 </div>
             </div>
-            <div className="container pt-48">
-                <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_zoneCusNew">
-                    <div className="pt-4">
-                        <h1 className="mb-12 fs-18 text-black"><strong className="f-bd">เลือกประเภทรถ</strong></h1>
-                    </div>
-                </div>
-                <VehicleListComponent />
 
-                <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarGroupID" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarGroupID" />
-                <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarGroupVal" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarGroupVal" />
-                <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarType" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarType" value="0" />
-                <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarName" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarName" value="0" />
-                <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarTypeRenew" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarTypeRenew" value="0" />
-                <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdChannelText" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdChannelText" value="CXM" />
-                {/* <input type="submit" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$btnSelVehicle" value="" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_btnSelVehicle" className="d-none" /> */}
-                {/* <input type="submit" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$btnSelRenew" value="" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_btnSelRenew" className="d-none" /> */}
-            </div>
+            {/* //TODO: Move this to seperate component */}
+            {typeOfData && typeOfData === 'new' &&
+                < div className="container pt-48">
+                    <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_zoneCusNew">
+                        <div className="pt-4">
+                            <h1 className="mb-12 fs-18 text-black"><strong className="f-bd">เลือกประเภทรถ</strong></h1>
+                        </div>
+                    </div>
+                    <VehicleListComponent poCompulsoryTypes={resData?.data?.compulsoryTypes} />
+
+                    <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdftype" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdftype" value={resData?.from} />
+                    <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarGroupID" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarGroupID" />
+                    <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarGroupVal" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarGroupVal" />
+                    <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarType" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarType" value="0" />
+                    <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarName" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarName" value="0" />
+                    <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarTypeRenew" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarTypeRenew" value="0" />
+                    <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdChannelText" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdChannelText" value="CXM" />
+                    {/* <input type="submit" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$btnSelVehicle" value="" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_btnSelVehicle" className="d-none" /> */}
+                    {/* <input type="submit" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$btnSelRenew" value="" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_btnSelRenew" className="d-none" /> */}
+                </div>
+            }
+
+            {/* //TODO: Move this to seperate component */}
+            {typeOfData && typeOfData === 'renew' &&
+                <div className="container pt-48">
+                    <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_zoneCusRenew">
+                        <div className="pt-4">
+                            <h1 className="mb-12 fs-18 text-black"><strong className="f-bd">เลือกรถของคุณที่ต้องการต่อ พ.ร.บ.</strong></h1>
+                        </div>
+                        <div className="row car-select mb-4">
+                            <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_showCarLicense">
+                                <div className='col-6 pe-2'>
+                                    {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selRenew(this);" */}
+                                    <div className='pt-10 pb-2 px-12 rounded-4 choice-card text-center h-100 active' data-cartype='ไม่เกิน 40 ที่นั่ง' data-cargroup='4' data-cardisplayname='รถโดยสารมากกว่า 7 ที่นั่ง' data-cf-modified-9c7f6b03e9a69efe3189d580-="">
+                                        <p className='mb-0 text-grey fs-22'><strong className='f-bd'>6กย 1001</strong></p>
+                                        <p className='mb-0 text-center text-grey'>รถยนต์</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h2 className="mb-12 fs-18 text-black mb-0"><strong className="f-bd">ซื้อ พ.ร.บ. ให้รถคันอื่น</strong></h2>
+                            <p className="mb-12 text-grey">เลือกประเภทรถที่ต้องการซื้อ พ.ร.บ.</p>
+                        </div>
+                    </div>
+
+                    <VehicleListComponent />
+
+                    <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarGroupID" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarGroupID" />
+                    <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarGroupVal" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarGroupVal" />
+                    <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarType" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarType" value="0" />
+                    <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarName" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarName" value="0" />
+
+                    <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarTypeRenew" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarTypeRenew" value="0" />
+
+                    <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdChannelText" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdChannelText" value="CXM" />
+
+                    <input type="submit" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$btnSelVehicle" value="" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_btnSelVehicle" className="d-none" />
+                    <input type="submit" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$btnSelRenew" value="" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_btnSelRenew" className="d-none" />
+
+                </div>
+            }
 
             {/* <script type="2d7b21b358a016e2ff53c284-text/javascript">
     const selVehicle = (element) => {
@@ -140,15 +205,6 @@ export default async function VehicleCTP() {
 
             </script> */}
 
-            <div className="modal fade modalSpinner" id="ModalLoading" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
-                <div className="modal-dialog modal-dialog-centered">
-                    <div className="modal-content bg-transparent border-0 justify-content-center align-items-center mx-auto">
-                        <div className="spinner-border text-light"></div>
-                        <p className="text-white text-center mt-3 mb-0">กำลังดำเนินการ<br />
-                            กรุณารอซักครู่</p>
-                    </div>
-                </div>
-            </div>
-        </main>
+        </main >
     );
 };

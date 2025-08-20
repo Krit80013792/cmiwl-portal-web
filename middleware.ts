@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { getIronSession } from 'iron-session';
+import { sessionOptions } from '@/src/shared/utils/session';
 import { decrypt } from './src/shared/utils/auth.crypto';
 
 const protectedRoutes = [
@@ -20,6 +22,17 @@ export default async function middleware(req: NextRequest) {
 
     if (path === '/') {
         return NextResponse.next();
+    }
+
+    //* Client
+    if (path.startsWith('/th/')) {
+        const session = await getIronSession(cookies(), sessionOptions);
+        const sessionData = (session as any)?.usrData?.data;
+        const token = sessionData?.jwt;
+        //TODO: Don't forget this 555
+        if (!token) {
+            return NextResponse.redirect(new URL('https://app.tidlor.com/main', req.url));
+        }
     }
 
     const isProtectedRoute = protectedRoutes.includes(path);
