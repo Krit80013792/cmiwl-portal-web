@@ -5,10 +5,7 @@ import { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { getIronSession } from 'iron-session';
 import { sessionOptions } from '@/src/shared/utils/session';
-
-import { UserGroupRepository } from '@/src/infrastructure/database/mongodb/repositories/UserGroupRepository';
-import { UserGroupService } from '@/src/application/services/UserGroupService';
-import { UserGroupDTO } from '@/src/application/dtos/UserGroupDTO';
+import { getConfigs } from '@/services/server/actions/configs.action';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,36 +16,27 @@ export async function generateMetadata(): Promise<Metadata> {
     };
 };
 
-async function getData() {
-
-    // const userGroupService = new UserGroupService(new UserGroupRepository());
-
-    // const data = await userGroupService.getUserGroups();
-    // return data;
-}
-
 export default async function IntroChannel() {
 
     const session = await getIronSession(cookies(), sessionOptions);
     const sessionData = (session as any)?.usrData?.data;
     const channel = sessionData?.prefill?.channel;
 
-    let chn = 'btn btn-tidlor fs-6 d-flex justify-content-center align-items-center mx-auto continue-btn';
-    if (channel) {
-        const channelName = channel?.channelName as string;
-        if (channelName.toLowerCase() === 'heygoody') {
-            chn = 'btn btn-hey fs-6 d-flex justify-content-center align-items-center mx-auto continue-btn';
-        }
+    const configs = await getConfigs();
+    const channelConfig = configs?.find(c => c.configByChannel === channel?.channelCode);
+
+    let configValue: any = {};
+    try {
+        configValue = JSON.parse(channelConfig?.configValue ?? "{}");
+    } catch {
+        configValue = {};
     }
-
-
-
 
     return (
         <main
             style={{
-                ['--primary' as string]: '#f2b41c',
-                ['--bg-active' as string]: '#fff8e6'
+                ['--primary' as string]: `#${configValue?.primaryColor}`,
+                ['--bg-active' as string]: `#${configValue?.secondaryColor}`
             }}>
             <div className="bg-white">
                 <div className="bg-building pt-4">
@@ -76,9 +64,9 @@ export default async function IntroChannel() {
                             <div className="text-sm-center license-linkBoxWrapper d-flex justify-content-sm-center">
                                 <div className="license-linkBox pb-4">
                                     {/* onclick="if (!window.__cfRLUnblockHandlers) return false; if (!window.__cfRLUnblockHandlers) return false; if (!window.__cfRLUnblockHandlers) return false; PushGTMDefault('intro', 'click_text', 'เลขที่ใบอนุญาตประกันวินาศภัย')" */}
-                                    <a title="เลขที่ใบอนุญาตประกันวินาศภัย" className="fs-12 text-placeholder d-block text-decoration-none" href="/th/oic-certificate" data-cf-modified-e9c163d6727633da1d0a186d-="">เลขที่ใบอนุญาตประกันวินาศภัย ว00015/2556</a>
+                                    <a title={configValue?.oicCertTxt} className="fs-12 text-placeholder d-block text-decoration-none" href="/th/oic-certificate" data-cf-modified-e9c163d6727633da1d0a186d-="">{configValue?.oicCertTxt}</a>
                                     {/* onclick="if (!window.__cfRLUnblockHandlers) return false; if (!window.__cfRLUnblockHandlers) return false; if (!window.__cfRLUnblockHandlers) return false; PushGTMDefault('intro', 'click_text', 'เลขที่ใบอนุญาตเสนอขายประกันภัยผ่านช่องทางอิเล็กทรอนิกส์ อลว 015521000/2563')" */}
-                                    <a title="เลขที่ใบอนุญาตเสนอขายประกันภัยผ่านช่องทาง" className="fs-12 text-placeholder d-block text-decoration-none" href="/th/oic-certificate-electronic" data-cf-modified-e9c163d6727633da1d0a186d-="">เลขที่ใบอนุญาตเสนอขายประกันภัยผ่านช่องทางอิเล็กทรอนิกส์ <span className="d-inline-block">อลว 015521000/2563</span></a>
+                                    <a title={configValue?.oicCertElectronicTxt} className="fs-12 text-placeholder d-block text-decoration-none" href="/th/oic-certificate-electronic" data-cf-modified-e9c163d6727633da1d0a186d-="">{configValue?.oicCertElectronicTxt}</a>
                                 </div>
                             </div>
                         </div>
