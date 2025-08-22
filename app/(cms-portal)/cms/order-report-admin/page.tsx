@@ -9,100 +9,156 @@ import { Calendar } from 'primereact/calendar';
 import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
+import { ApiRoute } from '@/src/shared/utils/profile';
+import { formatDateToYMD } from '@/src/shared/utils/utils';
+import { getCmiApiLogs } from '@/services/client/cmiLogsApi.service';
+import { dataColumns } from './_constants';
 
 const OrderReportAdminPage = () => {
+    const toastRef = useRef<Toast>(null);
+    const [channel, setChannel] = useState<string>('');
+    const [startDate, setStartDate] = useState<Date | null>(new Date());
+    const [endDate, setEndDate] = useState<Date | null>(new Date());
+    const [name, setName] = useState<string>('');
+    const [licensePlate, setLicensePlate] = useState<string>('');
+    const [orderNo, setOrderNo] = useState<string>('');
+    const [data, setData] = useState<any[]>([]);
+    const [loading, setLoading] = useState(false);
 
-    const toast = useRef<Toast>(null);
+    const setApiRoute = async (): Promise<any> => {
+        const c = await ApiRoute();
+        const de = JSON.parse(Buffer.from(c, 'base64').toString('binary'));
+        return de;
+    };
+
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const apiRoute = await setApiRoute();
+            const sStartDate = formatDateToYMD(new Date(startDate || new Date()));
+            const sEndDate = formatDateToYMD(new Date(endDate || new Date()));
+            const res = await getCmiApiLogs(apiRoute, `channel=${channel}&startDate=${sStartDate}&endDate=${sEndDate}&name=${name}&licensePlate=${licensePlate}&orderNo=${orderNo}`);
+            const data = await res.json();
+            if (data.data.length > 0) {
+                setData(data.data);
+            } else {
+                toastRef.current && toastRef.current.show({ severity: 'warn', summary: 'No Data', detail: 'No data found for the selected filters', life: 3000 });
+            }
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            if (toastRef.current) {
+                toastRef.current.show({ severity: 'error', summary: 'Error', detail: 'Failed to fetch data', life: 3000 });
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const handleSearch = async () => {
+        await fetchData();
+    };
+
+    const handleResetSearch = async () => {
+        setChannel('');
+        setStartDate(new Date());
+        setEndDate(new Date());
+        setName('');
+        setLicensePlate('');
+        setOrderNo('');
+        setData([]);
+        await fetchData();
+    };
 
     return (
         <div className="grid">
             <div className="col-12">
                 <div className="card">
-                    <Toast ref={toast} />
-                    <h5><i className="pi pi-table" style={{ fontSize: '2rem' }}></i><strong> Order Report Admin</strong></h5>
+                    <Toast ref={toastRef} />
+                    <h5>
+                        <i className="pi pi-table" style={{ fontSize: '2rem' }} /> <strong>Order Report Admin</strong>
+                    </h5>
                 </div>
+
+                {loading && <LoadingComponent />}
 
                 <div className="card p-fluid">
                     <div className="field grid">
-                        <label htmlFor="channel" className="col-12 mb-2 md:col-2 md:mb-0"> Channel: </label>
+                        <label htmlFor="channel" className="col-12 mb-2 md:col-2 md:mb-0">
+                            Channel:
+                        </label>
                         <div className="col-12 md:col-6">
                             <Dropdown
-                                inputId="newsType"
-                                //value={news.newsType}
-                                //onChange={(e) => onDropdownTypeChange(e, 'newsType')}
-                                //options={newsTypeOptions}
+                                inputId="channel"
+                                value={channel}
+                                onChange={(e) => setChannel(e.value)}
+                                // options={channelOptions}
                                 placeholder="Select Channel"
                             />
                         </div>
                     </div>
                     <div className="field grid">
-                        <label htmlFor="requestdate" className="col-12 mb-2 md:col-2 md:mb-0"> วันที่เริ่มทำรายการ: </label>
+                        <label htmlFor="startDate" className="col-12 mb-2 md:col-2 md:mb-0">
+                            วันที่เริ่มทำรายการ:{' '}
+                        </label>
                         <div className="col-12 md:col-3">
-                            <Calendar
-                                inputId="startDate"
-                                //value={news.sPostDate}
-                                //onChange={(e) => onInputPostDateChange(e, 'postDate')}
-                                dateFormat="yy-mm-dd"
-                                showIcon
-                            />
+                            <Calendar inputId="startDate" value={startDate} onChange={(e) => setStartDate(e.value || null)} dateFormat="yy-mm-dd" showIcon />
                         </div>
                     </div>
                     <div className="field grid">
-                        <label htmlFor="enddate" className="col-12 mb-2 md:col-2 md:mb-0"> วันที่สิ้นสุดทำรายการ: </label>
+                        <label htmlFor="endDate" className="col-12 mb-2 md:col-2 md:mb-0">
+                            วันที่สิ้นสุดทำรายการ:{' '}
+                        </label>
                         <div className="col-12 md:col-3">
-                            <Calendar
-                                inputId="endDate"
-                                //value={news.sPostDate}
-                                //onChange={(e) => onInputPostDateChange(e, 'postDate')}
-                                dateFormat="yy-mm-dd"
-                                showIcon
-                            />
+                            <Calendar inputId="endDate" value={endDate} onChange={(e) => setEndDate(e.value || null)} dateFormat="yy-mm-dd" showIcon />
                         </div>
                     </div>
                     <div className="field grid">
-                        <label htmlFor="name" className="col-12 mb-2 md:col-2 md:mb-0"> ชื่อ: </label>
+                        <label htmlFor="name" className="col-12 mb-2 md:col-2 md:mb-0">
+                            ชื่อ:{' '}
+                        </label>
                         <div className="col-12 md:col-6">
-                            <InputText
-                                id="name" />
+                            <InputText id="name" name="name" placeholder="ชื่อ" onChange={(e) => setName(e.target.value)} />
                         </div>
                     </div>
                     <div className="field grid">
-                        <label htmlFor="licenseplate" className="col-12 mb-2 md:col-2 md:mb-0"> ทะเบียนรถ: </label>
+                        <label htmlFor="licensePlate" className="col-12 mb-2 md:col-2 md:mb-0">
+                            ทะเบียนรถ:{' '}
+                        </label>
                         <div className="col-12 md:col-6">
-                            <InputText
-                                id="licenseplate" />
+                            <InputText id="licensePlate" name="licensePlate" placeholder="ทะเบียนรถ" onChange={(e) => setLicensePlate(e.target.value)} />
                         </div>
                     </div>
                     <div className="field grid">
-                        <label htmlFor="orderNo" className="col-12 mb-2 md:col-2 md:mb-0"> หมายเลข Order: </label>
+                        <label htmlFor="orderNo" className="col-12 mb-2 md:col-2 md:mb-0">
+                            หมายเลข Order:{' '}
+                        </label>
                         <div className="col-12 md:col-6">
-                            <InputText
-                                id="orderNo" />
+                            <InputText id="orderNo" name="orderNo" placeholder="หมายเลข Order" onChange={(e) => setOrderNo(e.target.value)} />
                         </div>
                     </div>
                     <div className="field grid">
-                        <div className="col-12 md:col-4">
-
+                        <div className="col-12 md:col-4"></div>
+                        <div className="col-12 md:col-2">
+                            <Button label="Reset" icon="pi pi-replay" severity="secondary" className="mr-2" onClick={handleResetSearch} />
                         </div>
                         <div className="col-12 md:col-2">
-                            <Button label="Reset" icon="pi pi-replay" severity="secondary" className="mr-2" />
+                            <Button label="Search" icon="pi pi-search" severity="success" className="mr-2" onClick={handleSearch} />
                         </div>
-                        <div className="col-12 md:col-2">
-                            <Button label="Search" icon="pi pi-search" severity="success" className="mr-2" />
-                        </div>
-                        <div className="col-12 md:col-4">
-
-                        </div>
+                        <div className="col-12 md:col-4"></div>
                     </div>
                 </div>
 
                 <div className="card">
                     <DataTable
                         //ref={dt}
-                        //value={newss}
+                        value={data}
                         //selection={selectedNewss}
                         //onSelectionChange={(e) => setSelectedNewss(e.value)}
-                        dataKey="newsId"
+                        dataKey="itemID"
                         paginator
                         rows={20}
                         rowsPerPageOptions={[5, 10, 20, 50, 100]}
@@ -111,25 +167,14 @@ const OrderReportAdminPage = () => {
                         scrollHeight="600px"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Records"
-                        //loading={loading}
-                        //filters={filters}
+                        loading={loading}
                         globalFilterFields={['newsPageName', 'newsHeaderContent']}
                         emptyMessage="Data not found."
-                    //header={tableHeader}
+                        //header={tableHeader}
                     >
-                        <Column header="Actions" headerStyle={{ minWidth: '10rem' }} />
-                        <Column header="วันที่ทำรายการ" field="itemID" sortable />
-                        <Column header="ชื่อ" field="refNo" sortable />
-                        <Column header="นามสกุล" field="api_name" sortable />
-                        <Column header="เบอร์โทร" field="headerStatus" sortable />
-                        <Column header="Email" field="requestDate" sortable />
-                        <Column header="Channel" field="request" sortable />
-                        <Column header="OrderNo" field="request" sortable />
-                        <Column header="OrderStatus" field="request" sortable />
-                        <Column header="PaymentNO" field="request" sortable />
-                        <Column header="ทะเบียนรถ" field="request" sortable />
-                        <Column header="insOrderNo" field="request" sortable />
-                        <Column header="message" field="request" sortable />
+                        {dataColumns.map((col, index) => (
+                            <Column key={col.field} header={col.header} headerStyle={col.headerStyle} field={col.field} sortable={col.sortable} />
+                        ))}
                     </DataTable>
                 </div>
             </div>

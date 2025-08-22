@@ -685,7 +685,7 @@ export default async function CustomerInformation() {
 
         document.querySelector('.formMain input[id*=txtSurName]').addEventListener('change', function (e) {
             checkTxtSurName();
-            pushGTMCustomerInfo('fill_customer_detail', 'lastname');
+            pushGTMCustomerInfo('fill_customer_detail', 'lastName');
         }, true);
         document.querySelector('.formMain input[id*=txtSurName]').addEventListener('blur', function (e) {
             checkTxtSurName();

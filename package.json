@@ -6,7 +6,7 @@
     "test": "jest --verbose",
     "test:cov": "jest --coverage",
     "test:watch": "jest --watch",
-    "dev": "NODE_OPTIONS=--require=elastic-apm-node/start-next.js next dev",
+    "dev": "next dev",
     "build": "next build",
     "start": "NODE_OPTIONS=--require=elastic-apm-node/start-next.js next start",
     "build:start": "npm run build && npm run start",

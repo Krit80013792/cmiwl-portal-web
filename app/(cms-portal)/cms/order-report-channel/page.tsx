@@ -27,7 +27,7 @@ const OrderReportChannelPage = () => {
                         <label htmlFor="channel" className="col-12 mb-2 md:col-2 md:mb-0"> Channel: </label>
                         <div className="col-12 md:col-6">
                             <Dropdown
-                                inputId="newsType"
+                                inputId="channel"
                                 //value={news.newsType}
                                 //onChange={(e) => onDropdownTypeChange(e, 'newsType')}
                                 //options={newsTypeOptions}
