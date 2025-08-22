@@ -5,6 +5,7 @@ import { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import { getIronSession } from 'iron-session';
 import { sessionOptions } from '@/src/shared/utils/session';
+import { getConfigs } from '@/services/server/actions/configs.action';
 import InsurerListComponent from '@/cmi-layout/components/InsurerListComponent';
 
 export const dynamic = 'force-dynamic';
@@ -21,6 +22,9 @@ export default async function Insurers() {
     const session = await getIronSession(cookies(), sessionOptions);
     const sessionData = (session as any)?.usrData?.data;
     const channel = sessionData?.prefill?.channel;
+
+    const configs = await getConfigs();
+    const channelConfig = configs?.find(c => c.configByChannel === channel?.channelCode);
 
     return (
         <main>
