@@ -1,11 +1,12 @@
-@import './_variables';
-@import "./_mixins";
-@import "./_main";
-@import "./_topbar";
-@import "./_menu";
-@import "./_config";
-@import "./_content";
-@import "./_footer";
-@import "./_responsive";
-@import "./_utils";
-@import "./_typography";
+@use './variables' as *;
+@use './mixins' as *;   // must come before anything using mixins
+
+@use './main' as *;
+@use './topbar' as *;   // safe, now it can find focused()
+@use './menu' as *;
+@use './config' as *;
+@use './content' as *;
+@use './footer' as *;
+@use './responsive' as *;
+@use './utils' as *;
+@use './typography' as *;

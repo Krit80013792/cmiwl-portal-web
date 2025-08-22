@@ -4,15 +4,7 @@ import { getIronSession } from 'iron-session';
 import { sessionOptions } from '@/src/shared/utils/session';
 import { decrypt } from './src/shared/utils/auth.crypto';
 
-const protectedRoutes = [
-    '/cms/main',
-    '/cms/users',
-    '/cms/activity-logs',
-    '/cms/configs',
-    '/cms/master-data',
-    '/cms/order-report-admin',
-    '/cms/order-report-channel',
-];
+const protectedRoutes = ['/cms/main', '/cms/users', '/cms/activity-logs', '/cms/configs', '/cms/master-data', '/cms/order-report-admin', '/cms/order-report-channel'];
 const publicRoutes = ['/pw0wl'];
 
 export default async function middleware(req: NextRequest) {
@@ -26,28 +18,28 @@ export default async function middleware(req: NextRequest) {
 
     //* Client
     if (path.startsWith('/th/')) {
-        const session = await getIronSession(cookies(), sessionOptions);
+        const session = await getIronSession(await cookies(), sessionOptions);
         const sessionData = (session as any)?.usrData?.data;
         const token = sessionData?.jwt;
         //TODO: Don't forget this 555
-        if (!token) {
-            return NextResponse.redirect(new URL('https://app.tidlor.com/main', req.url));
-        }
+        // if (!token) {
+        //     return NextResponse.redirect(new URL('https://app.tidlor.com/main', req.url));
+        // }
     }
 
     const isProtectedRoute = protectedRoutes.includes(path);
     const isPublicRoute = publicRoutes.includes(path);
 
     const CMIWL_CMS_COOKIE_NAME = `${process.env.APP_ENV}_cmiwl_cms_token`;
-    const CMIWL_CMS_COOKIE = cookies().get(CMIWL_CMS_COOKIE_NAME);
+    const CMIWL_CMS_COOKIE = (await cookies()).get(CMIWL_CMS_COOKIE_NAME);
 
     let session: any = {};
     try {
         if (CMIWL_CMS_COOKIE) {
-            session = JSON.parse(await decrypt(CMIWL_CMS_COOKIE.value, process.env.PORTAL_API_KEY ?? '') ?? '{}');
+            session = JSON.parse((await decrypt(CMIWL_CMS_COOKIE.value, process.env.PORTAL_API_KEY ?? '')) ?? '{}');
             const newPayload = {
                 userName: session?.userName,
-                perms: session?.permissions,
+                perms: session?.permissions
             };
             const jsonStr = JSON.stringify(newPayload);
             const base64 = Buffer.from(jsonStr, 'utf-8').toString('base64');
@@ -83,5 +75,5 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
+    matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)']
 };
