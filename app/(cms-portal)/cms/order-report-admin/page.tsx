@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import LoadingComponent from '@/layout/components/loading/LoadingComponent';
 import { Toast } from 'primereact/toast';
 import { Dropdown } from 'primereact/dropdown';
@@ -13,9 +13,12 @@ import { ApiRoute } from '@/src/shared/utils/profile';
 import { formatDateToYMD } from '@/src/shared/utils/utils';
 import { getCmiApiLogs } from '@/services/client/cmiLogsApi.service';
 import { dataColumns } from './_constants';
+import FormDialog, { FormDialogRef } from '@/modules/FormDialog';
+import 'primeicons/primeicons.css';
 
 const OrderReportAdminPage = () => {
     const toastRef = useRef<Toast>(null);
+    const dialogViewRef = useRef<FormDialogRef>(null);
     const [channel, setChannel] = useState<string>('');
     const [startDate, setStartDate] = useState<Date | null>(new Date());
     const [endDate, setEndDate] = useState<Date | null>(new Date());
@@ -72,6 +75,67 @@ const OrderReportAdminPage = () => {
         setData([]);
         await fetchData();
     };
+
+    const logsData = useMemo(() => {
+        return data.map((item) => {
+            const handleView = () => {
+                dialogViewRef.current?.open({
+                    title: 'Log Detail',
+                    draggable: false,
+                    children: (
+                        <div style={{ minWidth: 350, background: '#f8f9fa', borderRadius: 8, padding: 20 }}>
+                            <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
+                                <label className="font-bold" style={{ width: 130, color: '#495057' }}>
+                                    Order No:
+                                </label>
+                                <span style={{ color: '#212529' }}>{item.orderNo || '-'}</span>
+                            </div>
+                            <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
+                                <label className="font-bold" style={{ width: 130, color: '#495057' }}>
+                                    Channel:
+                                </label>
+                                <span style={{ color: '#212529' }}>{item.channel || '-'}</span>
+                            </div>
+                            <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
+                                <label className="font-bold" style={{ width: 130, color: '#495057' }}>
+                                    Name:
+                                </label>
+                                <span style={{ color: '#212529' }}>{item.name || '-'}</span>
+                            </div>
+                            <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
+                                <label className="font-bold" style={{ width: 130, color: '#495057' }}>
+                                    License Plate:
+                                </label>
+                                <span style={{ color: '#212529' }}>{item.licensePlate || '-'}</span>
+                            </div>
+                            <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
+                                <label className="font-bold" style={{ width: 130, color: '#495057' }}>
+                                    Date:
+                                </label>
+                                <span style={{ color: '#212529' }}>{item.date || '-'}</span>
+                            </div>
+                            <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
+                                <label className="font-bold" style={{ width: 130, color: '#495057' }}>
+                                    Status:
+                                </label>
+                                <span style={{ color: item.status === 'success' ? '#28a745' : '#dc3545', fontWeight: 500 }}>{item.status || '-'}</span>
+                            </div>
+                            <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
+                                <label className="font-bold" style={{ width: 130, color: '#495057' }}>
+                                    Message:
+                                </label>
+                                <span style={{ color: '#212529' }}>{item.message || '-'}</span>
+                            </div>
+                        </div>
+                    )
+                });
+            };
+            return {
+                ...item,
+                actions: <Button label="View" icon="pi pi-eye" onClick={handleView} className="p-button-text" />
+            };
+        });
+    }, [data]);
 
     return (
         <div className="grid">
@@ -155,7 +219,7 @@ const OrderReportAdminPage = () => {
                 <div className="card">
                     <DataTable
                         //ref={dt}
-                        value={data}
+                        value={logsData}
                         //selection={selectedNewss}
                         //onSelectionChange={(e) => setSelectedNewss(e.value)}
                         dataKey="itemID"
@@ -176,6 +240,7 @@ const OrderReportAdminPage = () => {
                             <Column key={col.field} header={col.header} headerStyle={col.headerStyle} field={col.field} sortable={col.sortable} />
                         ))}
                     </DataTable>
+                    <FormDialog ref={dialogViewRef} />
                 </div>
             </div>
         </div>
