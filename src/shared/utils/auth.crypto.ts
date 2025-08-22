@@ -1,4 +1,4 @@
-//* utils/auth.crypto.ts
+//* /src/shared/utils/auth.crypto.ts
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();

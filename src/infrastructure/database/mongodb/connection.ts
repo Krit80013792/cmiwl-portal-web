@@ -19,7 +19,6 @@ export async function MongoDBConnectionService(uri?: string) {
             await mongoose.connect(mongoUri, {
                 dbName: 'test',
             });
-            console.log(`✅ Connected to MongoDB at ${mongoUri}`);
         }
         else {
             const mongoUri = process.env.MONGODB_URI ?? '';

@@ -150,7 +150,7 @@ const MasterDataPage = () => {
             const resData = await res.json();
             setDataMap(prev => ({ ...prev, [tabName]: resData?.data }));
         } catch {
-            toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to load ${tabName}` });
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to load ${tabName}`, life: 5000 });
         }
         setLoading(false);
     };
@@ -162,20 +162,19 @@ const MasterDataPage = () => {
     };
 
     const handleSync = async () => {
-        toast.current?.show({ severity: 'info', summary: 'Sync', detail: `Syncing ${tabName}...` });
-
         setLoading(true);
         try {
             const route = await setApiRoute();
             const res = await syncMasterDataByEndpoint(route, route?.amd, tabName);
             if (!res?.ok) {
-                toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to sync ${tabName}` });
+                toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to sync ${tabName}`, life: 5000 });
                 return;
             }
             const resData = await res.json();
             fetchData(tabName); //* reload data
+            toast.current?.show({ severity: 'success', summary: 'Successful', detail: `Syncing ${tabName} Done`, life: 5000 });
         } catch {
-            toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to sync ${tabName}` });
+            toast.current?.show({ severity: 'error', summary: 'Error', detail: `Failed to sync ${tabName}`, life: 5000 });
         }
         finally {
             setLoading(false);

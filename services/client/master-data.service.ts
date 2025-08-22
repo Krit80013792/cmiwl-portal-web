@@ -7,6 +7,5 @@ export async function getMasterDataByEndpoint(paConf: any, psBaseUrl: string, ps
 
 export async function syncMasterDataByEndpoint(paConf: any, psBaseUrl: string, psEndpoint: string): Promise<Response> {
     const sEndpoint = `${Buffer.from(psBaseUrl, 'base64').toString('binary')}/sync/${psEndpoint}`;
-    return await httpClient(sEndpoint, HttpMethod.POST, paConf);
+    return await httpClient(sEndpoint, HttpMethod.PATCH, paConf);
 };
-

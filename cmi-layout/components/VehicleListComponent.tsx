@@ -21,8 +21,8 @@ const VehicleListComponent = (poCompulsoryTypes: any) => {
             <div className='col-6 pe-2 mb-3  '>
                 {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selVehicle(this);" */}
                 {/* data-cartype='1' data-cargroupval='type' data-cargroup='1' data-carDisplayName='รถเก๋ง' data-cf-modified-2d7b21b358a016e2ff53c284-="" */}
-                <div className='py-12 px-3 rounded-4 choice-card text-center h-100 hey-active' onClick={handleVehicleCategory}>
-                    <img className='img-fluid mb-1' width='80' height='42' alt='รถเก๋ง' src='/assets/icon/car.png' />
+                <div className='py-12 px-3 rounded-4 choice-card text-center h-100' onClick={handleVehicleCategory}>
+                    <img className='img-fluid mb-1' width='80' height='42' alt='รถเก๋ง' src='/assets/icon/EVcar.png' />
                     <p className='mb-0 text-center text-grey'>รถเก๋ง</p>
                 </div>
             </div>
