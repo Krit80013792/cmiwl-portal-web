@@ -19,15 +19,15 @@ const nextConfig = {
                     },
                 ],
             },
-            {
-                source: '/th/:path*',
-                headers: [
-                    {
-                        key: 'Cache-Control',
-                        value: 'private, max-age=3600, must-revalidate',
-                    },
-                ],
-            },
+            // {
+            //     source: '/th/:path*',
+            //     headers: [
+            //         {
+            //             key: 'Cache-Control',
+            //             value: 'private, max-age=3600, must-revalidate',
+            //         },
+            //     ],
+            // },
             {
                 source: '/:all*\\.(css|js|woff2|ico|png|jpg|jpeg|gif|svg|webp)',
                 headers: [
