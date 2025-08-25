@@ -43,8 +43,7 @@ async function getCompulsoryTypes(psToken: string, psChannelCode: string): Promi
   }
   //* If not found in cache, fetch from API
   try {
-    //TODO: Change this to env
-    const res = await fetch('https://cmiwl-dev.tidlortech.com/api/master-data/v1/compulsory-type', {
+    const res = await fetch(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/compulsory-type`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -79,9 +78,7 @@ export default async function VehicleCTP() {
   const token = sessionData?.jwt
   const channel = sessionData?.prefill?.channel
   const typeOfData = sessionData?.prefill?.typeOfData
-  console.log(typeOfData)
   const resData = await getCompulsoryTypes(token, channel?.channelCode)
-  console.log(resData?.data?.compulsoryTypes)
 
   return (
     <main>

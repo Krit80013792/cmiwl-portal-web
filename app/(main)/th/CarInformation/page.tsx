@@ -1,304 +1,376 @@
 /* eslint-disable @next/next/no-img-element */
 
-import React from 'react';
-import { Metadata } from 'next';
-import { cookies } from 'next/headers';
-import { getIronSession } from 'iron-session';
-import { sessionOptions } from '@/src/shared/utils/session';
-import Image from 'next/image';
+import React from 'react'
+import { Metadata } from 'next'
+import { cookies } from 'next/headers'
+import { getIronSession } from 'iron-session'
+import { sessionOptions } from '@/src/shared/utils/session'
+import Image from 'next/image'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export async function generateMetadata(): Promise<Metadata> {
-    return {
-        title: 'ข้อมูลรถยนต์สำหรับซื้อพ.ร.บ. รถยนต์ | ติดล้อ',
-        description: 'ข้อมูลรถยนต์สำหรับซื้อพ.ร.บ. รถยนต์ | ติดล้อ'
-    };
+  return {
+    title: 'ข้อมูลรถยนต์สำหรับซื้อพ.ร.บ. รถยนต์ | ติดล้อ',
+    description: 'ข้อมูลรถยนต์สำหรับซื้อพ.ร.บ. รถยนต์ | ติดล้อ',
+  }
 }
 
 async function getCarColor(token: string) {
-    try {
-        //TODO: Change this to env
-        const res = await fetch("https://cmiwl-dev.tidlortech.com/api/master-data/v1/car-color", {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,
-            },
-        });
-        if (res?.status === 401) {
-            // redirect
-        }
-        const carColorData = await res.json();
-        return carColorData?.data ?? [];
-    } catch {
-
+  try {
+    const res = await fetch(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/car-color`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    if (res?.status === 401) {
+      // redirect
     }
-};
+    const carColorData = await res.json()
+    return carColorData?.data ?? []
+  } catch {}
+}
 
 export default async function CarInformation() {
+  const session = await getIronSession(await cookies(), sessionOptions)
+  const sessionData = (session as any)?.usrData?.data
+  const token = sessionData?.jwt
 
-    const session = await getIronSession(await cookies(), sessionOptions);
-    const sessionData = (session as any)?.usrData?.data;
-    const token = sessionData?.jwt;
+  const carColor = await getCarColor(token)
 
-    const carColor = await getCarColor(token);
-
-    return (
-        <main
-            style={{
-                ['--primary' as any]: '#f2b41c',
-                ['--bg-active' as any]: '#fff8e6'
-            }}>
-
-            {/* <!--------- dropdown select2 --------->
+  return (
+    <main
+      style={{
+        ['--primary' as any]: '#f2b41c',
+        ['--bg-active' as any]: '#fff8e6',
+      }}
+    >
+      {/* <!--------- dropdown select2 --------->
 <!-- <link href="/CMSPages/GetResource.ashx?stylesheetname=custom-select2&=v1.3" type="text/css" rel="stylesheet" /> -->
 <link href="/custom/plugin/select2/css/select2.min.css" rel="stylesheet">
 <script src="/custom/plugin/jquery/jquery-3.4.1.min.js" type="903f39338c6b3be20c53ec4e-text/javascript"></script>
 <script src="/custom/plugin/select2/js/select2.min.js" type="903f39338c6b3be20c53ec4e-text/javascript"></script>
 <!--------- dropdown select2 ---------> */}
 
-            <div className="head-bar">
-                <div className="container d-flex align-items-center">
-                    {/* onclick="if (!window.__cfRLUnblockHandlers) return false; return backOnclick();" */}
-                    <a href="/th/VehicleCTP" className="back-btn"><img alt="กลับ" width="36" height="36" src="/assets/icon/back.png" /></a>
-                    <p id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_lbHeaderBar" className="text-center mb-0 w-100 fs-18 f-bd">พ.ร.บ.</p>
+      <div className="head-bar">
+        <div className="container d-flex align-items-center">
+          {/* onclick="if (!window.__cfRLUnblockHandlers) return false; return backOnclick();" */}
+          <a href="/th/VehicleCTP" className="back-btn">
+            <img alt="กลับ" width="36" height="36" src="/assets/icon/back.png" />
+          </a>
+          <p
+            id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_lbHeaderBar"
+            className="text-center mb-0 w-100 fs-18 f-bd"
+          >
+            พ.ร.บ.
+          </p>
+        </div>
+      </div>
+
+      <div className="head-section bg-lightgrey pt-48">
+        <div className="container">
+          <div className="d-flex py-12 align-items-center">
+            <div className="percent-30">
+              <div className="progress-2 yellow">
+                <span className="progress-2-left">
+                  <span className="progress-2-bar"></span>
+                </span>
+                <span className="progress-2-right">
+                  <span className="progress-2-bar"></span>
+                </span>
+                <div className="progress-2-value">
+                  30<span>%</span>
                 </div>
+              </div>
             </div>
+            <div className="step-title-wrapper ms-12">
+              <p className="mb-0 text-grey fs-14">ขั้นตอนที่ 1/3</p>
+              <h1 className="mb-0 text-grey fs-6 f-bd">กรอกข้อมูล</h1>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            <div className="head-section bg-lightgrey pt-48">
-                <div className="container">
-                    <div className="d-flex py-12 align-items-center">
-                        <div className="percent-30">
-                            <div className="progress-2 yellow">
-                                <span className="progress-2-left">
-                                    <span className="progress-2-bar"></span>
-                                </span>
-                                <span className="progress-2-right">
-                                    <span className="progress-2-bar"></span>
-                                </span>
-                                <div className="progress-2-value">30<span>%</span></div>
-                            </div>
-                        </div>
-                        <div className="step-title-wrapper ms-12">
-                            <p className="mb-0 text-grey fs-14">ขั้นตอนที่ 1/3</p>
-                            <h1 className="mb-0 text-grey fs-6 f-bd">กรอกข้อมูล</h1>
-                        </div>
-                    </div>
+      <div className="content-section fullPage-150">
+        <div className="container">
+          <div className="d-flex justify-content-between pt-3 pb-12">
+            <h2 className="mb-0 text-black fs-18">
+              <strong>บอกข้อมูลรถของคุณกับเราหน่อย</strong>
+            </h2>
+          </div>
+          <div className="formMain">
+            <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_panelSelect">
+              <div className="row car-brand">
+                <div className="col-4 pe-6 mb-12">
+                  {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
+                  <div
+                    className="border-grey rounded-4 text-center js-listdata"
+                    data-index="MQCB0000007"
+                    data-text="TOYOTA"
+                    data-cf-modified-903f39338c6b3be20c53ec4e-=""
+                  >
+                    <img alt="TOYOTA" width="48" height="48" src="/assets/logo-car/toyota.png" />
+                  </div>
                 </div>
+                <div className="col-4 px-6 mb-12">
+                  {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
+                  <div
+                    className="border-grey rounded-4 text-center js-listdata"
+                    data-index="MQCB0000001"
+                    data-text="ISUZU"
+                    data-cf-modified-903f39338c6b3be20c53ec4e-=""
+                  >
+                    <img alt="ISUZU" width="48" height="48" src="/assets/logo-car/isuzu.png" />
+                  </div>
+                </div>
+                <div className="col-4 ps-6 mb-12">
+                  {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
+                  <div
+                    className="border-grey rounded-4 text-center js-listdata"
+                    data-index="MQCB0000026"
+                    data-text="HONDA"
+                    data-cf-modified-903f39338c6b3be20c53ec4e-=""
+                  >
+                    <img alt="HONDA" width="48" height="48" src="/assets/logo-car/honda.png" />
+                  </div>
+                </div>
+                <div className="col-4 pe-6 mb-12">
+                  {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
+                  <div
+                    className="border-grey rounded-4 text-center js-listdata"
+                    data-index="MQCB0000046"
+                    data-text="NISSAN"
+                    data-cf-modified-903f39338c6b3be20c53ec4e-=""
+                  >
+                    <img alt="NISSAN" width="48" height="48" src="/assets/logo-car/nissan.png" />
+                  </div>
+                </div>
+                <div className="col-4 px-6 mb-12">
+                  {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
+                  <div
+                    className="border-grey rounded-4 text-center js-listdata"
+                    data-index="MQCB0000030"
+                    data-text="MITSUBISHI"
+                    data-cf-modified-903f39338c6b3be20c53ec4e-=""
+                  >
+                    <img alt="MITSUBISHI" width="48" height="48" src="/assets/logo-car/mitsubishi.png" />
+                  </div>
+                </div>
+                <div className="col-4 ps-6 mb-12">
+                  {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
+                  <div
+                    className="border-grey rounded-4 text-center js-listdata"
+                    data-index="MQCB0000024"
+                    data-text="MAZDA"
+                    data-cf-modified-903f39338c6b3be20c53ec4e-=""
+                  >
+                    <img alt="MAZDA" width="48" height="48" src="/assets/logo-car/mazda.png" />
+                  </div>
+                </div>
+                <div className="col-4 pe-6 mb-12">
+                  {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
+                  <div
+                    className="border-grey rounded-4 text-center js-listdata"
+                    data-index="MQCB0000032"
+                    data-text="FORD"
+                    data-cf-modified-903f39338c6b3be20c53ec4e-=""
+                  >
+                    <img alt="FORD" width="48" height="48" src="/assets/logo-car/ford.png" />
+                  </div>
+                </div>
+                <div className="col-4 px-6 mb-12">
+                  {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
+                  <div
+                    className="border-grey rounded-4 text-center js-listdata"
+                    data-index="MQCB0000059"
+                    data-text="CHEVROLET"
+                    data-cf-modified-903f39338c6b3be20c53ec4e-=""
+                  >
+                    <img alt="CHEVROLET" width="48" height="48" src="/assets/logo-car/chevrolet.png" />
+                  </div>
+                </div>
+                <div className="col-4 ps-6 mb-12">
+                  {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
+                  <div
+                    className="border-grey rounded-4 text-center js-listdata"
+                    data-index="MQCB0000014"
+                    data-text="SUZUKI"
+                    data-cf-modified-903f39338c6b3be20c53ec4e-=""
+                  >
+                    <img alt="SUZUKI" width="48" height="48" src="/assets/logo-car/suzuki.png" />
+                  </div>
+                </div>
+              </div>
+              <div className="form-group mb-12 carbrand">
+                {/* onchange="if (!window.__cfRLUnblockHandlers) return false; javascript:setTimeout(&#39;__doPostBack(\&#39;p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlCarBrand\&#39;,\&#39;\&#39;)&#39;, 0)" */}
+                <select
+                  name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlCarBrand"
+                  id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlCarBrand"
+                  className="js-ddlSelectBrand form-control"
+                  data-cf-modified-903f39338c6b3be20c53ec4e-=""
+                >
+                  <option value="">เลือกยี่ห้อรถ</option>
+                  <option value="MQCB0000232">AION</option>
+                  <option value="MQCB0000052">ALFA</option>
+                  <option value="MQCB0000054">ASTON</option>
+                  <option value="MQCB0000040">AUDI</option>
+                  <option value="MQCB0000084">AUSTIN MINI</option>
+                  <option value="MQCB0000016">BENTLEY</option>
+                  <option value="MQCB0000022">BMW</option>
+                  <option value="MQCB0000107">BYD</option>
+                  <option value="MQCB0000058">CHERY</option>
+                  <option value="MQCB0000059">CHEVROLET</option>
+                  <option value="MQCB0000038">CHRYSLER</option>
+                  <option value="MQCB0000012">CITROEN</option>
+                  <option value="MQCB0000057">DAEWOO</option>
+                  <option value="MQCB0000027">DAIHATSU</option>
+                  <option value="MQCB0000093">DAIMLER</option>
+                  <option value="MQCB0000233">DEEP</option>
+                  <option value="MQCB0000037">DFM</option>
+                  <option value="MQCB0000070">DFSK</option>
+                  <option value="MQCB0000020">FERRARI</option>
+                  <option value="MQCB0000043">FIAT</option>
+                  <option value="MQCB0000214">FOMM</option>
+                  <option value="MQCB0000032">FORD</option>
+                  <option value="MQCB0000051">FOTON</option>
+                  <option value="MQCB0000231">GWMT</option>
+                  <option value="MQCB0000215">HAVAL</option>
+                  <option value="MQCB0000056">HOLD</option>
+                  <option value="MQCB0000073">HOLDDEN</option>
+                  <option value="MQCB0000026">HONDA</option>
+                  <option value="MQCB0000021">HUMMER</option>
+                  <option value="MQCB0000049">HYUNDAI</option>
+                  <option value="MQCB0000001">ISUZU</option>
+                  <option value="MQCB0000226">JAC</option>
+                  <option value="MQCB0000034">JAGUAR</option>
+                  <option value="MQCB0000053">JEEP</option>
+                  <option value="MQCB0000045">KIA</option>
+                  <option value="MQCB0000004">LAMBORGHINI</option>
+                  <option value="MQCB0000149">LAMBRETTA</option>
+                  <option value="MQCB0000048">LAND ROVER</option>
+                  <option value="MQCB0000055">LEXUS</option>
+                  <option value="MQCB0000039">LOTUS</option>
+                  <option value="MQCB0000018">MASERATI</option>
+                  <option value="MQCB0000024">MAZDA</option>
+                  <option value="MQCB0000042">MCLR</option>
+                  <option value="MQCB0000157">MERCEDES BENZ</option>
+                  <option value="MQCB0000033">MERCEDES-BENZ</option>
+                  <option value="MQCB0000050">MG</option>
+                  <option value="MQCB0000158">MINI</option>
+                  <option value="MQCB0000036">MINI COOPER</option>
+                  <option value="MQCB0000076">MINI ROVER</option>
+                  <option value="MQCB0000019">MIOK</option>
+                  <option value="MQCB0000030">MITSUBISHI</option>
+                  <option value="MQCB0000060">NAZA</option>
+                  <option value="MQCB0000223">NETA</option>
+                  <option value="MQCB0000234">NEX</option>
+                  <option value="MQCB0000046">NISSAN</option>
+                  <option value="MQCB0000011">OPEL</option>
+                  <option value="MQCB0000216">ORA</option>
+                  <option value="MQCB0000166">PERODUA</option>
+                  <option value="MQCB0000010">PEUGEOT</option>
+                  <option value="MQCB0000025">PORSCHE</option>
+                  <option value="MQCB0000023">PROTON</option>
+                  <option value="MQCB0000041">RANGE ROVER</option>
+                  <option value="MQCB0000029">RENAULT</option>
+                  <option value="MQCB0000173">ROLLS ROYCE</option>
+                  <option value="MQCB0000015">ROLLS-ROYCE</option>
+                  <option value="MQCB0000174">ROVER</option>
+                  <option value="MQCB0000009">SAAB</option>
+                  <option value="MQCB0000031">SEAT</option>
+                  <option value="MQCB0000047">SKODA</option>
+                  <option value="MQCB0000017">SMART</option>
+                  <option value="MQCB0000005">SPYKER</option>
+                  <option value="MQCB0000188">SSANG YONG</option>
+                  <option value="MQCB0000003">SSANGYONG</option>
+                  <option value="MQCB0000006">SUBARU</option>
+                  <option value="MQCB0000014">SUZUKI</option>
+                  <option value="MQCB0000008">TATA</option>
+                  <option value="MQCB0000227">TESLA</option>
+                  <option value="MQCB0000013">THAIRUNG</option>
+                  <option value="MQCB0000007">TOYOTA</option>
+                  <option value="MQCB0000028">VOLKSWAGEN</option>
+                  <option value="MQCB0000222">VOLT</option>
+                  <option value="MQCB0000002">VOLVO</option>
+                  <option value="MQCB0000204">WULING</option>
+                </select>
+                <label className="form-label">ยี่ห้อรถ</label>
+                <div className="feedback">กรุณาเลือก</div>
+              </div>
+              <div className="form-group mb-12 carmodel">
+                <select
+                  name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlCarModel"
+                  id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlCarModel"
+                  className="js-ddlSelect form-control"
+                  disabled
+                >
+                  <option value="">เลือกรุ่นรถ</option>
+                </select>
+                <label className="form-label">รุ่นรถ</label>
+                <div className="feedback">กรุณาเลือก</div>
+              </div>
             </div>
-
-            <div className="content-section fullPage-150">
-                <div className="container">
-                    <div className="d-flex justify-content-between pt-3 pb-12">
-                        <h2 className="mb-0 text-black fs-18"><strong>บอกข้อมูลรถของคุณกับเราหน่อย</strong></h2>
-                    </div>
-                    <div className="formMain">
-                        <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_panelSelect">
-
-                            <div className="row car-brand">
-                                <div className='col-4 pe-6 mb-12'>
-                                    {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
-                                    <div className='border-grey rounded-4 text-center js-listdata' data-index='MQCB0000007' data-text='TOYOTA'
-                                        data-cf-modified-903f39338c6b3be20c53ec4e-="">
-                                        <img alt='TOYOTA' width='48' height='48' src='/assets/logo-car/toyota.png' />
-                                    </div>
-                                </div>
-                                <div className='col-4 px-6 mb-12'>
-                                    {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
-                                    <div className='border-grey rounded-4 text-center js-listdata' data-index='MQCB0000001' data-text='ISUZU'
-                                        data-cf-modified-903f39338c6b3be20c53ec4e-="">
-                                        <img alt='ISUZU' width='48' height='48' src='/assets/logo-car/isuzu.png' />
-                                    </div>
-                                </div>
-                                <div className='col-4 ps-6 mb-12'>
-                                    {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
-                                    <div className='border-grey rounded-4 text-center js-listdata' data-index='MQCB0000026' data-text='HONDA'
-                                        data-cf-modified-903f39338c6b3be20c53ec4e-="">
-                                        <img alt='HONDA' width='48' height='48' src='/assets/logo-car/honda.png' />
-                                    </div>
-                                </div>
-                                <div className='col-4 pe-6 mb-12'>
-                                    {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
-                                    <div className='border-grey rounded-4 text-center js-listdata' data-index='MQCB0000046' data-text='NISSAN'
-                                        data-cf-modified-903f39338c6b3be20c53ec4e-="">
-                                        <img alt='NISSAN' width='48' height='48' src='/assets/logo-car/nissan.png' />
-                                    </div>
-                                </div>
-                                <div className='col-4 px-6 mb-12'>
-                                    {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
-                                    <div className='border-grey rounded-4 text-center js-listdata' data-index='MQCB0000030' data-text='MITSUBISHI'
-                                        data-cf-modified-903f39338c6b3be20c53ec4e-="">
-                                        <img alt='MITSUBISHI' width='48' height='48' src='/assets/logo-car/mitsubishi.png' />
-                                    </div>
-                                </div>
-                                <div className='col-4 ps-6 mb-12'>
-                                    {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
-                                    <div className='border-grey rounded-4 text-center js-listdata' data-index='MQCB0000024' data-text='MAZDA'
-                                        data-cf-modified-903f39338c6b3be20c53ec4e-="">
-                                        <img alt='MAZDA' width='48' height='48' src='/assets/logo-car/mazda.png' />
-                                    </div>
-                                </div>
-                                <div className='col-4 pe-6 mb-12'>
-                                    {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
-                                    <div className='border-grey rounded-4 text-center js-listdata' data-index='MQCB0000032' data-text='FORD'
-                                        data-cf-modified-903f39338c6b3be20c53ec4e-="">
-                                        <img alt='FORD' width='48' height='48' src='/assets/logo-car/ford.png' />
-                                    </div>
-                                </div>
-                                <div className='col-4 px-6 mb-12'>
-                                    {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
-                                    <div className='border-grey rounded-4 text-center js-listdata' data-index='MQCB0000059' data-text='CHEVROLET'
-                                        data-cf-modified-903f39338c6b3be20c53ec4e-="">
-                                        <img alt='CHEVROLET' width='48' height='48' src='/assets/logo-car/chevrolet.png' />
-                                    </div>
-                                </div>
-                                <div className='col-4 ps-6 mb-12'>
-                                    {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selCarBrand(this);" */}
-                                    <div className='border-grey rounded-4 text-center js-listdata' data-index='MQCB0000014' data-text='SUZUKI'
-                                        data-cf-modified-903f39338c6b3be20c53ec4e-="">
-                                        <img alt='SUZUKI' width='48' height='48' src='/assets/logo-car/suzuki.png' />
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="form-group mb-12 carbrand">
-                                {/* onchange="if (!window.__cfRLUnblockHandlers) return false; javascript:setTimeout(&#39;__doPostBack(\&#39;p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlCarBrand\&#39;,\&#39;\&#39;)&#39;, 0)" */}
-                                <select name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlCarBrand" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlCarBrand" className="js-ddlSelectBrand form-control" data-cf-modified-903f39338c6b3be20c53ec4e-="">
-                                    <option value="">เลือกยี่ห้อรถ</option>
-                                    <option value="MQCB0000232">AION</option>
-                                    <option value="MQCB0000052">ALFA</option>
-                                    <option value="MQCB0000054">ASTON</option>
-                                    <option value="MQCB0000040">AUDI</option>
-                                    <option value="MQCB0000084">AUSTIN MINI</option>
-                                    <option value="MQCB0000016">BENTLEY</option>
-                                    <option value="MQCB0000022">BMW</option>
-                                    <option value="MQCB0000107">BYD</option>
-                                    <option value="MQCB0000058">CHERY</option>
-                                    <option value="MQCB0000059">CHEVROLET</option>
-                                    <option value="MQCB0000038">CHRYSLER</option>
-                                    <option value="MQCB0000012">CITROEN</option>
-                                    <option value="MQCB0000057">DAEWOO</option>
-                                    <option value="MQCB0000027">DAIHATSU</option>
-                                    <option value="MQCB0000093">DAIMLER</option>
-                                    <option value="MQCB0000233">DEEP</option>
-                                    <option value="MQCB0000037">DFM</option>
-                                    <option value="MQCB0000070">DFSK</option>
-                                    <option value="MQCB0000020">FERRARI</option>
-                                    <option value="MQCB0000043">FIAT</option>
-                                    <option value="MQCB0000214">FOMM</option>
-                                    <option value="MQCB0000032">FORD</option>
-                                    <option value="MQCB0000051">FOTON</option>
-                                    <option value="MQCB0000231">GWMT</option>
-                                    <option value="MQCB0000215">HAVAL</option>
-                                    <option value="MQCB0000056">HOLD</option>
-                                    <option value="MQCB0000073">HOLDDEN</option>
-                                    <option value="MQCB0000026">HONDA</option>
-                                    <option value="MQCB0000021">HUMMER</option>
-                                    <option value="MQCB0000049">HYUNDAI</option>
-                                    <option value="MQCB0000001">ISUZU</option>
-                                    <option value="MQCB0000226">JAC</option>
-                                    <option value="MQCB0000034">JAGUAR</option>
-                                    <option value="MQCB0000053">JEEP</option>
-                                    <option value="MQCB0000045">KIA</option>
-                                    <option value="MQCB0000004">LAMBORGHINI</option>
-                                    <option value="MQCB0000149">LAMBRETTA</option>
-                                    <option value="MQCB0000048">LAND ROVER</option>
-                                    <option value="MQCB0000055">LEXUS</option>
-                                    <option value="MQCB0000039">LOTUS</option>
-                                    <option value="MQCB0000018">MASERATI</option>
-                                    <option value="MQCB0000024">MAZDA</option>
-                                    <option value="MQCB0000042">MCLR</option>
-                                    <option value="MQCB0000157">MERCEDES BENZ</option>
-                                    <option value="MQCB0000033">MERCEDES-BENZ</option>
-                                    <option value="MQCB0000050">MG</option>
-                                    <option value="MQCB0000158">MINI</option>
-                                    <option value="MQCB0000036">MINI COOPER</option>
-                                    <option value="MQCB0000076">MINI ROVER</option>
-                                    <option value="MQCB0000019">MIOK</option>
-                                    <option value="MQCB0000030">MITSUBISHI</option>
-                                    <option value="MQCB0000060">NAZA</option>
-                                    <option value="MQCB0000223">NETA</option>
-                                    <option value="MQCB0000234">NEX</option>
-                                    <option value="MQCB0000046">NISSAN</option>
-                                    <option value="MQCB0000011">OPEL</option>
-                                    <option value="MQCB0000216">ORA</option>
-                                    <option value="MQCB0000166">PERODUA</option>
-                                    <option value="MQCB0000010">PEUGEOT</option>
-                                    <option value="MQCB0000025">PORSCHE</option>
-                                    <option value="MQCB0000023">PROTON</option>
-                                    <option value="MQCB0000041">RANGE ROVER</option>
-                                    <option value="MQCB0000029">RENAULT</option>
-                                    <option value="MQCB0000173">ROLLS ROYCE</option>
-                                    <option value="MQCB0000015">ROLLS-ROYCE</option>
-                                    <option value="MQCB0000174">ROVER</option>
-                                    <option value="MQCB0000009">SAAB</option>
-                                    <option value="MQCB0000031">SEAT</option>
-                                    <option value="MQCB0000047">SKODA</option>
-                                    <option value="MQCB0000017">SMART</option>
-                                    <option value="MQCB0000005">SPYKER</option>
-                                    <option value="MQCB0000188">SSANG YONG</option>
-                                    <option value="MQCB0000003">SSANGYONG</option>
-                                    <option value="MQCB0000006">SUBARU</option>
-                                    <option value="MQCB0000014">SUZUKI</option>
-                                    <option value="MQCB0000008">TATA</option>
-                                    <option value="MQCB0000227">TESLA</option>
-                                    <option value="MQCB0000013">THAIRUNG</option>
-                                    <option value="MQCB0000007">TOYOTA</option>
-                                    <option value="MQCB0000028">VOLKSWAGEN</option>
-                                    <option value="MQCB0000222">VOLT</option>
-                                    <option value="MQCB0000002">VOLVO</option>
-                                    <option value="MQCB0000204">WULING</option>
-
-                                </select>
-                                <label className="form-label">ยี่ห้อรถ</label>
-                                <div className="feedback">กรุณาเลือก</div>
-                            </div>
-                            <div className="form-group mb-12 carmodel">
-                                <select name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlCarModel" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlCarModel" className="js-ddlSelect form-control" disabled>
-                                    <option value="">เลือกรุ่นรถ</option>
-
-                                </select>
-                                <label className="form-label">รุ่นรถ</label>
-                                <div className="feedback">กรุณาเลือก</div>
-                            </div>
-
-                        </div>
-                        <div className="form-group mb-12 carcolor">
-                            <select
-                                name="carColorId"
-                                id="carColorId"
-                                //defaultValue={carInfo.carColorId}
-                                className="js-ddlSelect form-control">
-                                <option value="">เลือกสีรถ</option>
-                                {carColor?.map((color: any) => (
-                                    <option key={color.carColorId} value={color.carColorId}>
-                                        {color.carColorNameTh}
-                                    </option>
-                                ))}
-                            </select>
-                            <label className="form-label">สีรถ</label>
-                            <div className="feedback">กรุณาเลือก</div>
-                        </div>
-                        <div className="form-group form-vehicle-id mb-12 chassisnumber">
-                            {/* onkeydown="if (!window.__cfRLUnblockHandlers) return false; return (event.keyCode!=13);" */}
-                            <input name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$txtChassisNumber" type="text" maxLength={17} id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_txtChassisNumber" className="form-control engNum" placeholder="ตัวอย่าง AAAAAA123AA123456" data-cf-modified-903f39338c6b3be20c53ec4e-="" />
-                            <label className="form-label">เลขตัวถัง</label>
-                            {/* onclick="if (!window.__cfRLUnblockHandlers) return false; hintVehicleOnclick()" */}
-                            <button type="button" className="bg-transparent border-0 z-index-2" data-bs-toggle="modal" data-bs-target="#vidHelperModal" data-cf-modified-903f39338c6b3be20c53ec4e-="">
-                                <img alt="ตัวช่วย" width="24" height="24" src="/assets/icon/icon-question.png" className="" />
-                            </button>
-                            {/* onclick="if (!window.__cfRLUnblockHandlers) return false; clearValue('txtChassisNumber', 'chassisnumber', false); checkCarChassisNumber();" */}
-                            <a className="d-flex align-items-center justify-content-center clearFeild-btn-wrapper z-index-1" data-cf-modified-903f39338c6b3be20c53ec4e-="">
-                                <img className="img-fluid mb-2 mx-auto position-absolute clearFeild-btn" alt="test" width="24" height="24" src="/cmisite/media/assets/icon-clear.png" />
-                            </a>
-                            <div className="feedback">กรุณากรอก</div>
-                        </div>
-                        <div className="form-group mb-12 radio-list-horizontal">
-                            <span className="EditingFormLabel fs-14 ">รถของคุณป้ายแดงหรือไม่ ?</span>
-                            <div className="mt-2">
-                                <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_UpdatePanel2">
-
-                                    {/* <table id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_rdoIsRed">
+            <div className="form-group mb-12 carcolor">
+              <select
+                name="carColorId"
+                id="carColorId"
+                //defaultValue={carInfo.carColorId}
+                className="js-ddlSelect form-control"
+              >
+                <option value="">เลือกสีรถ</option>
+                {carColor?.map((color: any) => (
+                  <option key={color.carColorId} value={color.carColorId}>
+                    {color.carColorNameTh}
+                  </option>
+                ))}
+              </select>
+              <label className="form-label">สีรถ</label>
+              <div className="feedback">กรุณาเลือก</div>
+            </div>
+            <div className="form-group form-vehicle-id mb-12 chassisnumber">
+              {/* onkeydown="if (!window.__cfRLUnblockHandlers) return false; return (event.keyCode!=13);" */}
+              <input
+                name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$txtChassisNumber"
+                type="text"
+                maxLength={17}
+                id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_txtChassisNumber"
+                className="form-control engNum"
+                placeholder="ตัวอย่าง AAAAAA123AA123456"
+                data-cf-modified-903f39338c6b3be20c53ec4e-=""
+              />
+              <label className="form-label">เลขตัวถัง</label>
+              {/* onclick="if (!window.__cfRLUnblockHandlers) return false; hintVehicleOnclick()" */}
+              <button
+                type="button"
+                className="bg-transparent border-0 z-index-2"
+                data-bs-toggle="modal"
+                data-bs-target="#vidHelperModal"
+                data-cf-modified-903f39338c6b3be20c53ec4e-=""
+              >
+                <img alt="ตัวช่วย" width="24" height="24" src="/assets/icon/icon-question.png" className="" />
+              </button>
+              {/* onclick="if (!window.__cfRLUnblockHandlers) return false; clearValue('txtChassisNumber', 'chassisnumber', false); checkCarChassisNumber();" */}
+              <a
+                className="d-flex align-items-center justify-content-center clearFeild-btn-wrapper z-index-1"
+                data-cf-modified-903f39338c6b3be20c53ec4e-=""
+              >
+                <img
+                  className="img-fluid mb-2 mx-auto position-absolute clearFeild-btn"
+                  alt="test"
+                  width="24"
+                  height="24"
+                  src="/cmisite/media/assets/icon-clear.png"
+                />
+              </a>
+              <div className="feedback">กรุณากรอก</div>
+            </div>
+            <div className="form-group mb-12 radio-list-horizontal">
+              <span className="EditingFormLabel fs-14 ">รถของคุณป้ายแดงหรือไม่ ?</span>
+              <div className="mt-2">
+                <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_UpdatePanel2">
+                  {/* <table id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_rdoIsRed">
                                         <tr>
                                             <td><input id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_rdoIsRed_0" type="radio" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$rdoIsRed" value="NOTRED" checked /><label htmlFor="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_rdoIsRed_0">ไม่ใช่</label></td>
 
@@ -308,264 +380,418 @@ export default async function CarInformation() {
                                             <td><input id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_rdoIsRed_1" type="radio" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$rdoIsRed" value="ISRED" data-cf-modified-903f39338c6b3be20c53ec4e-="" /><label htmlFor="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_rdoIsRed_1">ใช่ ป้ายแดง</label></td>
                                         </tr>
                                     </table> */}
-
-                                </div>
-                            </div>
-                        </div>
-                        <div className="form-group mb-12 licenseregis">
-                            {/* onkeydown="if (!window.__cfRLUnblockHandlers) return false; return (event.keyCode!=13);" */}
-                            <input name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$txtLicenseRegis" type="text" maxLength={13} id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_txtLicenseRegis" className="form-control carRegistra" placeholder="ตัวอย่าง 2ขข2222" data-cf-modified-903f39338c6b3be20c53ec4e-="" />
-                            {/* onclick="if (!window.__cfRLUnblockHandlers) return false; clearValue('txtLicenseRegis', 'licenseregis'); checkCarRegis();" */}
-                            <a className="d-flex align-items-center justify-content-center clearFeild-btn-wrapper clearfiled-hide" data-cf-modified-903f39338c6b3be20c53ec4e-="">
-                                <img className="img-fluid mb-2 mx-auto position-absolute clearFeild-btn hide" alt="test" width="24" height="24" src="/cmisite/media/assets/icon-clear.png" />
-                            </a>
-                            <label className="form-label">ทะเบียนรถ</label>
-                            <div className="feedback">กรุณากรอก</div>
-                            <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdLicensePrefix" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdLicensePrefix" />
-                            <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdLicenseNo" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdLicenseNo" />
-                        </div>
-                        <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_UpdatePanel1">
-
-                            <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_zoneIsRed" className="js-zoneIsRed">
-                                <div className="form-group mb-12 yearregis">
-                                    <select name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlYearRegis" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlYearRegis" className="js-ddlSelect form-control">
-                                        <option value="">เลือกปีที่จดทะเบียน</option>
-                                        <option value="2025">2025 (2568)</option>
-                                        <option value="2024">2024 (2567)</option>
-                                        <option value="2023">2023 (2566)</option>
-                                        <option value="2022">2022 (2565)</option>
-                                        <option value="2021">2021 (2564)</option>
-                                        <option value="2020">2020 (2563)</option>
-                                        <option value="2019">2019 (2562)</option>
-                                        <option value="2018">2018 (2561)</option>
-                                        <option value="2017">2017 (2560)</option>
-                                        <option value="2016">2016 (2559)</option>
-                                        <option value="2015">2015 (2558)</option>
-                                        <option value="2014">2014 (2557)</option>
-                                        <option value="2013">2013 (2556)</option>
-                                        <option value="2012">2012 (2555)</option>
-                                        <option value="2011">2011 (2554)</option>
-                                        <option value="2010">2010 (2553)</option>
-                                        <option value="2009">2009 (2552)</option>
-                                        <option value="2008">2008 (2551)</option>
-                                        <option value="2007">2007 (2550)</option>
-                                        <option value="2006">2006 (2549)</option>
-                                        <option value="2005">2005 (2548)</option>
-                                        <option value="2004">2004 (2547)</option>
-                                        <option value="2003">2003 (2546)</option>
-                                        <option value="2002">2002 (2545)</option>
-                                        <option value="2001">2001 (2544)</option>
-                                        <option value="2000">2000 (2543)</option>
-                                        <option value="1999">1999 (2542)</option>
-                                        <option value="1998">1998 (2541)</option>
-                                        <option value="1997">1997 (2540)</option>
-                                        <option value="1996">1996 (2539)</option>
-                                        <option value="1995">1995 (2538)</option>
-                                        <option value="1994">1994 (2537)</option>
-                                        <option value="1993">1993 (2536)</option>
-                                        <option value="1992">1992 (2535)</option>
-                                        <option value="1991">1991 (2534)</option>
-                                        <option value="1990">1990 (2533)</option>
-                                        <option value="1989">1989 (2532)</option>
-                                        <option value="1988">1988 (2531)</option>
-                                        <option value="1987">1987 (2530)</option>
-                                        <option value="1986">1986 (2529)</option>
-                                        <option value="1985">1985 (2528)</option>
-                                        <option value="1984">1984 (2527)</option>
-                                        <option value="1983">1983 (2526)</option>
-                                        <option value="1982">1982 (2525)</option>
-                                        <option value="1981">1981 (2524)</option>
-                                        <option value="1980">1980 (2523)</option>
-                                        <option value="1979">1979 (2522)</option>
-                                        <option value="1978">1978 (2521)</option>
-                                        <option value="1977">1977 (2520)</option>
-                                        <option value="1976">1976 (2519)</option>
-
-                                    </select>
-                                    <label className="form-label">ปีที่จดทะเบียน</label>
-                                    <div className="feedback">กรุณาเลือก</div>
-                                </div>
-                                <div className="form-group mb-12 province">
-                                    <select name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlProvince" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlProvince" className="js-ddlSelect form-control">
-                                        <option value="">เลือกจังหวัดที่จดทะเบียน</option>
-                                        <option value="64">กระบี่</option>
-                                        <option value="1">กรุงเทพมหานคร</option>
-                                        <option value="56">กาญจนบุรี</option>
-                                        <option value="34">กาฬสินธุ์</option>
-                                        <option value="49">กำแพงเพชร</option>
-                                        <option value="28">ขอนแก่น</option>
-                                        <option value="13">จันทบุรี</option>
-                                        <option value="15">ฉะเชิงเทรา</option>
-                                        <option value="11">ชลบุรี</option>
-                                        <option value="9">ชัยนาท</option>
-                                        <option value="25">ชัยภูมิ</option>
-                                        <option value="69">ชุมพร</option>
-                                        <option value="45">เชียงราย</option>
-                                        <option value="38">เชียงใหม่</option>
-                                        <option value="72">ตรัง</option>
-                                        <option value="14">ตราด</option>
-                                        <option value="50">ตาก</option>
-                                        <option value="17">นครนายก</option>
-                                        <option value="58">นครปฐม</option>
-                                        <option value="36">นครพนม</option>
-                                        <option value="19">นครราชสีมา</option>
-                                        <option value="63">นครศรีธรรมราช</option>
-                                        <option value="47">นครสวรรค์</option>
-                                        <option value="3">นนทบุรี</option>
-                                        <option value="76">นราธิวาส</option>
-                                        <option value="43">น่าน</option>
-                                        <option value="77">บึงกาฬ</option>
-                                        <option value="20">บุรีรัมย์</option>
-                                        <option value="4">ปทุมธานี</option>
-                                        <option value="62">ประจวบคีรีขันธ์</option>
-                                        <option value="16">ปราจีนบุรี</option>
-                                        <option value="74">ปัตตานี</option>
-                                        <option value="5">พระนครศรีอยุธยา</option>
-                                        <option value="44">พะเยา</option>
-                                        <option value="65">พังงา</option>
-                                        <option value="73">พัทลุง</option>
-                                        <option value="53">พิจิตร</option>
-                                        <option value="52">พิษณุโลก</option>
-                                        <option value="61">เพชรบุรี</option>
-                                        <option value="54">เพชรบูรณ์</option>
-                                        <option value="42">แพร่</option>
-                                        <option value="66">ภูเก็ต</option>
-                                        <option value="32">มหาสารคาม</option>
-                                        <option value="37">มุกดาหาร</option>
-                                        <option value="46">แม่ฮ่องสอน</option>
-                                        <option value="24">ยโสธร</option>
-                                        <option value="75">ยะลา</option>
-                                        <option value="33">ร้อยเอ็ด</option>
-                                        <option value="68">ระนอง</option>
-                                        <option value="12">ระยอง</option>
-                                        <option value="55">ราชบุรี</option>
-                                        <option value="7">ลพบุรี</option>
-                                        <option value="40">ลำปาง</option>
-                                        <option value="39">ลำพูน</option>
-                                        <option value="30">เลย</option>
-                                        <option value="22">ศรีสะเกษ</option>
-                                        <option value="35">สกลนคร</option>
-                                        <option value="70">สงขลา</option>
-                                        <option value="71">สตูล</option>
-                                        <option value="2">สมุทรปราการ</option>
-                                        <option value="60">สมุทรสงคราม</option>
-                                        <option value="59">สมุทรสาคร</option>
-                                        <option value="18">สระแก้ว</option>
-                                        <option value="10">สระบุรี</option>
-                                        <option value="8">สิงห์บุรี</option>
-                                        <option value="51">สุโขทัย</option>
-                                        <option value="57">สุพรรณบุรี</option>
-                                        <option value="67">สุราษฎร์ธานี</option>
-                                        <option value="21">สุรินทร์</option>
-                                        <option value="31">หนองคาย</option>
-                                        <option value="27">หนองบัวลำภู</option>
-                                        <option value="6">อ่างทอง</option>
-                                        <option value="26">อำนาจเจริญ</option>
-                                        <option value="29">อุดรธานี</option>
-                                        <option value="41">อุตรดิตถ์</option>
-                                        <option value="48">อุทัยธานี</option>
-                                        <option value="23">อุบลราชธานี</option>
-
-                                    </select>
-                                    <label className="form-label">จังหวัดที่จดทะเบียน</label>
-                                    <div className="feedback">กรุณาเลือก</div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <h6 className="fs-18 f-bd mb-12 mt-4">ระยะเวลาคุ้มครอง</h6>
-                        <span className="fs-14 f-bd d-block mb-2 coverageDate-textFeild">วันที่เริ่มความคุ้มครอง</span>
-                        <div className="form-group mb-12 form-coverage">
-                            <div>
-                                <div className="d-flex">
-                                    <div className="w-100 position-relative year">
-                                        <select name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlYearCoverage" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlYearCoverage" className="form-control">
-
-                                        </select>
-                                        <label className="form-label">ปี</label>
-                                    </div>
-                                    <div className="ms-2 me-2 w-100 position-relative month">
-                                        <select name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlMonthCoverage" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlMonthCoverage" className="form-control">
-
-                                        </select>
-                                        <label className="form-label">เดือน</label>
-                                    </div>
-                                    <div className="ms-0 w-100 position-relative day">
-                                        <select name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlDayCoverage" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlDayCoverage" className="form-control">
-
-                                        </select>
-                                        <label className="form-label">วัน</label>
-                                    </div>
-
-                                </div>
-                                <div className="feedback d-none">กรุณาเลือก</div>
-                            </div>
-                            <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$coverageDateStartVal" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_coverageDateStartVal" />
-                            <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$coverageDateEndVal" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_coverageDateEndVal" />
-                            <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdCoverageEndDate" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdCoverageEndDate" value="2025-05-21" />
-                            <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdChannelText" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdChannelText" value="CXM" />
-                            <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdPriceText" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdPriceText" value="645.21" />
-                            <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdVehicleCategoryId" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdVehicleCategoryId" value="1" />
-                            <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdVehicleCategoryText" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdVehicleCategoryText" value="ส่วนบุคคล" />
-                            <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdVehicleNameText" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdVehicleNameText" value="รถเก๋ง" />
-
-                            <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdTypeOfDataCustomerText" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdTypeOfDataCustomerText" value="NEW" />
-                            <input type="hidden" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdSelVehicleNameText" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdSelVehicleNameText" />
-
-                        </div>
-
-
-                        <div className="d-flex justify-content-between mt-2 mb-4">
-                            <span className="f-md text-grey">วันที่สิ้นสุดความคุ้มครอง</span>
-                            <span className="f-bd text-grey line-dotted"><strong id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_coverageDateEndShow">31 มกราคม 2567</strong></span>
-
-                        </div>
-                    </div>
                 </div>
+              </div>
             </div>
-
-            <div className="container">
-                {/* onclick="if (!window.__cfRLUnblockHandlers) return false; return checkValidation();" */}
-                <a href="/th/CustomerInformation" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_btnSubmit" className="btn btn-primary fs-6 d-flex justify-content-center align-items-center mx-auto mb-4 f-bd" data-cf-modified-903f39338c6b3be20c53ec4e-="">ดำเนินการต่อ</a>
+            <div className="form-group mb-12 licenseregis">
+              {/* onkeydown="if (!window.__cfRLUnblockHandlers) return false; return (event.keyCode!=13);" */}
+              <input
+                name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$txtLicenseRegis"
+                type="text"
+                maxLength={13}
+                id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_txtLicenseRegis"
+                className="form-control carRegistra"
+                placeholder="ตัวอย่าง 2ขข2222"
+                data-cf-modified-903f39338c6b3be20c53ec4e-=""
+              />
+              {/* onclick="if (!window.__cfRLUnblockHandlers) return false; clearValue('txtLicenseRegis', 'licenseregis'); checkCarRegis();" */}
+              <a
+                className="d-flex align-items-center justify-content-center clearFeild-btn-wrapper clearfiled-hide"
+                data-cf-modified-903f39338c6b3be20c53ec4e-=""
+              >
+                <img
+                  className="img-fluid mb-2 mx-auto position-absolute clearFeild-btn hide"
+                  alt="test"
+                  width="24"
+                  height="24"
+                  src="/cmisite/media/assets/icon-clear.png"
+                />
+              </a>
+              <label className="form-label">ทะเบียนรถ</label>
+              <div className="feedback">กรุณากรอก</div>
+              <input
+                type="hidden"
+                name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdLicensePrefix"
+                id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdLicensePrefix"
+              />
+              <input
+                type="hidden"
+                name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdLicenseNo"
+                id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdLicenseNo"
+              />
             </div>
-
-            <div className="modal hint-modal fade" id="vidHelperModal" aria-labelledby="exampleModalLongTitle" style={{ display: 'none' }} aria-hidden="true">
-                <div className="modal-dialog modal-dialog-centered">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title f-bd fs-18" id="exampleModalLongTitle">หมายเลขตัวถังดูได้จากที่ไหนบ้าง</h5>
-                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div className="modal-body" style={{ maxHeight: '314px' }}>
-
-                            <nav>
-                                <div className="nav nav-tabs border-0" id="nav-tab" role="tablist">
-                                    {/* onclick="if (!window.__cfRLUnblockHandlers) return false; PushGTMDefault('car_info', 'click_hint', 'เล่มทะเบียน');PushGTMDefault('car_info', 'display', 'เล่มทะเบียน');" */}
-                                    <button className="nav-link f-bd active" id="nav-bookNumber-tab" data-bs-toggle="tab" data-bs-target="#nav-bookNumber" type="button" role="tab" aria-controls="nav-bookNumber" aria-selected="false" data-cf-modified-903f39338c6b3be20c53ec4e-="">เล่มทะเบียน</button>
-                                    {/* onclick="if (!window.__cfRLUnblockHandlers) return false; PushGTMDefault('car_info', 'click_hint', 'ป้ายภาษี');PushGTMDefault('car_info', 'display', 'ป้ายภาษี');" */}
-                                    <button className="nav-link f-bd" id="nav-ctp-tab" data-bs-toggle="tab" data-bs-target="#nav-ctp" type="button" role="tab" aria-controls="nav-ctp" aria-selected="true" data-cf-modified-903f39338c6b3be20c53ec4e-="">ป้ายภาษี</button>
-                                    {/* onclick="if (!window.__cfRLUnblockHandlers) return false; PushGTMDefault('car_info', 'click_hint', 'ตัวรถ');PushGTMDefault('car_info', 'display', 'ตัวรถ');" */}
-                                    <button className="nav-link f-bd me-0" id="nav-ctpNumber-tab" data-bs-toggle="tab" data-bs-target="#nav-ctpNumber" type="button" role="tab" aria-controls="nav-ctpNumber" aria-selected="false" data-cf-modified-903f39338c6b3be20c53ec4e-="">ตัวรถ</button>
-                                </div>
-                            </nav>
-                            <div className="tab-content" id="nav-tabContent">
-                                <div className="tab-pane fade show active" id="nav-bookNumber" role="tabpanel" aria-labelledby="nav-bookNumber-tab">
-                                    <img className="img-fluid d-block my-3 mx-auto" alt="เล่มทะเบียน" width="280" height="226" src="/assets/object/hint-book-number.png" />
-                                </div>
-                                <div className="tab-pane fade" id="nav-ctp" role="tabpanel" aria-labelledby="nav-ctp-tab">
-                                    <img className="img-fluid d-block my-3 mx-auto" alt="ป้ายภาษี" width="300" height="226" src="/assets/object/hint-ctp.png" />
-                                </div>
-                                <div className="tab-pane fade" id="nav-ctpNumber" role="tabpanel" aria-labelledby="nav-ctpNumber-tab">
-                                    <img className="img-fluid d-block my-3 mx-auto" alt="ตัวรถ" width="280" height="226" src="/assets/object/hint-ctp-number.png" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_UpdatePanel1">
+              <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_zoneIsRed" className="js-zoneIsRed">
+                <div className="form-group mb-12 yearregis">
+                  <select
+                    name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlYearRegis"
+                    id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlYearRegis"
+                    className="js-ddlSelect form-control"
+                  >
+                    <option value="">เลือกปีที่จดทะเบียน</option>
+                    <option value="2025">2025 (2568)</option>
+                    <option value="2024">2024 (2567)</option>
+                    <option value="2023">2023 (2566)</option>
+                    <option value="2022">2022 (2565)</option>
+                    <option value="2021">2021 (2564)</option>
+                    <option value="2020">2020 (2563)</option>
+                    <option value="2019">2019 (2562)</option>
+                    <option value="2018">2018 (2561)</option>
+                    <option value="2017">2017 (2560)</option>
+                    <option value="2016">2016 (2559)</option>
+                    <option value="2015">2015 (2558)</option>
+                    <option value="2014">2014 (2557)</option>
+                    <option value="2013">2013 (2556)</option>
+                    <option value="2012">2012 (2555)</option>
+                    <option value="2011">2011 (2554)</option>
+                    <option value="2010">2010 (2553)</option>
+                    <option value="2009">2009 (2552)</option>
+                    <option value="2008">2008 (2551)</option>
+                    <option value="2007">2007 (2550)</option>
+                    <option value="2006">2006 (2549)</option>
+                    <option value="2005">2005 (2548)</option>
+                    <option value="2004">2004 (2547)</option>
+                    <option value="2003">2003 (2546)</option>
+                    <option value="2002">2002 (2545)</option>
+                    <option value="2001">2001 (2544)</option>
+                    <option value="2000">2000 (2543)</option>
+                    <option value="1999">1999 (2542)</option>
+                    <option value="1998">1998 (2541)</option>
+                    <option value="1997">1997 (2540)</option>
+                    <option value="1996">1996 (2539)</option>
+                    <option value="1995">1995 (2538)</option>
+                    <option value="1994">1994 (2537)</option>
+                    <option value="1993">1993 (2536)</option>
+                    <option value="1992">1992 (2535)</option>
+                    <option value="1991">1991 (2534)</option>
+                    <option value="1990">1990 (2533)</option>
+                    <option value="1989">1989 (2532)</option>
+                    <option value="1988">1988 (2531)</option>
+                    <option value="1987">1987 (2530)</option>
+                    <option value="1986">1986 (2529)</option>
+                    <option value="1985">1985 (2528)</option>
+                    <option value="1984">1984 (2527)</option>
+                    <option value="1983">1983 (2526)</option>
+                    <option value="1982">1982 (2525)</option>
+                    <option value="1981">1981 (2524)</option>
+                    <option value="1980">1980 (2523)</option>
+                    <option value="1979">1979 (2522)</option>
+                    <option value="1978">1978 (2521)</option>
+                    <option value="1977">1977 (2520)</option>
+                    <option value="1976">1976 (2519)</option>
+                  </select>
+                  <label className="form-label">ปีที่จดทะเบียน</label>
+                  <div className="feedback">กรุณาเลือก</div>
                 </div>
+                <div className="form-group mb-12 province">
+                  <select
+                    name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlProvince"
+                    id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlProvince"
+                    className="js-ddlSelect form-control"
+                  >
+                    <option value="">เลือกจังหวัดที่จดทะเบียน</option>
+                    <option value="64">กระบี่</option>
+                    <option value="1">กรุงเทพมหานคร</option>
+                    <option value="56">กาญจนบุรี</option>
+                    <option value="34">กาฬสินธุ์</option>
+                    <option value="49">กำแพงเพชร</option>
+                    <option value="28">ขอนแก่น</option>
+                    <option value="13">จันทบุรี</option>
+                    <option value="15">ฉะเชิงเทรา</option>
+                    <option value="11">ชลบุรี</option>
+                    <option value="9">ชัยนาท</option>
+                    <option value="25">ชัยภูมิ</option>
+                    <option value="69">ชุมพร</option>
+                    <option value="45">เชียงราย</option>
+                    <option value="38">เชียงใหม่</option>
+                    <option value="72">ตรัง</option>
+                    <option value="14">ตราด</option>
+                    <option value="50">ตาก</option>
+                    <option value="17">นครนายก</option>
+                    <option value="58">นครปฐม</option>
+                    <option value="36">นครพนม</option>
+                    <option value="19">นครราชสีมา</option>
+                    <option value="63">นครศรีธรรมราช</option>
+                    <option value="47">นครสวรรค์</option>
+                    <option value="3">นนทบุรี</option>
+                    <option value="76">นราธิวาส</option>
+                    <option value="43">น่าน</option>
+                    <option value="77">บึงกาฬ</option>
+                    <option value="20">บุรีรัมย์</option>
+                    <option value="4">ปทุมธานี</option>
+                    <option value="62">ประจวบคีรีขันธ์</option>
+                    <option value="16">ปราจีนบุรี</option>
+                    <option value="74">ปัตตานี</option>
+                    <option value="5">พระนครศรีอยุธยา</option>
+                    <option value="44">พะเยา</option>
+                    <option value="65">พังงา</option>
+                    <option value="73">พัทลุง</option>
+                    <option value="53">พิจิตร</option>
+                    <option value="52">พิษณุโลก</option>
+                    <option value="61">เพชรบุรี</option>
+                    <option value="54">เพชรบูรณ์</option>
+                    <option value="42">แพร่</option>
+                    <option value="66">ภูเก็ต</option>
+                    <option value="32">มหาสารคาม</option>
+                    <option value="37">มุกดาหาร</option>
+                    <option value="46">แม่ฮ่องสอน</option>
+                    <option value="24">ยโสธร</option>
+                    <option value="75">ยะลา</option>
+                    <option value="33">ร้อยเอ็ด</option>
+                    <option value="68">ระนอง</option>
+                    <option value="12">ระยอง</option>
+                    <option value="55">ราชบุรี</option>
+                    <option value="7">ลพบุรี</option>
+                    <option value="40">ลำปาง</option>
+                    <option value="39">ลำพูน</option>
+                    <option value="30">เลย</option>
+                    <option value="22">ศรีสะเกษ</option>
+                    <option value="35">สกลนคร</option>
+                    <option value="70">สงขลา</option>
+                    <option value="71">สตูล</option>
+                    <option value="2">สมุทรปราการ</option>
+                    <option value="60">สมุทรสงคราม</option>
+                    <option value="59">สมุทรสาคร</option>
+                    <option value="18">สระแก้ว</option>
+                    <option value="10">สระบุรี</option>
+                    <option value="8">สิงห์บุรี</option>
+                    <option value="51">สุโขทัย</option>
+                    <option value="57">สุพรรณบุรี</option>
+                    <option value="67">สุราษฎร์ธานี</option>
+                    <option value="21">สุรินทร์</option>
+                    <option value="31">หนองคาย</option>
+                    <option value="27">หนองบัวลำภู</option>
+                    <option value="6">อ่างทอง</option>
+                    <option value="26">อำนาจเจริญ</option>
+                    <option value="29">อุดรธานี</option>
+                    <option value="41">อุตรดิตถ์</option>
+                    <option value="48">อุทัยธานี</option>
+                    <option value="23">อุบลราชธานี</option>
+                  </select>
+                  <label className="form-label">จังหวัดที่จดทะเบียน</label>
+                  <div className="feedback">กรุณาเลือก</div>
+                </div>
+              </div>
             </div>
 
-            {/* <script type="903f39338c6b3be20c53ec4e-text/javascript">
+            <h6 className="fs-18 f-bd mb-12 mt-4">ระยะเวลาคุ้มครอง</h6>
+            <span className="fs-14 f-bd d-block mb-2 coverageDate-textFeild">วันที่เริ่มความคุ้มครอง</span>
+            <div className="form-group mb-12 form-coverage">
+              <div>
+                <div className="d-flex">
+                  <div className="w-100 position-relative year">
+                    <select
+                      name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlYearCoverage"
+                      id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlYearCoverage"
+                      className="form-control"
+                    ></select>
+                    <label className="form-label">ปี</label>
+                  </div>
+                  <div className="ms-2 me-2 w-100 position-relative month">
+                    <select
+                      name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlMonthCoverage"
+                      id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlMonthCoverage"
+                      className="form-control"
+                    ></select>
+                    <label className="form-label">เดือน</label>
+                  </div>
+                  <div className="ms-0 w-100 position-relative day">
+                    <select
+                      name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlDayCoverage"
+                      id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlDayCoverage"
+                      className="form-control"
+                    ></select>
+                    <label className="form-label">วัน</label>
+                  </div>
+                </div>
+                <div className="feedback d-none">กรุณาเลือก</div>
+              </div>
+              <input
+                type="hidden"
+                name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$coverageDateStartVal"
+                id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_coverageDateStartVal"
+              />
+              <input
+                type="hidden"
+                name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$coverageDateEndVal"
+                id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_coverageDateEndVal"
+              />
+              <input
+                type="hidden"
+                name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdCoverageEndDate"
+                id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdCoverageEndDate"
+                value="2025-05-21"
+              />
+              <input
+                type="hidden"
+                name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdChannelText"
+                id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdChannelText"
+                value="CXM"
+              />
+              <input
+                type="hidden"
+                name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdPriceText"
+                id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdPriceText"
+                value="645.21"
+              />
+              <input
+                type="hidden"
+                name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdVehicleCategoryId"
+                id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdVehicleCategoryId"
+                value="1"
+              />
+              <input
+                type="hidden"
+                name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdVehicleCategoryText"
+                id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdVehicleCategoryText"
+                value="ส่วนบุคคล"
+              />
+              <input
+                type="hidden"
+                name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdVehicleNameText"
+                id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdVehicleNameText"
+                value="รถเก๋ง"
+              />
+
+              <input
+                type="hidden"
+                name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdTypeOfDataCustomerText"
+                id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdTypeOfDataCustomerText"
+                value="NEW"
+              />
+              <input
+                type="hidden"
+                name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$hdSelVehicleNameText"
+                id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_hdSelVehicleNameText"
+              />
+            </div>
+
+            <div className="d-flex justify-content-between mt-2 mb-4">
+              <span className="f-md text-grey">วันที่สิ้นสุดความคุ้มครอง</span>
+              <span className="f-bd text-grey line-dotted">
+                <strong id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_coverageDateEndShow">
+                  31 มกราคม 2567
+                </strong>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="container">
+        {/* onclick="if (!window.__cfRLUnblockHandlers) return false; return checkValidation();" */}
+        <a
+          href="/th/CustomerInformation"
+          id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_btnSubmit"
+          className="btn btn-primary fs-6 d-flex justify-content-center align-items-center mx-auto mb-4 f-bd"
+          data-cf-modified-903f39338c6b3be20c53ec4e-=""
+        >
+          ดำเนินการต่อ
+        </a>
+      </div>
+
+      <div
+        className="modal hint-modal fade"
+        id="vidHelperModal"
+        aria-labelledby="exampleModalLongTitle"
+        style={{ display: 'none' }}
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title f-bd fs-18" id="exampleModalLongTitle">
+                หมายเลขตัวถังดูได้จากที่ไหนบ้าง
+              </h5>
+              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body" style={{ maxHeight: '314px' }}>
+              <nav>
+                <div className="nav nav-tabs border-0" id="nav-tab" role="tablist">
+                  {/* onclick="if (!window.__cfRLUnblockHandlers) return false; PushGTMDefault('car_info', 'click_hint', 'เล่มทะเบียน');PushGTMDefault('car_info', 'display', 'เล่มทะเบียน');" */}
+                  <button
+                    className="nav-link f-bd active"
+                    id="nav-bookNumber-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#nav-bookNumber"
+                    type="button"
+                    role="tab"
+                    aria-controls="nav-bookNumber"
+                    aria-selected="false"
+                    data-cf-modified-903f39338c6b3be20c53ec4e-=""
+                  >
+                    เล่มทะเบียน
+                  </button>
+                  {/* onclick="if (!window.__cfRLUnblockHandlers) return false; PushGTMDefault('car_info', 'click_hint', 'ป้ายภาษี');PushGTMDefault('car_info', 'display', 'ป้ายภาษี');" */}
+                  <button
+                    className="nav-link f-bd"
+                    id="nav-ctp-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#nav-ctp"
+                    type="button"
+                    role="tab"
+                    aria-controls="nav-ctp"
+                    aria-selected="true"
+                    data-cf-modified-903f39338c6b3be20c53ec4e-=""
+                  >
+                    ป้ายภาษี
+                  </button>
+                  {/* onclick="if (!window.__cfRLUnblockHandlers) return false; PushGTMDefault('car_info', 'click_hint', 'ตัวรถ');PushGTMDefault('car_info', 'display', 'ตัวรถ');" */}
+                  <button
+                    className="nav-link f-bd me-0"
+                    id="nav-ctpNumber-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#nav-ctpNumber"
+                    type="button"
+                    role="tab"
+                    aria-controls="nav-ctpNumber"
+                    aria-selected="false"
+                    data-cf-modified-903f39338c6b3be20c53ec4e-=""
+                  >
+                    ตัวรถ
+                  </button>
+                </div>
+              </nav>
+              <div className="tab-content" id="nav-tabContent">
+                <div
+                  className="tab-pane fade show active"
+                  id="nav-bookNumber"
+                  role="tabpanel"
+                  aria-labelledby="nav-bookNumber-tab"
+                >
+                  <img
+                    className="img-fluid d-block my-3 mx-auto"
+                    alt="เล่มทะเบียน"
+                    width="280"
+                    height="226"
+                    src="/assets/object/hint-book-number.png"
+                  />
+                </div>
+                <div className="tab-pane fade" id="nav-ctp" role="tabpanel" aria-labelledby="nav-ctp-tab">
+                  <img
+                    className="img-fluid d-block my-3 mx-auto"
+                    alt="ป้ายภาษี"
+                    width="300"
+                    height="226"
+                    src="/assets/object/hint-ctp.png"
+                  />
+                </div>
+                <div className="tab-pane fade" id="nav-ctpNumber" role="tabpanel" aria-labelledby="nav-ctpNumber-tab">
+                  <img
+                    className="img-fluid d-block my-3 mx-auto"
+                    alt="ตัวรถ"
+                    width="280"
+                    height="226"
+                    src="/assets/object/hint-ctp-number.png"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* <script type="903f39338c6b3be20c53ec4e-text/javascript">
     let selectOrderBy = [];
     document.addEventListener(("DOMContentLoaded"), () => {
         $('select[id*="ddlCarBrand"]').select2(
@@ -2197,15 +2423,24 @@ export default async function CarInformation() {
     }
 </script> */}
 
-            <div className="modal fade modalSpinner" id="ModalLoading" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
-                <div className="modal-dialog modal-dialog-centered">
-                    <div className="modal-content bg-transparent border-0 justify-content-center align-items-center mx-auto">
-                        <div className="spinner-border text-light" ></div>
-                        <p className="text-white text-center mt-3 mb-0">กำลังดำเนินการ<br />
-                            กรุณารอซักครู่</p>
-                    </div>
-                </div>
-            </div>
-        </main>
-    );
+      <div
+        className="modal fade modalSpinner"
+        id="ModalLoading"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-content bg-transparent border-0 justify-content-center align-items-center mx-auto">
+            <div className="spinner-border text-light"></div>
+            <p className="text-white text-center mt-3 mb-0">
+              กำลังดำเนินการ
+              <br />
+              กรุณารอซักครู่
+            </p>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
 }
