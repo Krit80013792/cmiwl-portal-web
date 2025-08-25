@@ -38,7 +38,7 @@ async function getCarColor(token: string) {
 
 export default async function CarInformation() {
 
-    const session = await getIronSession(cookies(), sessionOptions);
+    const session = await getIronSession(await cookies(), sessionOptions);
     const sessionData = (session as any)?.usrData?.data;
     const token = sessionData?.jwt;
 

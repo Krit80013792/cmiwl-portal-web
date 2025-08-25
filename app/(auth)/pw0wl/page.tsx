@@ -92,7 +92,7 @@ const LoginPage = () => {
                                 <label htmlFor="password1" className="block text-900 font-medium text-xl mb-2">
                                     Password
                                 </label>
-                                <Password inputId="password1" value={pw} onChange={(e) => setPw(e.target.value)} required placeholder="Password" toggleMask className="w-full mb-5" inputClassName="w-full p-3 md:w-30rem"></Password>
+                                <Password inputId="password1" value={pw} onChange={(e) => setPw(e.target.value)} required placeholder="Password" className="w-full mb-5" inputClassName="w-full p-3 md:w-30rem"></Password>
 
                                 <div className="flex align-items-center justify-content-between mb-5 gap-5"></div>
                                 <Button label="Sign In" className="w-full p-3 text-xl" type="submit"></Button>

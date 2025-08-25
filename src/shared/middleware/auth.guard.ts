@@ -2,7 +2,7 @@ import { cookies } from 'next/headers';
 import { decrypt } from '../utils/auth.crypto';
 
 export async function authGuard() {
-    const cookie = cookies().get(`${process.env.APP_ENV}_cmiwl_cms_token`);
+    const cookie = (await cookies()).get(`${process.env.APP_ENV}_cmiwl_cms_token`);
 
     if (!cookie?.value) {
         throw new Error('Unauthorized');
@@ -15,10 +15,10 @@ export async function authGuard() {
         return {
             user,
             permissions: user.permissions || [],
-            roles: user.roles || [],
+            roles: user.roles || []
         };
     } catch (error) {
         console.error(`Error AuthGuard :`, error);
         throw new Error('Unauthorized');
     }
-};
+}

@@ -6,7 +6,7 @@ import { sessionOptions } from '@/src/shared/utils/session';
 
 export async function POST(oReq: NextRequest) {
     try {
-        const session = await getIronSession(cookies(), sessionOptions);
+        const session = await getIronSession(await cookies(), sessionOptions);
 
         const { ck, token } = await oReq.json();
 

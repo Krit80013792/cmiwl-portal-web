@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Insurers() {
 
-    const session = await getIronSession(cookies(), sessionOptions);
+    const session = await getIronSession(await cookies(), sessionOptions);
     const sessionData = (session as any)?.usrData?.data;
     const channel = sessionData?.prefill?.channel;
 

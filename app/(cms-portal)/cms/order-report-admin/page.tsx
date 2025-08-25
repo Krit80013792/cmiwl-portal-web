@@ -15,11 +15,18 @@ import { getCmiApiLogs } from '@/services/client/cmiLogsApi.service';
 import { dataColumns } from './_constants';
 import FormDialog, { FormDialogRef } from '@/modules/FormDialog';
 import 'primeicons/primeicons.css';
+import { getMasterDataByEndpoint } from '@/services/client/master-data.service';
+
+interface ChannelOptions {
+    label: string;
+    value: string;
+}
 
 const OrderReportAdminPage = () => {
     const toastRef = useRef<Toast>(null);
     const dialogViewRef = useRef<FormDialogRef>(null);
     const [channel, setChannel] = useState<string>('');
+    const [channelOptions, setChannelOptions] = useState<ChannelOptions[]>([]);
     const [startDate, setStartDate] = useState<Date | null>(new Date());
     const [endDate, setEndDate] = useState<Date | null>(new Date());
     const [name, setName] = useState<string>('');
@@ -57,8 +64,24 @@ const OrderReportAdminPage = () => {
         }
     };
 
+    const fetchChannelOptions = async () => {
+        try {
+            const apiRoute = await setApiRoute();
+            const res = await getMasterDataByEndpoint(apiRoute, apiRoute?.amd, 'channels');
+            const data = await res.json();
+            const options: ChannelOptions[] = data.data.map((channel: { displayName: string; keyCode: string }) => ({
+                label: channel.displayName,
+                value: channel.keyCode
+            }));
+            setChannelOptions(options);
+        } catch (error) {
+            console.error('Error fetching channel options:', error);
+        }
+    };
+
     useEffect(() => {
         fetchData();
+        fetchChannelOptions();
     }, []);
 
     const handleSearch = async () => {
@@ -85,46 +108,60 @@ const OrderReportAdminPage = () => {
                     children: (
                         <div style={{ minWidth: 350, background: '#f8f9fa', borderRadius: 8, padding: 20 }}>
                             <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
-                                <label className="font-bold" style={{ width: 130, color: '#495057' }}>
+                                <label htmlFor={`orderNo-detail-${item.orderNo}`} className="font-bold" style={{ width: 130, color: '#495057' }}>
                                     Order No:
                                 </label>
-                                <span style={{ color: '#212529' }}>{item.orderNo || '-'}</span>
+                                <span id={`orderNo-detail-${item.orderNo}`} style={{ color: '#212529' }}>
+                                    {item.orderNo || '-'}
+                                </span>
                             </div>
                             <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
-                                <label className="font-bold" style={{ width: 130, color: '#495057' }}>
+                                <label htmlFor={`channel-detail-${item.orderNo}`} className="font-bold" style={{ width: 130, color: '#495057' }}>
                                     Channel:
                                 </label>
-                                <span style={{ color: '#212529' }}>{item.channel || '-'}</span>
+                                <span id={`channel-detail-${item.orderNo}`} style={{ color: '#212529' }}>
+                                    {item.channel || '-'}
+                                </span>
                             </div>
                             <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
-                                <label className="font-bold" style={{ width: 130, color: '#495057' }}>
+                                <label htmlFor={`name-detail-${item.orderNo}`} className="font-bold" style={{ width: 130, color: '#495057' }}>
                                     Name:
                                 </label>
-                                <span style={{ color: '#212529' }}>{item.name || '-'}</span>
+                                <span id={`name-detail-${item.orderNo}`} style={{ color: '#212529' }}>
+                                    {item.name || '-'}
+                                </span>
                             </div>
                             <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
-                                <label className="font-bold" style={{ width: 130, color: '#495057' }}>
+                                <label htmlFor={`licensePlate-detail-${item.orderNo}`} className="font-bold" style={{ width: 130, color: '#495057' }}>
                                     License Plate:
                                 </label>
-                                <span style={{ color: '#212529' }}>{item.licensePlate || '-'}</span>
+                                <span id={`licensePlate-detail-${item.orderNo}`} style={{ color: '#212529' }}>
+                                    {item.licensePlate || '-'}
+                                </span>
                             </div>
                             <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
-                                <label className="font-bold" style={{ width: 130, color: '#495057' }}>
+                                <label htmlFor={`date-detail-${item.orderNo}`} className="font-bold" style={{ width: 130, color: '#495057' }}>
                                     Date:
                                 </label>
-                                <span style={{ color: '#212529' }}>{item.date || '-'}</span>
+                                <span id={`date-detail-${item.orderNo}`} style={{ color: '#212529' }}>
+                                    {item.date || '-'}
+                                </span>
                             </div>
                             <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
-                                <label className="font-bold" style={{ width: 130, color: '#495057' }}>
+                                <label htmlFor={`status-detail-${item.orderNo}`} className="font-bold" style={{ width: 130, color: '#495057' }}>
                                     Status:
                                 </label>
-                                <span style={{ color: item.status === 'success' ? '#28a745' : '#dc3545', fontWeight: 500 }}>{item.status || '-'}</span>
+                                <span id={`status-detail-${item.orderNo}`} style={{ color: item.status === 'success' ? '#28a745' : '#dc3545', fontWeight: 500 }}>
+                                    {item.status || '-'}
+                                </span>
                             </div>
                             <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
-                                <label className="font-bold" style={{ width: 130, color: '#495057' }}>
+                                <label htmlFor={`message-detail-${item.orderNo}`} className="font-bold" style={{ width: 130, color: '#495057' }}>
                                     Message:
                                 </label>
-                                <span style={{ color: '#212529' }}>{item.message || '-'}</span>
+                                <span id={`message-detail-${item.orderNo}`} style={{ color: '#212529' }}>
+                                    {item.message || '-'}
+                                </span>
                             </div>
                         </div>
                     )
@@ -155,13 +192,7 @@ const OrderReportAdminPage = () => {
                             Channel:
                         </label>
                         <div className="col-12 md:col-6">
-                            <Dropdown
-                                inputId="channel"
-                                value={channel}
-                                onChange={(e) => setChannel(e.value)}
-                                // options={channelOptions}
-                                placeholder="Select Channel"
-                            />
+                            <Dropdown inputId="channel" value={channel} onChange={(e) => setChannel(e.value)} options={channelOptions} placeholder="Select Channel" />
                         </div>
                     </div>
                     <div className="field grid">

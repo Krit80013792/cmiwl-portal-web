@@ -75,7 +75,7 @@ async function getCompulsoryTypes(psToken: string, psChannelCode: string): Promi
 
 export default async function VehicleCTP() {
 
-    const session = await getIronSession(cookies(), sessionOptions);
+    const session = await getIronSession(await cookies(), sessionOptions);
     const sessionData = (session as any)?.usrData?.data;
     const token = sessionData?.jwt;
     const channel = sessionData?.prefill?.channel;
