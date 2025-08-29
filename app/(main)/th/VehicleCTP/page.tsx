@@ -1,13 +1,9 @@
-/* eslint-disable @next/next/no-img-element */
-
 import React from 'react'
 import { Metadata } from 'next'
-import { cookies } from 'next/headers'
-import { getIronSession } from 'iron-session'
-import { sessionOptions } from '@/src/shared/utils/session'
-
-import VehicleListComponent from '@/cmi-layout/components/VehicleListComponent'
+import VehicleList from './_components/VehicleList'
+import MainWithDynamicStyle from '../../../../cmi-layout/components/MainWithDynamicStyle'
 import redis from '@/src/shared/utils/redis'
+import { getDataFromSession } from '@/helpers/functions/getDataFromSession'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +22,7 @@ interface BaseResponse {
 
 async function getCompulsoryTypes(psToken: string, psChannelCode: string): Promise<BaseResponse> {
   const cacheKey = `${psChannelCode}:CompulsoryTypes`
-  //* Fecth from Redis cache first
+  // * Fecth from Redis cache first
   try {
     const cached = await redis.get(cacheKey)
     if (cached) {
@@ -50,20 +46,25 @@ async function getCompulsoryTypes(psToken: string, psChannelCode: string): Promi
         Authorization: `Bearer ${psToken}`,
       },
     })
-    if (res?.status === 401) {
-      //TODO: redirect
+    if (res?.status === 200) {
+      const resData = await res.json()
+      console.info('Fetched CompulsoryTypes from API')
+      const data = resData?.data?.compulsoryTypes?.map((item: any) => ({
+        ...item,
+      }))
+      return {
+        message: 'success',
+        data: data ?? [],
+        from: 'db',
+      }
     }
-    const resData = await res.json()
-
-    console.info('Fetched CompulsoryTypes from API')
-
     return {
-      message: 'success',
-      data: resData?.data ?? [],
+      message: 'failed',
+      data: [],
       from: 'db',
     }
-  } catch (e) {
-    console.warn('API unavailable:', e)
+  } catch (error) {
+    console.warn('API unavailable:', error)
     return {
       message: 'failed',
       data: [],
@@ -73,18 +74,22 @@ async function getCompulsoryTypes(psToken: string, psChannelCode: string): Promi
 }
 
 export default async function VehicleCTP() {
-  const session = await getIronSession(await cookies(), sessionOptions)
-  const sessionData = (session as any)?.usrData?.data
-  const token = sessionData?.jwt
-  const channel = sessionData?.prefill?.channel
-  const typeOfData = sessionData?.prefill?.typeOfData
-  const resData = await getCompulsoryTypes(token, channel?.channelCode)
-
+  const { channelData, token, prefillData } = await getDataFromSession()
+  let configValue: any = {}
+  try {
+    configValue = JSON.parse(channelData?.channelConfig?.configValue ?? '{}')
+  } catch {
+    configValue = {}
+  }
+  const resData = await getCompulsoryTypes(token as string, channelData?.channelCode as string)
+  const data = resData.data ?? []
+  const isProductCmiDetailValid = Object.values(prefillData?.productCmiDetail || {}).every(
+    (value) => value !== null && value !== undefined,
+  )
   return (
-    <main>
+    <MainWithDynamicStyle primaryColor={configValue?.primaryColor} secondaryColor={configValue?.secondaryColor}>
       <div className="head-bar">
         <div className="container d-flex align-items-center">
-          {/* onclick="if (!window.__cfRLUnblockHandlers) return false; return backOnclick();" */}
           <a href="/th/intro-channel" className="back-btn">
             <img alt="กลับ" width="36" height="36" src="/assets/icon/back.png" />
           </a>
@@ -97,66 +102,8 @@ export default async function VehicleCTP() {
         </div>
       </div>
 
-      {/* //TODO: Move this to seperate component */}
-      {typeOfData && typeOfData === 'new' && (
-        <div className="container pt-48">
-          <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_zoneCusNew">
-            <div className="pt-4">
-              <h1 className="mb-12 fs-18 text-black">
-                <strong className="f-bd">เลือกประเภทรถ</strong>
-              </h1>
-            </div>
-          </div>
-          <VehicleListComponent poCompulsoryTypes={resData?.data?.compulsoryTypes} />
-
-          <input
-            type="hidden"
-            name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdftype"
-            id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdftype"
-            value={resData?.from}
-          />
-          <input
-            type="hidden"
-            name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarGroupID"
-            id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarGroupID"
-          />
-          <input
-            type="hidden"
-            name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarGroupVal"
-            id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarGroupVal"
-          />
-          <input
-            type="hidden"
-            name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarType"
-            id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarType"
-            value="0"
-          />
-          <input
-            type="hidden"
-            name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarName"
-            id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarName"
-            value="0"
-          />
-          <input
-            type="hidden"
-            name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarTypeRenew"
-            id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarTypeRenew"
-            value="0"
-          />
-          <input
-            type="hidden"
-            name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdChannelText"
-            id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdChannelText"
-            value="CXM"
-          />
-          {/* <input type="submit" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$btnSelVehicle" value="" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_btnSelVehicle" className="d-none" /> */}
-          {/* <input type="submit" name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$btnSelRenew" value="" id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_btnSelRenew" className="d-none" /> */}
-        </div>
-      )}
-
-      {/* //TODO: Move this to seperate component */}
-      {typeOfData && typeOfData === 'renew' && (
-        <div className="container pt-48">
+      <div className="container pt-48">
+        {isProductCmiDetailValid && (
           <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_zoneCusRenew">
             <div className="pt-4">
               <h1 className="mb-12 fs-18 text-black">
@@ -166,16 +113,9 @@ export default async function VehicleCTP() {
             <div className="row car-select mb-4">
               <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_showCarLicense">
                 <div className="col-6 pe-2">
-                  {/* onclick="if (!window.__cfRLUnblockHandlers) return false; selRenew(this);" */}
-                  <div
-                    className="pt-10 pb-2 px-12 rounded-4 choice-card text-center h-100 active"
-                    data-cartype="ไม่เกิน 40 ที่นั่ง"
-                    data-cargroup="4"
-                    data-cardisplayname="รถโดยสารมากกว่า 7 ที่นั่ง"
-                    data-cf-modified-9c7f6b03e9a69efe3189d580-=""
-                  >
+                  <div className="pt-10 pb-2 px-12 rounded-4 choice-card text-center h-100 active">
                     <p className="mb-0 text-grey fs-22">
-                      <strong className="f-bd">6กย 1001</strong>
+                      <strong className="f-bd">{`${prefillData?.productCmiDetail?.licensePrefix}${prefillData?.productCmiDetail?.licenseNo}`}</strong>
                     </p>
                     <p className="mb-0 text-center text-grey">รถยนต์</p>
                   </div>
@@ -189,110 +129,22 @@ export default async function VehicleCTP() {
               <p className="mb-12 text-grey">เลือกประเภทรถที่ต้องการซื้อ พ.ร.บ.</p>
             </div>
           </div>
-
-          <VehicleListComponent />
-
-          <input
-            type="hidden"
-            name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarGroupID"
-            id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarGroupID"
-          />
-          <input
-            type="hidden"
-            name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarGroupVal"
-            id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarGroupVal"
-          />
-          <input
-            type="hidden"
-            name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarType"
-            id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarType"
-            value="0"
-          />
-          <input
-            type="hidden"
-            name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarName"
-            id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarName"
-            value="0"
-          />
-
-          <input
-            type="hidden"
-            name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdfSelCarTypeRenew"
-            id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdfSelCarTypeRenew"
-            value="0"
-          />
-
-          <input
-            type="hidden"
-            name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$hdChannelText"
-            id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_hdChannelText"
-            value="CXM"
-          />
-
-          <input
-            type="submit"
-            name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$btnSelVehicle"
-            value=""
-            id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_btnSelVehicle"
-            className="d-none"
-          />
-          <input
-            type="submit"
-            name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$VehicleCTP$btnSelRenew"
-            value=""
-            id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_btnSelRenew"
-            className="d-none"
-          />
-        </div>
-      )}
-
-      {/* <script type="2d7b21b358a016e2ff53c284-text/javascript">
-    const selVehicle = (element) => {
-                    let carGroup = element.getAttribute('data-cargroup');
-                let carGroupVal = element.getAttribute('data-cargroupval');
-                let carType = element.getAttribute('data-cartype');
-                let carDisplayName = element.getAttribute('data-carDisplayName');
-                if (document.querySelector("[id*=showVehicle] .choice-card.active")) {document.querySelector("[id*=showVehicle] .choice-card.active").classList.remove("active"); }
-                element.classList.add('active');
-                document.querySelector("[id*=hdfSelCarGroupID]").value = carGroup;
-                document.querySelector("[id*=hdfSelCarGroupVal]").value = carGroupVal;
-                document.querySelector("[id*=hdfSelCarType]").value = carType;
-                document.querySelector("[id*=hdfSelCarName]").value = carDisplayName;
-                new bootstrap.Modal(document.getElementById('ModalLoading')).show();
-                document.querySelector("[id*=btnSelVehicle]").click();
-                PushGTMDefault('vehicle_category', 'click_vehicle', carDisplayName);
-    }
-
-                function activeVehicle(val) {
-        if (document.querySelector("[id*=showVehicle] .choice-card[data-cargroup='" + val + "']")) {
-                    document.querySelector("[id*=showVehicle] .choice-card[data-cargroup='" + val + "']").classList.add('active');
-        }
-    }
-    const selRenew = (element) => {
-                    // document.querySelector("[id*=hdfSelCarGroupID]").value = carGroup;
-                    // document.querySelector("[id*=hdfSelCarGroupVal]").value = carGroupVal;
-                    // document.querySelector("[id*=hdfSelCarType]").value = carType;
-                    // document.querySelector("[id*=hdfSelCarName]").value = carDisplayName;
-
-                    let carGroup = element.getAttribute('data-cargroup');
-                let carType = element.getAttribute('data-cartype');
-                let carDisplayName = element.getAttribute('data-carDisplayName');
-                document.querySelector("[id*=hdfSelCarGroupID]").value = carGroup;
-                document.querySelector("[id*=hdfSelCarTypeRenew]").value = carType;
-                document.querySelector("[id*=hdfSelCarName]").value = carDisplayName;
-
-                document.querySelector("[id*=hdfSelCarName]").value = 'รถยนต์';
-                document.querySelector("[id*=btnSelRenew]").click();
-                PushGTMDefault('vehicle_category', 'click_vehicle', 'รถยนต์');
-    }
-
-                function backOnclick()
-                {
-                    PushGTMEventClickBack();
-                new bootstrap.Modal(document.getElementById('ModalLoading')).show();
-    }
-
-            </script> */}
-    </main>
+        )}
+        {!isProductCmiDetailValid && (
+          <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCTP_zoneCusNew">
+            <div className="pt-4">
+              <h1 className="mb-12 fs-18 text-black">
+                <strong className="f-bd">เลือกประเภทรถ</strong>
+              </h1>
+            </div>
+          </div>
+        )}
+        <VehicleList
+          poCompulsoryTypes={data?.sort(
+            (a: { itemOrder: number }, b: { itemOrder: number }) => (a.itemOrder ?? 0) - (b.itemOrder ?? 0),
+          )}
+        />
+      </div>
+    </MainWithDynamicStyle>
   )
 }

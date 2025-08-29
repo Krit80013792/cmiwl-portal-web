@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { Metadata } from 'next'
-import { getDataFromSession } from '@/app/helpers/functions/getDataFromSession'
+import { getDataFromSession } from '@/helpers/functions/getDataFromSession'
 
 export const dynamic = 'force-dynamic'
 

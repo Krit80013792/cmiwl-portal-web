@@ -18,14 +18,14 @@ export async function getConfigs(): Promise<ConfigDTO[]> {
   const cacheTtl = 60 * 60 * 24 * 30 //* 30 Days
 
   //* Find from cache first
-  try {
-    const cached = await redis.get(cacheKey)
-    if (cached) {
-      return JSON.parse(cached) as ConfigDTO[]
-    }
-  } catch (err) {
-    console.warn('Redis unavailable, fallback to DB:', err)
-  }
+  // try {
+  //   const cached = await redis.get(cacheKey)
+  //   if (cached) {
+  //     return JSON.parse(cached) as ConfigDTO[]
+  //   }
+  // } catch (err) {
+  //   console.warn('Redis unavailable, fallback to DB:', err)
+  // }
 
   //* Fallback to DB
   const configService = await ConfigServiceInstance()

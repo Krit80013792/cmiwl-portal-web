@@ -7,6 +7,8 @@ export interface FormDialogConfig {
   title: string
   draggable: boolean
   children: React.ReactNode
+  style?: React.CSSProperties
+  footer?: React.ReactNode
 }
 
 export interface FormDialogRef {
@@ -38,10 +40,11 @@ const FormDialog = forwardRef<FormDialogRef, FormDialogProps>((props, ref) => {
     <Dialog
       header={config?.title || 'Form Dialog'}
       visible={visible}
-      style={{ width: '400px' }}
+      style={config?.style}
       modal
       onHide={onHide}
       draggable={config?.draggable}
+      footer={config?.footer}
     >
       {config?.children}
     </Dialog>

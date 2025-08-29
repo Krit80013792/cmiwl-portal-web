@@ -6,7 +6,8 @@ import { sessionOptions } from '@/src/shared/utils/session'
 
 export async function POST(oReq: NextRequest) {
   try {
-    const session = await getIronSession(await cookies(), sessionOptions)
+    const session: any = await getIronSession(await cookies(), sessionOptions)
+    session.destroy()
 
     const { ck, token } = await oReq.json()
 
@@ -14,7 +15,6 @@ export async function POST(oReq: NextRequest) {
       return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 })
     }
 
-    //TODO: Change this to env
     const res = await fetch(`${process.env.TIDLOR_TECH_URI}/api/auth/v1/authorize`, {
       method: 'POST',
       headers: {
@@ -31,7 +31,7 @@ export async function POST(oReq: NextRequest) {
       return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 })
     }
 
-    ;(session as any).usrData = data
+    session.usrData = data
     await session.save()
 
     return new NextResponse(JSON.stringify({ message: `Success` }), { status: 200 })
