@@ -10,16 +10,14 @@ export type SessionData = {
     channelCode: string | null
   }
   token: string | null
-  prefillData: any
-  vehicleCategory: any
+  prefill: any
 }
 
 export const getDataFromSession: () => Promise<SessionData> = async () => {
   const session: any = await getIronSession(await cookies(), sessionOptions)
   const sessionData = session?.usrData?.data
-  const vehicleCategory = session?.vehicleCategory
-  const prefillData = sessionData?.prefill
-  const channel = prefillData?.channel
+  const prefill = sessionData?.prefill
+  const channel = prefill?.channel
   const token = sessionData?.jwt
 
   const configs = await getConfigs()
@@ -30,5 +28,5 @@ export const getDataFromSession: () => Promise<SessionData> = async () => {
     channelCode: channel?.channelCode,
   }
 
-  return { channelData, token, prefillData, vehicleCategory }
+  return { channelData, token, prefill }
 }

@@ -1,36 +1,109 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
-import { getCarBrands, getCarColors, getCarModels } from '../../_actions'
-import FormDialog, { FormDialogRef } from '@/modules/FormDialog'
+import { getCarBrands, getCarColors, getCarModels, getProvinces } from '../../_actions'
 import { RadioButton } from 'primereact/radiobutton'
+import { MONTHS_TH, YEAR_REGISTER } from '../../_constants'
+import { ChassisDialog } from './ChassisDialog'
+import dayjs from 'dayjs'
+import 'dayjs/locale/th'
+import { useDispatch, useSelector } from 'react-redux'
+import { carUserDetailSlice } from '@/stores/redux/slices/carUserDetailSlice'
+import { useRouter } from 'next/navigation'
+import { Select } from '@/cmi-layout/components/Select'
+import { Input } from '@/cmi-layout/components/Input'
+import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
+import { convertStrToFormat } from '@/helpers/functions/utils'
+dayjs.locale('th')
 
 interface FormProps {
   data: any
 }
 
 const CarInformationForm = ({ data }: FormProps) => {
-  const dialogChassisRef = useRef<FormDialogRef>(null)
+  const route = useRouter()
+  const prefillData = useSelector((state: any) => state.prefillData)
+  const dispatch = useDispatch()
+  const [open, setOpen] = useState<boolean>(false)
   const [carColorList, setCarColorList] = useState<any[]>([])
   const [carBrandList, setCarBrandList] = useState<any[]>([])
   const [carModelList, setCarModelList] = useState<any[]>([])
+  const [carProvinceList, setCarProvinceList] = useState<any[]>([])
   const [carBrandId, setCarBrandId] = useState<string | null>(null)
-  const [carModelId, setCarModelId] = useState<string | null>(null)
+  const [carModelName, setCarModelName] = useState<string | null>(null)
   const [carColorId, setCarColorId] = useState<string | null>(null)
   const [chassisNumber, setChassisNumber] = useState<string | null>(null)
   const [isRedLicense, setIsRedLicense] = useState<boolean>(false)
-  const [carLicense, setCarLicense] = useState<string | null>(null)
+  const [licenseNo, setLicenseNo] = useState<string | null>(null)
+  const [yearCoverage, setYearCoverage] = useState<number | null>(null)
+  const [monthCoverage, setMonthCoverage] = useState<number | null>(null)
+  const [dayCoverage, setDayCoverage] = useState<number | null>(null)
+  const [registrationYear, setRegistrationYear] = useState<string>('')
+  const [registrationProvinceId, setRegistrationProvinceId] = useState<string>('')
+
+  useEffect(() => {
+    if (!yearCoverage) setYearCoverage(dayjs().year())
+    if (!monthCoverage) setMonthCoverage(dayjs().month() + 1)
+    if (!dayCoverage) setDayCoverage(dayjs().date())
+    if (!carBrandId) setCarBrandId(prefillData?.productCmiDetail?.carBrandId ?? null)
+    if (!carModelName) setCarModelName(prefillData?.productCmiDetail?.carModelName ?? null)
+    if (!carColorId) setCarColorId(prefillData?.productCmiDetail?.carColorId ?? null)
+    if (!chassisNumber) setChassisNumber(prefillData?.productCmiDetail?.chassisNumber ?? null)
+    if (!licenseNo)
+      setLicenseNo(
+        prefillData?.productCmiDetail?.licenseNo
+          ? `${prefillData?.productCmiDetail?.licensePrefix}${prefillData?.productCmiDetail?.licenseNo}`
+          : null,
+      )
+    if (!registrationYear) setRegistrationYear(prefillData?.productCmiDetail?.registrationYear ?? null)
+    if (!registrationProvinceId)
+      setRegistrationProvinceId(prefillData?.productCmiDetail?.registrationProvinceId ?? null)
+  }, [
+    yearCoverage,
+    monthCoverage,
+    dayCoverage,
+    carBrandId,
+    carModelName,
+    carColorId,
+    chassisNumber,
+    licenseNo,
+    registrationYear,
+    registrationProvinceId,
+  ])
+
+  const fetchCarProvinces = useCallback(async () => {
+    const res = await getProvinces({ token: data?.token })
+    setCarProvinceList(res.data.data)
+  }, [data?.token])
 
   const fetchCarColors = useCallback(async () => {
     const res = await getCarColors({ token: data?.token })
     setCarColorList(res.data.data)
-  }, [])
+  }, [data?.token])
 
   const fetchCarBrands = useCallback(async () => {
-    const res = await getCarBrands({ token: data?.token, vehicleCategory: data?.vehicleCategory })
-    setCarBrandList(res.data.data)
-  }, [])
+    try {
+      const res = await getCarBrands({
+        token: data?.token,
+        carTypeKey: prefillData?.productCmiDetail?.carTypeKey,
+        isEvType: prefillData?.productCmiDetail?.isEvType,
+      })
+      setCarBrandList(res?.data?.data)
+    } catch (error) {
+      console.error('Error fetching car brands:', error)
+    }
+  }, [data?.token])
+
+  useEffect(() => {
+    fetchCarProvinces()
+  }, [fetchCarProvinces])
+
+  useEffect(() => {
+    if (carBrandId) {
+      fetchCarModelData(carBrandId as string)
+    }
+  }, [carBrandId])
 
   useEffect(() => {
     fetchCarColors()
@@ -38,22 +111,51 @@ const CarInformationForm = ({ data }: FormProps) => {
   }, [fetchCarColors, fetchCarBrands])
 
   const fetchCarModelData = async (brandId: string) => {
-    const res = await getCarModels({ token: data?.token, carBrandId: brandId, vehicleCategory: data?.vehicleCategory })
-    setCarModelList(res.data.data)
-    setCarBrandId(brandId)
+    try {
+      const res = await getCarModels({
+        token: data?.token,
+        carBrandId: brandId,
+        carTypeKey: prefillData?.productCmiDetail?.carTypeKey,
+        isEvType: prefillData?.productCmiDetail?.isEvType,
+      })
+      setCarModelList(res?.data?.data)
+      setCarBrandId(brandId)
+    } catch (error) {
+      console.error('Error fetching car model data:', error)
+    }
   }
 
-  const handleChassisHelp = () => {
-    dialogChassisRef.current?.open({
-      title: 'หมายเลขตัวถังดูได้จากที่ไหนบ้าง',
-      style: { maxWidth: '480px', width: '90%' },
-      draggable: false,
-      children: (
-        <div style={{ minWidth: 350, background: '#f8f9fa', borderRadius: 8, padding: 20 }}>
-          <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}></div>
-        </div>
-      ),
-    })
+  const handleSubmit = async () => {
+    try {
+      const prefix = licenseNo?.split('-')[0]
+      const license = licenseNo?.split('-')[1]
+      const data = {
+        carBrandId,
+        carModelName,
+        carColorId,
+        chassisNumber,
+        isRedLicense,
+        licensePrefix: !license ? null : prefix,
+        licenseNo: !license ? prefix : license,
+        yearCoverage: yearCoverage?.toString(),
+        monthCoverage: monthCoverage?.toString(),
+        dayCoverage: dayCoverage?.toString(),
+      }
+      !isRedLicense &&
+        Object.assign(data, {
+          registrationYear,
+          registrationProvinceId,
+        })
+      dispatch(
+        prefillDataSlice.actions.setPrefillData({
+          ...prefillData,
+          productCmiDetail: { ...prefillData?.productCmiDetail, ...data },
+        }),
+      )
+      route.push(`/th/CustomerInformation`)
+    } catch (error) {
+      console.error('Error in handleSubmit:', error)
+    }
   }
 
   return (
@@ -80,83 +182,67 @@ const CarInformationForm = ({ data }: FormProps) => {
             })}
         </div>
         <div className="form-group mb-12 carbrand">
-          <select
+          <Select
+            label="ยี่ห้อรถ"
             name="carBrand"
-            className="form-control"
-            onChange={(e) => fetchCarModelData(e.target.value)}
-            value={carBrandId || ''}
-          >
-            <option value="">เลือกยี่ห้อรถ</option>
-            {carBrandList
+            firstOptionLabel="เลือกยี่ห้อรถ"
+            options={carBrandList
               ?.slice()
               ?.sort((a: any, b: any) => a.carBrandRanking - b.carBrandRanking)
-              ?.map((brand: any) => (
-                <option key={brand?.carBrandId} value={brand?.carBrandId}>
-                  {brand?.carBrandName}
-                </option>
-              ))}
-          </select>
-          <label className="form-label" htmlFor="carBrand">
-            ยี่ห้อรถ
-          </label>
-          <div className="feedback">กรุณาเลือก</div>
+              ?.map((brand: any) => ({
+                label: brand?.carBrandName,
+                value: brand?.carBrandId,
+              }))}
+            onChange={(value) => {
+              fetchCarModelData(value)
+            }}
+            value={carBrandId || ''}
+          />
         </div>
         <div className="form-group mb-12 carmodel">
-          <select
-            className="form-control"
-            disabled={!carBrandId}
-            onChange={(e) => setCarModelId(e.target.value)}
-            value={carModelId || ''}
-          >
-            <option value="">เลือกรุ่นรถ</option>
-            {carModelList?.map((model: any) => (
-              <option key={model} value={model}>
-                {model}
-              </option>
-            ))}
-          </select>
-          <label className="form-label" htmlFor="carModel">
-            รุ่นรถ
-          </label>
-          <div className="feedback">กรุณาเลือก</div>
+          <Select
+            label="รุ่นรถ"
+            name="carModel"
+            firstOptionLabel="เลือกรุ่นรถ"
+            disabled={carBrandId === 'NO_VALUE'}
+            options={carModelList?.slice()?.map((model: any) => ({
+              label: model,
+              value: model,
+            }))}
+            onChange={(value) => setCarModelName(value)}
+            value={carModelName || ''}
+          />
         </div>
         <div className="form-group mb-12 carcolor">
-          <select
+          <Select
+            label="สีรถ"
             name="carColorId"
-            className="form-control"
+            firstOptionLabel="เลือกสีรถ"
             value={carColorId || ''}
-            onChange={(e) => setCarColorId(e.target.value)}
-          >
-            <option value="">เลือกสีรถ</option>
-            {carColorList?.map((color: any) => (
-              <option key={color.carColorId} value={color.carColorId}>
-                {color.carColorNameTh}
-              </option>
-            ))}
-          </select>
-          <label className="form-label" htmlFor="carColorId">
-            สีรถ
-          </label>
-          <div className="feedback">กรุณาเลือก</div>
+            onChange={(value) => setCarColorId(value)}
+            options={carColorList?.slice()?.map((color: any) => ({
+              label: color?.carColorNameTh,
+              value: color?.carColorId,
+            }))}
+          />
         </div>
         <div className="form-group form-vehicle-id mb-12 chassisnumber">
-          <input
+          <Input
+            label="เลขตัวถัง"
             name="chassisNumber"
             type="text"
             maxLength={17}
-            className="form-control engNum"
             placeholder="ตัวอย่าง AAAAAA123AA123456"
             value={chassisNumber || ''}
             onChange={(e) => setChassisNumber(e.target.value)}
+            suffix={
+              <button type="button" className="bg-transparent border-0 z-index-2" onClick={() => setOpen(true)}>
+                <Image alt="ตัวช่วย" width="24" height="24" src="/assets/icon/icon-question.png" />
+              </button>
+            }
           />
-          <label className="form-label" htmlFor="chassisNumber">
-            เลขตัวถัง
-          </label>
-          <button type="button" className="bg-transparent border-0 z-index-2" onClick={handleChassisHelp}>
-            <Image alt="ตัวช่วย" width="24" height="24" src="/assets/icon/icon-question.png" />
-          </button>
-          <FormDialog ref={dialogChassisRef} />
         </div>
+        <ChassisDialog open={open} onClose={() => setOpen(false)} />
         <div className="form-group mb-12 radio-list-horizontal">
           <span className="EditingFormLabel fs-14 ">รถของคุณป้ายแดงหรือไม่ ?</span>
           <div className="mt-2">
@@ -164,8 +250,9 @@ const CarInformationForm = ({ data }: FormProps) => {
               <div className="flex-wrap gap-3" style={{ display: 'flex' }}>
                 <div style={{ display: 'flex' }}>
                   <RadioButton
-                    name="pizza"
-                    value="Cheese"
+                    inputId="isNotRed"
+                    name="isRedLicense"
+                    value={false}
                     onChange={(e) => setIsRedLicense(e.value)}
                     checked={!isRedLicense}
                   />
@@ -175,8 +262,9 @@ const CarInformationForm = ({ data }: FormProps) => {
                 </div>
                 <div style={{ display: 'flex' }}>
                   <RadioButton
-                    name="pizza"
-                    value="Mushroom"
+                    inputId="isRedLicense"
+                    name="isRedLicense"
+                    value={true}
                     onChange={(e) => setIsRedLicense(e.value)}
                     checked={isRedLicense}
                   />
@@ -189,175 +277,43 @@ const CarInformationForm = ({ data }: FormProps) => {
           </div>
         </div>
         <div className="form-group mb-12 licenseregis">
-          <input
-            name="carLicense"
+          <Input
+            label="ทะเบียนรถ"
+            name="licenseNo"
             type="text"
             maxLength={13}
-            className="form-control carRegistra"
             placeholder="ตัวอย่าง 2ขข2222"
-            value={carLicense || ''}
-            onChange={(e) => setCarLicense(e.target.value)}
+            value={licenseNo?.replaceAll('-', '') || ''}
+            onChange={(e) => setLicenseNo(convertStrToFormat(e.target.value, 'idcar'))}
           />
-          <label className="form-label" htmlFor="carId">
-            ทะเบียนรถ
-          </label>
-          <div className="feedback">กรุณากรอก</div>
         </div>
-        <div id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_zoneIsRed" className="js-zoneIsRed">
-          <div className="form-group mb-12 yearregis">
-            <select
-              name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlYearRegis"
-              id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlYearRegis"
-              className="form-control"
-            >
-              <option value="">เลือกปีที่จดทะเบียน</option>
-              <option value="2025">2025 (2568)</option>
-              <option value="2024">2024 (2567)</option>
-              <option value="2023">2023 (2566)</option>
-              <option value="2022">2022 (2565)</option>
-              <option value="2021">2021 (2564)</option>
-              <option value="2020">2020 (2563)</option>
-              <option value="2019">2019 (2562)</option>
-              <option value="2018">2018 (2561)</option>
-              <option value="2017">2017 (2560)</option>
-              <option value="2016">2016 (2559)</option>
-              <option value="2015">2015 (2558)</option>
-              <option value="2014">2014 (2557)</option>
-              <option value="2013">2013 (2556)</option>
-              <option value="2012">2012 (2555)</option>
-              <option value="2011">2011 (2554)</option>
-              <option value="2010">2010 (2553)</option>
-              <option value="2009">2009 (2552)</option>
-              <option value="2008">2008 (2551)</option>
-              <option value="2007">2007 (2550)</option>
-              <option value="2006">2006 (2549)</option>
-              <option value="2005">2005 (2548)</option>
-              <option value="2004">2004 (2547)</option>
-              <option value="2003">2003 (2546)</option>
-              <option value="2002">2002 (2545)</option>
-              <option value="2001">2001 (2544)</option>
-              <option value="2000">2000 (2543)</option>
-              <option value="1999">1999 (2542)</option>
-              <option value="1998">1998 (2541)</option>
-              <option value="1997">1997 (2540)</option>
-              <option value="1996">1996 (2539)</option>
-              <option value="1995">1995 (2538)</option>
-              <option value="1994">1994 (2537)</option>
-              <option value="1993">1993 (2536)</option>
-              <option value="1992">1992 (2535)</option>
-              <option value="1991">1991 (2534)</option>
-              <option value="1990">1990 (2533)</option>
-              <option value="1989">1989 (2532)</option>
-              <option value="1988">1988 (2531)</option>
-              <option value="1987">1987 (2530)</option>
-              <option value="1986">1986 (2529)</option>
-              <option value="1985">1985 (2528)</option>
-              <option value="1984">1984 (2527)</option>
-              <option value="1983">1983 (2526)</option>
-              <option value="1982">1982 (2525)</option>
-              <option value="1981">1981 (2524)</option>
-              <option value="1980">1980 (2523)</option>
-              <option value="1979">1979 (2522)</option>
-              <option value="1978">1978 (2521)</option>
-              <option value="1977">1977 (2520)</option>
-              <option value="1976">1976 (2519)</option>
-            </select>
-            <label className="form-label" htmlFor="carYear">
-              ปีที่จดทะเบียน
-            </label>
-            <div className="feedback">กรุณาเลือก</div>
+        {!isRedLicense && (
+          <div>
+            <div className="form-group mb-12 yearregis">
+              <Select
+                label="ปีที่จดทะเบียน"
+                name="registrationYear"
+                value={registrationYear}
+                onChange={(value) => setRegistrationYear(value)}
+                options={YEAR_REGISTER}
+                firstOptionLabel="เลือกปีที่จดทะเบียน"
+              />
+            </div>
+            <div className="form-group mb-12 province">
+              <Select
+                label="จังหวัดที่จดทะเบียน"
+                name="registrationProvinceId"
+                value={registrationProvinceId}
+                onChange={(value) => setRegistrationProvinceId(value)}
+                options={carProvinceList?.map((e) => ({
+                  label: e.provinceName,
+                  value: e.provinceId,
+                }))}
+                firstOptionLabel="เลือกจังหวัดที่จดทะเบียน"
+              />
+            </div>
           </div>
-          <div className="form-group mb-12 province">
-            <select
-              name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlProvince"
-              id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlProvince"
-              className="form-control"
-            >
-              <option value="">เลือกจังหวัดที่จดทะเบียน</option>
-              <option value="64">กระบี่</option>
-              <option value="1">กรุงเทพมหานคร</option>
-              <option value="56">กาญจนบุรี</option>
-              <option value="34">กาฬสินธุ์</option>
-              <option value="49">กำแพงเพชร</option>
-              <option value="28">ขอนแก่น</option>
-              <option value="13">จันทบุรี</option>
-              <option value="15">ฉะเชิงเทรา</option>
-              <option value="11">ชลบุรี</option>
-              <option value="9">ชัยนาท</option>
-              <option value="25">ชัยภูมิ</option>
-              <option value="69">ชุมพร</option>
-              <option value="45">เชียงราย</option>
-              <option value="38">เชียงใหม่</option>
-              <option value="72">ตรัง</option>
-              <option value="14">ตราด</option>
-              <option value="50">ตาก</option>
-              <option value="17">นครนายก</option>
-              <option value="58">นครปฐม</option>
-              <option value="36">นครพนม</option>
-              <option value="19">นครราชสีมา</option>
-              <option value="63">นครศรีธรรมราช</option>
-              <option value="47">นครสวรรค์</option>
-              <option value="3">นนทบุรี</option>
-              <option value="76">นราธิวาส</option>
-              <option value="43">น่าน</option>
-              <option value="77">บึงกาฬ</option>
-              <option value="20">บุรีรัมย์</option>
-              <option value="4">ปทุมธานี</option>
-              <option value="62">ประจวบคีรีขันธ์</option>
-              <option value="16">ปราจีนบุรี</option>
-              <option value="74">ปัตตานี</option>
-              <option value="5">พระนครศรีอยุธยา</option>
-              <option value="44">พะเยา</option>
-              <option value="65">พังงา</option>
-              <option value="73">พัทลุง</option>
-              <option value="53">พิจิตร</option>
-              <option value="52">พิษณุโลก</option>
-              <option value="61">เพชรบุรี</option>
-              <option value="54">เพชรบูรณ์</option>
-              <option value="42">แพร่</option>
-              <option value="66">ภูเก็ต</option>
-              <option value="32">มหาสารคาม</option>
-              <option value="37">มุกดาหาร</option>
-              <option value="46">แม่ฮ่องสอน</option>
-              <option value="24">ยโสธร</option>
-              <option value="75">ยะลา</option>
-              <option value="33">ร้อยเอ็ด</option>
-              <option value="68">ระนอง</option>
-              <option value="12">ระยอง</option>
-              <option value="55">ราชบุรี</option>
-              <option value="7">ลพบุรี</option>
-              <option value="40">ลำปาง</option>
-              <option value="39">ลำพูน</option>
-              <option value="30">เลย</option>
-              <option value="22">ศรีสะเกษ</option>
-              <option value="35">สกลนคร</option>
-              <option value="70">สงขลา</option>
-              <option value="71">สตูล</option>
-              <option value="2">สมุทรปราการ</option>
-              <option value="60">สมุทรสงคราม</option>
-              <option value="59">สมุทรสาคร</option>
-              <option value="18">สระแก้ว</option>
-              <option value="10">สระบุรี</option>
-              <option value="8">สิงห์บุรี</option>
-              <option value="51">สุโขทัย</option>
-              <option value="57">สุพรรณบุรี</option>
-              <option value="67">สุราษฎร์ธานี</option>
-              <option value="21">สุรินทร์</option>
-              <option value="31">หนองคาย</option>
-              <option value="27">หนองบัวลำภู</option>
-              <option value="6">อ่างทอง</option>
-              <option value="26">อำนาจเจริญ</option>
-              <option value="29">อุดรธานี</option>
-              <option value="41">อุตรดิตถ์</option>
-              <option value="48">อุทัยธานี</option>
-              <option value="23">อุบลราชธานี</option>
-            </select>
-            <label className="form-label" htmlFor="carProvince">
-              จังหวัดที่จดทะเบียน
-            </label>
-            <div className="feedback">กรุณาเลือก</div>
-          </div>
-        </div>
+        )}
       </div>
 
       <div className="formMain">
@@ -367,34 +323,51 @@ const CarInformationForm = ({ data }: FormProps) => {
           <div>
             <div className="d-flex">
               <div className="w-100 position-relative year">
-                <select
-                  name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlYearCoverage"
-                  id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlYearCoverage"
-                  className="form-control"
-                ></select>
-                <label className="form-label" htmlFor="protectedYear">
-                  ปี
-                </label>
+                <Select
+                  label="ปี"
+                  firstOptionLabel="เลือกปี"
+                  name="yearCoverage"
+                  value={yearCoverage ? yearCoverage.toString() : ''}
+                  onChange={(value) => setYearCoverage(Number(value))}
+                  options={[dayjs().year()].map((year) => ({
+                    label: (year + 543).toString(),
+                    value: year.toString(),
+                  }))}
+                />
               </div>
               <div className="ms-2 me-2 w-100 position-relative month">
-                <select
-                  name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlMonthCoverage"
-                  id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlMonthCoverage"
-                  className="form-control"
-                ></select>
-                <label className="form-label" htmlFor="protectedMonth">
-                  เดือน
-                </label>
+                <Select
+                  label="เดือน"
+                  firstOptionLabel="เลือกเดือน"
+                  name="monthCoverage"
+                  value={monthCoverage?.toString() || ''}
+                  onChange={(value) => setMonthCoverage(Number(value))}
+                  options={Array.from({ length: 12 }, (_, i) => ({
+                    label: dayjs().month(i).format('MMMM'),
+                    value: (i + 1).toString(),
+                  }))}
+                />
               </div>
               <div className="ms-0 w-100 position-relative day">
-                <select
-                  name="p$lt$ctl00$pageplaceholder$p$lt$ctl00$CarInformation$ddlDayCoverage"
-                  id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CarInformation_ddlDayCoverage"
-                  className="form-control"
-                ></select>
-                <label className="form-label" htmlFor="protectedDay">
-                  วัน
-                </label>
+                <Select
+                  label="วัน"
+                  firstOptionLabel="เลือกวัน"
+                  name="dayCoverage"
+                  value={dayCoverage?.toString() || ''}
+                  onChange={(value) => setDayCoverage(Number(value))}
+                  options={(() => {
+                    const selectedMonth = monthCoverage ? dayjs().month(monthCoverage - 1) : dayjs()
+                    const daysInMonth = selectedMonth.daysInMonth()
+                    return Array.from({ length: daysInMonth }, (_, i) => {
+                      const day = i + 1
+                      return {
+                        value: day.toString(),
+                        label: day.toString(),
+                      }
+                    })
+                  })()}
+                />
+                {}
               </div>
             </div>
             <div className="feedback d-none">กรุณาเลือก</div>
@@ -404,9 +377,20 @@ const CarInformationForm = ({ data }: FormProps) => {
         <div className="d-flex justify-content-between mt-2 mb-4">
           <span className="f-md text-grey">วันที่สิ้นสุดความคุ้มครอง</span>
           <span className="f-bd text-grey line-dotted">
-            <strong>31 มกราคม 2567</strong>
+            <strong>
+              {`${dayCoverage} ${monthCoverage ? MONTHS_TH[monthCoverage - 1] : ''} ${yearCoverage !== null && yearCoverage !== undefined ? yearCoverage + 543 : ''}`}
+            </strong>
           </span>
         </div>
+      </div>
+      <div className="container">
+        <button
+          type="button"
+          onClick={handleSubmit}
+          className="btn btn-primary fs-6 d-flex justify-content-center align-items-center mx-auto mb-4 f-bd"
+        >
+          ดำเนินการต่อ
+        </button>
       </div>
     </form>
   )

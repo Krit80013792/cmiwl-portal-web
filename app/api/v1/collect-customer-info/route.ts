@@ -7,11 +7,11 @@ export async function POST(req: NextRequest) {
   try {
     const session: any = await getIronSession(await cookies(), sessionOptions)
     const data = await req.json()
-    session.vehicleCategory = data
+    session.customerInfo = data
     await session.save()
     return NextResponse.json({ message: 'Success' }, { status: 200 })
   } catch (error) {
-    console.error('Error in POST /api/v1/collect-vehicle-category:', error)
+    console.error('Error in POST /api/v1/collect-customer-info:', error)
     return NextResponse.json({ message: 'Internal Server Error' }, { status: 500 })
   }
 }

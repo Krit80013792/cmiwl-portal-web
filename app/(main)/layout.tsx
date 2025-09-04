@@ -65,35 +65,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
             <LayoutProvider>{children}</LayoutProvider>
           </PrimeReactProvider>
         </Providers>
-        {/* <noscript>
-                    <iframe title="ggtmg" src="https://www.googletagmanager.com/ns.html?id=GTM-TT3G8FN" height="0" width="0" style={{ display: 'none', visibility: 'hidden' }}></iframe>
-                </noscript>
-                <Script src="/themes/areegator/js/jquery.min.js" strategy="afterInteractive" />
-                <Script src="/themes/areegator/js/bootstrap.min.js" strategy="afterInteractive" />
-                <Script src="/themes/areegator/js/popper.min.js" strategy="afterInteractive" />
-                <Script src="/themes/areegator/js/owl.carousel.min.js" strategy="afterInteractive" />
-                <Script src="/themes/areegator/js/owl.min.js" strategy="afterInteractive" />
-                <Script src="/themes/areegator/js/scroll.min.js" strategy="afterInteractive" />
-                <Script src="/themes/areegator/js/home-video.min.js" strategy="lazyOnload" />
-                <Script type="text/javascript" src="https://cdn-apac.onetrust.com/consent/8e007815-2d32-457f-bde3-815f6103a308/OtAutoBlock.js" />
-                <Script src="https://cdn-apac.onetrust.com/scripttemplates/otSDKStub.js" data-language="th" type="text/javascript" data-domain-script="8e007815-2d32-457f-bde3-815f6103a308" />
-                <GoogleAnalytics gaId="GTM-TT3G8FN" />
-                <script
-                    defer
-                    type="application/ld+json"
-                    dangerouslySetInnerHTML={{
-                        __html: JSON.stringify({
-                            '@context': 'https://schema.org',
-                            '@type': 'Organization',
-                            name: 'areegator',
-                            url: 'https://www.areegator.com',
-                            logo: 'https://www.areegator.com/images/logo.png'
-                        })
-                    }}
-                /> */}
-        {/* <Script src="/custom/plugin/jquery/jquery.min.js" strategy="beforeInteractive" />
-        <Script src="/custom/plugin/bootstrap/bootstrap.bundle.min.js" strategy="afterInteractive" />
-        <Script src="/custom/plugin/select2/js/select2.min.js" strategy="afterInteractive" /> */}
       </body>
     </html>
   )

@@ -17,5 +17,7 @@ declare module 'iron-session' {
     usrData?: any
     vehicleCategory?: any
     vehicleRates?: any
+    carInfo?: any
+    customerInfo?: any
   }
 }

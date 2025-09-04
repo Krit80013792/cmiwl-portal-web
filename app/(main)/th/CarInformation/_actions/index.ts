@@ -1,7 +1,6 @@
 'use server'
 
 import { getDataFromServer } from '@/helpers/functions/getDataFromServer'
-import { apiService } from '@/services/apiService'
 
 interface Token {
   token: string
@@ -9,10 +8,8 @@ interface Token {
 
 interface CarInfo extends Token {
   carBrandId?: string
-  vehicleCategory?: {
-    carTypeKey: string
-    isEvType: boolean
-  }
+  carTypeKey: string
+  isEvType: boolean
 }
 
 export const getCarColors = async ({ token }: Token) => {
@@ -22,9 +19,7 @@ export const getCarColors = async ({ token }: Token) => {
   })
 }
 
-export const getCarBrands = async ({ token, vehicleCategory }: CarInfo) => {
-  const carTypeKey = vehicleCategory?.carTypeKey
-  const isEvType = vehicleCategory?.isEvType
+export const getCarBrands = async ({ token, carTypeKey, isEvType }: CarInfo) => {
   return await getDataFromServer(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/car-brand`, {
     method: 'POST',
     token,
@@ -36,9 +31,7 @@ export const getCarBrands = async ({ token, vehicleCategory }: CarInfo) => {
   })
 }
 
-export const getCarModels = async ({ token, carBrandId, vehicleCategory }: CarInfo) => {
-  const carTypeKey = vehicleCategory?.carTypeKey
-  const isEvType = vehicleCategory?.isEvType
+export const getCarModels = async ({ token, carBrandId, carTypeKey, isEvType }: CarInfo) => {
   return await getDataFromServer(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/car-model`, {
     method: 'POST',
     token,
@@ -48,5 +41,12 @@ export const getCarModels = async ({ token, carBrandId, vehicleCategory }: CarIn
       isEvType,
     }),
     cacheKey: `CarModel:${carBrandId}:${carTypeKey}:${isEvType}`,
+  })
+}
+
+export const getProvinces = async ({ token }: Token) => {
+  return await getDataFromServer(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/province`, {
+    method: 'GET',
+    token,
   })
 }

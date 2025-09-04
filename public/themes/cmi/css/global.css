@@ -490,15 +490,15 @@ strong {
 }
 
 main button {
-    background-color: transparent !important;
-    border: 0 !important;
+    background-color: transparent;
+    border: 0;
     padding: 0
 }
 
 button:active,
 button:focus {
-    background-color: transparent !important;
-    border: 0 !important
+    background-color: transparent;
+    border: 0;
 }
 
 .modal.show {
@@ -956,13 +956,13 @@ button.btn-close {
     box-shadow: inset 0 0 0 1px #c9c9c9
 }
 
-.formMain .form-select {
+/* .formMain .form-select {
     width: 100%;
     background-image: url(/assets/icon/edit-text.png);
     background-repeat: no-repeat;
     background-position: right 16px center;
     background-size: 24px
-}
+} */
 
 .formMain .hide {
     display: none
@@ -1289,12 +1289,12 @@ input[type="radio"] {
     border-radius: 50px;
     border: solid 1px #c9c9c9 !important;
     background-color: #fff !important;
-    margin-right: 16px
+    margin-right: 16px;
 }
 
 #vidHelperModal .nav-tabs .nav-link.active {
     border: solid 2px var(--primary) !important;
-    background-color: var(--bg-active) !important
+    background-color: var(--bg-active) !important;
 }
 
 .cvv-modal .modal-dialog {

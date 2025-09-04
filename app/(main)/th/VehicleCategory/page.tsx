@@ -1,12 +1,9 @@
 import React from 'react'
 import { Metadata } from 'next'
-import VehicleCategory from '@/app/(main)/th/VehicleCategory/_components/VehicleCategory'
 import MainWithDynamicStyle from '@/cmi-layout/components/MainWithDynamicStyle'
 import { getDataFromSession } from '@/helpers/functions/getDataFromSession'
-import { getDataFromServer } from '@/helpers/functions/getDataFromServer'
 import Image from 'next/image'
-
-export const dynamic = 'force-dynamic'
+import VehicleCategory from './_components/VehicleCategory'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -15,33 +12,9 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-const getCompulsoryRates = async ({
-  psToken,
-  psChannelCode,
-  psCarTypeKey,
-}: {
-  psToken: string
-  psChannelCode: string
-  psCarTypeKey: string
-}) => {
-  return await getDataFromServer(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/compulsory-rate/${psCarTypeKey}`, {
-    method: 'GET',
-    token: psToken,
-    channelCode: psChannelCode,
-    cacheKey: `compulsoryRate:${psCarTypeKey}`,
-  })
-}
-
 const Page = async () => {
-  const { channelData, token, vehicleCategory } = await getDataFromSession()
+  const { channelData, token } = await getDataFromSession()
   const configValue: Record<string, any> = JSON.parse(channelData?.channelConfig?.configValue ?? '{}')
-
-  const resData = await getCompulsoryRates({
-    psToken: token as string,
-    psChannelCode: channelData?.channelCode as string,
-    psCarTypeKey: vehicleCategory?.carTypeKey,
-  })
-  const data = resData.data.data.compulsoryRates ?? []
 
   return (
     <MainWithDynamicStyle primaryColor={configValue?.primaryColor} secondaryColor={configValue?.secondaryColor}>
@@ -66,7 +39,7 @@ const Page = async () => {
               เลือกประเภทการใช้งาน
             </strong>
           </h1>
-          <VehicleCategory compulsoryRates={data} />
+          <VehicleCategory data={{ token: token as string, channelCode: channelData?.channelCode as string }} />
           <div className="d-flex justify-content-center">
             <Image
               alt="เลือกประเภทการใช้งาน"

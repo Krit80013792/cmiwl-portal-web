@@ -18,14 +18,14 @@ export const getDataFromServer = async (url: string, options: Options): Promise<
   const { cacheKey, method, body } = options
   try {
     // Try to get data from Redis cache
-    // const cachedData = await redis.get(cacheKey)
-    // if (cachedData) {
-    //   try {
-    //     return JSON.parse(cachedData)
-    //   } catch (error) {
-    //     console.warn('Failed to parse cached data for', cacheKey, error)
-    //   }
-    // }
+    const cachedData = await redis.get(cacheKey as string)
+    if (cachedData) {
+      try {
+        return JSON.parse(cachedData)
+      } catch (error) {
+        console.warn('Failed to parse cached data for', cacheKey, error)
+      }
+    }
 
     // If not in cache, fetch from API
     const res = await fetch(url, {
