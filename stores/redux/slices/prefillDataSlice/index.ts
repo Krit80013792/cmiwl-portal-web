@@ -1,7 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import type { ReduxState } from '@/stores/redux'
 
-export interface PrefillDataSliceState {}
+export interface PrefillDataSliceState {
+  [key: string]: any
+}
 
 const initialState: PrefillDataSliceState = {}
 
@@ -14,7 +16,6 @@ export const prefillDataSlice = createSlice({
     },
     clearPrefillData: (state) => {
       Object.keys(state).forEach((key) => {
-        // @ts-ignore
         delete state[key]
       })
     },

@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import LoadingComponent from '@/cmi-layout/components/loading'
 import { useDispatch } from 'react-redux'
-import { carUserDetailSlice } from '@/stores/redux/slices/carUserDetailSlice'
 
 const LaunchPage = () => {
   const dispatch = useDispatch()
@@ -21,7 +20,6 @@ const LaunchPage = () => {
     }
 
     setLoading(true)
-    dispatch(carUserDetailSlice.actions.clearCarUserDetail())
 
     const fetchData = async () => {
       try {
@@ -34,6 +32,8 @@ const LaunchPage = () => {
         })
         if (res?.ok) {
           router.push('/th/VehicleCTP')
+        } else {
+          console.error('Failed to fetch data.')
         }
         setLoading(false)
       } catch {
@@ -42,7 +42,7 @@ const LaunchPage = () => {
     }
 
     fetchData()
-  }, [searchParams])
+  }, [searchParams, dispatch, router])
 
   return <main>{loading && <LoadingComponent />}</main>
 }

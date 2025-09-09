@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 export interface InputProps {
   name: string
@@ -12,6 +12,18 @@ export interface InputProps {
   suffix?: React.ReactNode
 }
 
+const StyledInput = styled.input.withConfig({
+  shouldForwardProp: (prop) => prop !== 'error',
+})<{ error: boolean }>`
+  &.form-control {
+    ${({ error }) =>
+      error &&
+      css`
+        box-shadow: 0 0 0 1px rgba(235, 88, 72, 1) !important;
+      `}
+  }
+`
+
 const Feedback = styled.span`
   display: block;
   color: #eb5748;
@@ -23,8 +35,8 @@ const Feedback = styled.span`
 
 export const Input = ({ name, type, maxLength, placeholder, onChange, value, label, feedback, suffix }: InputProps) => {
   return (
-    <>
-      <input
+    <div>
+      <StyledInput
         name={name}
         type={type}
         maxLength={maxLength}
@@ -32,10 +44,11 @@ export const Input = ({ name, type, maxLength, placeholder, onChange, value, lab
         placeholder={placeholder}
         onChange={onChange}
         value={value}
+        error={!!feedback}
       />
       <label className="form-label">{label}</label>
       {suffix}
       {feedback && <Feedback>{feedback}</Feedback>}
-    </>
+    </div>
   )
 }

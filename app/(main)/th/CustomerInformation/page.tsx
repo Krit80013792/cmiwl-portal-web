@@ -57,17 +57,8 @@ const Page = async () => {
         </div>
       </div>
 
-      <CustomerInformationForm data={{ token }} />
+      <CustomerInformationForm token={token as string} />
 
-      <div className="container">
-        {/* <a
-          href="/th/ReviewSummary"
-          className="btn btn-primary fs-6 d-flex justify-content-center align-items-center mx-auto mb-4 mt-12"
-          data-cf-modified-591f8b295234a2d03ed50c79-=""
-        >
-          ดำเนินการต่อ
-        </a> */}
-      </div>
       <div
         className="modal fade modalSpinner"
         id="ModalLoading"

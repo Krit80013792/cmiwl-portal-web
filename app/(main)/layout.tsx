@@ -1,5 +1,4 @@
 import React from 'react'
-import Script from 'next/script'
 import { Metadata } from 'next'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import { LayoutProvider } from '../../cmi-layout/context/layoutcontext'
@@ -59,7 +58,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <link id="custom-css" href={`/themes/cmi/css/custom-select2.css`} rel="stylesheet" />
         <link id="select2-css" href={`/custom/plugin/select2/css/select2.min.css`} rel="stylesheet" />
       </head>
-      <body className="LTR Chrome THTH ContentBody">
+      <body className="LTR Chrome THTH ContentBody" data-scroll-behavior="smooth">
         <Providers>
           <PrimeReactProvider>
             <LayoutProvider>{children}</LayoutProvider>

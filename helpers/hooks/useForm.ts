@@ -1,18 +1,23 @@
 import { useCallback, useState } from 'react'
 import { ObjectSchema, ValidationError } from 'yup'
+import { UseLoadingHook } from './useLoading' // adjust path if needed
 
 export type HandleFormChange = (key: string, value: any, index?: number, arrName?: any) => void
-export type HandleFormSubmit = (cb: () => void) => void
+export type HandleFormSubmit = (cb: () => void | Promise<void>) => void
 
 interface UseFormHook<T> {
   handleChange: HandleFormChange
   handleSubmit: HandleFormSubmit
   errors: Record<string, any>
   values: T
-  setValues?: React.Dispatch<React.SetStateAction<T | any>>
+  setValues?: any
 }
 
-export const useForm = <T>(initialState?: T, validateSchema?: ObjectSchema<any>): UseFormHook<T> => {
+export const useForm = <T>(
+  initialState?: T,
+  validateSchema?: ObjectSchema<any>,
+  loading?: Pick<UseLoadingHook, 'openLoading' | 'closeLoading'>,
+): UseFormHook<T> => {
   const [values, setValues] = useState<T | any>(initialState)
   const [errors, setErrors] = useState<Record<string, any>>({})
 
@@ -58,12 +63,17 @@ export const useForm = <T>(initialState?: T, validateSchema?: ObjectSchema<any>)
   }, [validateSchema, values])
 
   const handleSubmit = useCallback<HandleFormSubmit>(
-    (cb) => {
+    async (cb) => {
       if (handleError()) {
-        cb()
+        try {
+          loading?.openLoading?.()
+          await cb()
+        } finally {
+          loading?.closeLoading?.()
+        }
       }
     },
-    [handleError],
+    [handleError, loading],
   )
 
   return {

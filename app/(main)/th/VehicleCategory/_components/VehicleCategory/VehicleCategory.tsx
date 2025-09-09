@@ -25,7 +25,7 @@ const VehicleCategoryComponent = ({ data }: { data: { token: string; channelCode
     } catch (error) {
       console.error('Error fetching compulsory rates:', error)
     }
-  }, [prefill])
+  }, [data.token, prefill?.productCmiDetail?.carTypeKey])
 
   useEffect(() => {
     fetchData()
@@ -34,26 +34,25 @@ const VehicleCategoryComponent = ({ data }: { data: { token: string; channelCode
   const handleCarInformation = async (rate: any, idx: number) => {
     setActiveIndex(idx)
     const compulsoryData = {
-      ...compulsoryRateList?.rates[idx],
+      cmiSubCarTypeCode: compulsoryRateList?.cmiSubCarTypeCode,
+      cmiCoverage: {
+        netPremium: compulsoryRateList?.rates[idx]?.netPremium,
+        stamp: compulsoryRateList?.rates[idx]?.stamp,
+        vat: compulsoryRateList?.rates[idx]?.vat,
+        total: compulsoryRateList?.rates[idx]?.total,
+      },
     }
     const productCmiDetail = {
       ...prefill?.productCmiDetail,
       ...compulsoryData,
     }
-    dispatch(prefillDataSlice.actions.setPrefillData({ ...prefill, productCmiDetail }))
+    dispatch(
+      prefillDataSlice.actions.setPrefillData({
+        ...prefill,
+        productCmiDetail,
+      }),
+    )
     router.push(`/th/CarInformation`)
-    // try {
-    //   await fetch('/api/v1/collect-vehicle-rates', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify(compulsoryData),
-    //   })
-    //   router.push(`/th/CarInformation`)
-    // } catch (error) {
-    //   console.error('Error in handleCarInformation:', error)
-    // }
   }
   return (
     <div className="row seatamount-select mb-4">

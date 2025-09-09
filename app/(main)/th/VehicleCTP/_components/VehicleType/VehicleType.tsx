@@ -7,21 +7,23 @@ import { carUserDetailSlice } from '@/stores/redux/slices/carUserDetailSlice'
 import Image from 'next/image'
 import { getCompulsoryTypes } from '../../_actions'
 import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
+import useLoading from '@/helpers/hooks/useLoading'
 
-const VehicleCategory = ({ data }: { data: { token: string; channelCode: string } }) => {
+const VehicleCategory = ({ data }: { data: { token: string; channelData: any } }) => {
   const router = useRouter()
+  const { openLoading, closeLoading } = useLoading()
   const dispatch = useDispatch()
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [typeList, setTypeList] = useState<any[]>([])
 
   const fetchData = useCallback(async () => {
     try {
-      const res = await getCompulsoryTypes({ token: data.token, channelCode: data.channelCode })
+      const res = await getCompulsoryTypes({ token: data.token, channelCode: data?.channelData?.channel?.channelCode })
       setTypeList(res?.data?.data?.compulsoryTypes ?? [])
     } catch (error) {
       console.error('Error fetching compulsory types:', error)
     }
-  }, [])
+  }, [data.channelData?.channel?.channelCode, data.token])
 
   useEffect(() => {
     fetchData()
@@ -32,28 +34,20 @@ const VehicleCategory = ({ data }: { data: { token: string; channelCode: string 
     dispatch(carUserDetailSlice.actions.clearCarUserDetail())
   }, [dispatch])
 
-  const handleVehicleCategory = async (data: any, idx: number) => {
+  const handleVehicleCategory = async (type: any, idx: number) => {
     setActiveIndex(idx)
     const vehicleCategory = {
-      carTypeKey: data.carTypeKey,
-      isEvType: data.isEvType,
+      carTypeKey: type.carTypeKey,
+      isEvType: type.isEvType,
     }
-    dispatch(prefillDataSlice.actions.setPrefillData({ productCmiDetail: vehicleCategory }))
+    dispatch(
+      prefillDataSlice.actions.setPrefillData({
+        channel: { channelOrderID: data?.channelData?.channel?.channelOrderID },
+        productCmiDetail: vehicleCategory,
+      }),
+    )
 
     router.push(`/th/VehicleCategory`)
-    // try {
-    //   await fetch('/api/v1/collect-vehicle-category', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({ productCmiDetail: vehicleCategory }),
-    //   })
-
-    //   router.push(`/th/VehicleCategory`)
-    // } catch (error) {
-    //   console.error('Error in POST /api/v1/collect-vehicle-category:', error)
-    // }
   }
 
   return (

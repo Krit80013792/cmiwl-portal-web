@@ -1,0 +1,58 @@
+.fullPage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: #f8f9fa;
+}
+
+.content-block-404 {
+  margin-bottom: 32px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.img-fluid {
+  max-width: 100%;
+  height: auto;
+}
+
+.fs-18 {
+  font-size: 1.25rem;
+}
+
+.fs-16 {
+  font-size: 1rem;
+}
+
+.f-bd {
+  font-weight: bold;
+}
+
+.text-caption {
+  color: #6c757d;
+}
+
+.btn-wrapper-404 {
+  margin-top: 24px;
+}
+
+.btn-primary {
+  background: #e60021;
+  border: none;
+  color: #fff;
+  padding: 12px 32px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: #b8001a;
+}
+
+.modalSpinner .spinner-border {
+  width: 3rem;
+  height: 3rem;
+}

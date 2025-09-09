@@ -2,44 +2,144 @@
 
 import { convertStrToFormat } from '@/helpers/functions/utils'
 import { useForm } from '@/helpers/hooks/useForm'
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import customerInformationSchema from '../../_schemas'
 import { Input } from '@/cmi-layout/components/Input'
 import { Select } from '@/cmi-layout/components/Select'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import dayjs from 'dayjs'
+import 'dayjs/locale/th'
+import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
+import { useRouter } from 'next/navigation'
+import { getAdressByZipCode } from '../../_actions'
+import useLoading from '@/helpers/hooks/useLoading'
+import { useDebounce } from '@/helpers/hooks/useDebounce'
+dayjs.locale('th')
 
-interface FormProps {
-  data: any
+interface CustomerInformationFormProps {
+  token: string
 }
 
-const CustomerInformationForm: React.FC<FormProps> = ({ data }) => {
+const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token }) => {
+  const { openLoading, closeLoading } = useLoading()
+  const route = useRouter()
+  const dispatch = useDispatch()
   const prefillData = useSelector((state: any) => state.prefillData)
-  const [prefill, setPrefill] = React.useState<any>({})
-  const { handleChange, handleSubmit, errors, values, setValues } = useForm({} as any, customerInformationSchema)
+  const [prefill, setPrefill] = useState<any>({})
+  const [provinceList, setProvinceList] = useState<any[]>([])
+  const [districtList, setDistrictList] = useState<any[]>([])
+  const [subDistrictList, setSubDistrictList] = useState<any[]>([])
+  const [addressData, setAddressData] = useState<any>(null)
+  const { handleChange, handleSubmit, errors, values, setValues } = useForm(
+    {
+      title: prefillData?.customer?.title || '',
+      firstName: prefillData?.customer?.firstName || '',
+      lastName: prefillData?.customer?.lastName || '',
+      taxId: prefillData?.customer?.taxId || '',
+      birthDay: prefillData?.customer?.birthDay,
+      birthMonth: prefillData?.customer?.birthMonth,
+      birthYear: prefillData?.customer?.birthYear,
+      telephoneNo: prefillData?.personalInfo?.telephoneNo || '',
+      email: prefillData?.personalInfo?.email || '',
+      houseNumber: prefillData?.customerAddress?.houseNumber || '',
+      villageNo: prefillData?.customerAddress?.villageNo || '',
+      buildingVillage: prefillData?.customerAddress?.buildingVillage || '',
+      alley: prefillData?.customerAddress?.alley || '',
+      street: prefillData?.customerAddress?.street || '',
+      zipCode: prefillData?.customerAddress?.zipCode || '',
+      provinceId: prefillData?.customerAddress?.provinceId || '',
+      districtId: prefillData?.customerAddress?.districtId || '',
+      subDistrictId: prefillData?.customerAddress?.subDistrictId || '',
+    } as any,
+    customerInformationSchema,
+    { openLoading, closeLoading },
+  )
+  const zipCodeDebounced = useDebounce(values?.zipCode, 1000)
+
+  const fetchAddressByZipCode = useCallback(
+    async (zipCode: string) => {
+      try {
+        const res = await getAdressByZipCode({ token, zipCode })
+        const data = res?.data?.data[0] || null
+        setAddressData(data)
+        if (data) {
+          setValues((prevValues: any) => ({
+            ...prevValues,
+            provinceId: data?.province?.provinceId || '',
+          }))
+          setProvinceList(
+            data?.province ? [{ label: data?.province?.provinceName, value: data?.province?.provinceId }] : [],
+          )
+          setDistrictList(
+            data?.province?.districts?.map((e: any) => {
+              return { label: e.districtName, value: e.districtId }
+            }),
+          )
+        }
+      } catch (error) {
+        console.error('Error fetching address by zip code:', error)
+      }
+    },
+    [token, setValues],
+  )
+
+  useEffect(() => {
+    if (zipCodeDebounced.toString().length === 5 && values.zipCode === zipCodeDebounced) {
+      fetchAddressByZipCode(zipCodeDebounced.toString())
+    } else {
+      setProvinceList([])
+      setDistrictList([])
+      setSubDistrictList([])
+      setValues((prevValues: any) => ({
+        ...prevValues,
+        provinceId: '',
+        districtId: '',
+        subDistrictId: '',
+      }))
+      setAddressData(null)
+    }
+  }, [fetchAddressByZipCode, zipCodeDebounced, values.zipCode])
+
+  const handleSubmitForm = () => {
+    dispatch(
+      prefillDataSlice.actions.setPrefillData({
+        ...prefill,
+        customer: {
+          ...prefill.customer,
+          taxId: values.taxId,
+          firstName: values.firstName,
+          lastName: values.lastName,
+          title: values.title,
+          birthDay: values.birthDay,
+          birthMonth: values.birthMonth,
+          birthYear: values.birthYear,
+        },
+        personalInfo: { ...prefill.personalInfo, telephoneNo: values.telephoneNo, email: values.email },
+        customerAddress: {
+          ...prefill.customerAddress,
+          houseNumber: values.houseNumber,
+          villageNo: values.villageNo,
+          buildingVillage: values.buildingVillage,
+          alley: values.alley,
+          street: values.street,
+          zipCode: values.zipCode,
+          provinceId: values.provinceId,
+          provinceName: provinceList.find((p) => p.value?.toString() === values.provinceId?.toString())?.label || '',
+          districtName: districtList.find((d) => d.value?.toString() === values.districtId?.toString())?.label || '',
+          subDistrictName:
+            subDistrictList.find((sd) => sd.value?.toString() === values.subDistrictId?.toString())?.label || '',
+          districtId: values.districtId,
+          subDistrictId: values.subDistrictId,
+        },
+      }),
+    )
+    route.push('/th/ReviewSummary')
+  }
 
   useEffect(() => {
     setPrefill(prefillData)
-    if (typeof setValues === 'function') {
-      setValues({
-        title: prefillData?.customer?.title || '',
-        firstName: prefillData?.customer?.firstName || '',
-        lastName: prefillData?.customer?.lastName || '',
-        taxId: prefillData?.customer?.taxId || '',
-        telephoneNo: prefillData?.personalInfo?.telephoneNo || '',
-        email: prefillData?.personalInfo?.email || '',
-        houseNumber: prefillData?.customerAddress?.houseNumber || '',
-        moo: prefillData?.customerAddress?.moo || '',
-        villageNo: prefillData?.customerAddress?.villageNo || '',
-        buildingVillage: prefillData?.customerAddress?.buildingVillage || '',
-        alley: prefillData?.customerAddress?.alley || '',
-        street: prefillData?.customerAddress?.street || '',
-        zipCode: prefillData?.customerAddress?.zipCode || '',
-        provinceName: prefillData?.customerAddress?.provinceName || '',
-        districtName: prefillData?.customerAddress?.districtName || '',
-        subDistrictName: prefillData?.customerAddress?.subDistrictName || '',
-      })
-    }
   }, [prefillData])
+
   return (
     <form>
       <div className="content-section fullPage-150">
@@ -52,17 +152,19 @@ const CustomerInformationForm: React.FC<FormProps> = ({ data }) => {
 
           <div className="formMain">
             <div className="form-group mb-12">
-              <select
+              <Select
                 name="title"
-                className="form-control"
-                onChange={({ target: { name, value } }) => handleChange(name, value)}
+                label="คำนำหน้า"
+                firstOptionLabel="เลือกคำนำหน้า"
+                options={[
+                  { label: 'นาย', value: 'นาย' },
+                  { label: 'นาง', value: 'นาง' },
+                  { label: 'นางสาว', value: 'นางสาว' },
+                ]}
+                feedback={errors?.title}
+                onChange={(value) => handleChange('title', value)}
                 value={values?.title || ''}
-              >
-                <option value="">เลือกคำนำหน้า</option>
-                <option value="นาย">นาย</option>
-                <option value="นาง">นาง</option>
-                <option value="นางสาว">นางสาว</option>
-              </select>
+              />
               <label className="form-label">คำนำหน้า</label>
               <div className="feedback">กรุณาเลือก</div>
             </div>
@@ -97,8 +199,8 @@ const CustomerInformationForm: React.FC<FormProps> = ({ data }) => {
                 type="text"
                 maxLength={17}
                 placeholder="กรอกรหัสบัตรประชาชน 13 หลัก"
-                onChange={({ target: { name, value } }) => handleChange(name, convertStrToFormat(value, 'id_card'))}
-                value={values?.taxId || ''}
+                onChange={({ target: { name, value } }) => handleChange(name, value)}
+                value={convertStrToFormat(values?.taxId, 'id_card') || ''}
                 label="เลขบัตรประชาชน"
                 feedback={errors?.taxId}
               />
@@ -111,34 +213,55 @@ const CustomerInformationForm: React.FC<FormProps> = ({ data }) => {
                   <div className="w-100 position-relative">
                     <Select
                       label="ปี"
-                      name="year"
+                      name="birthYear"
                       firstOptionLabel="เลือกปี"
-                      options={[]}
-                      onChange={(value) => handleChange('year', value)}
-                      value={values?.year || ''}
-                      feedback={errors?.year}
+                      options={Array.from({ length: 80 }, (_, i) => {
+                        const year = dayjs().year() - i
+                        return {
+                          label: (year + 543).toString(),
+                          value: year.toString(),
+                        }
+                      })}
+                      onChange={(value) => handleChange('birthYear', value)}
+                      value={values?.birthYear || ''}
+                      feedback={errors?.birthYear}
                     />
                   </div>
                   <div className="ms-2 me-2 w-100 position-relative">
                     <Select
                       label="เดือน"
-                      name="month"
+                      name="birthMonth"
                       firstOptionLabel="เลือกเดือน"
-                      options={[]}
-                      onChange={(value) => handleChange('month', value)}
-                      value={values?.month || ''}
-                      feedback={errors?.month}
+                      options={Array.from({ length: 12 }, (_, i) => ({
+                        label: dayjs().month(i).format('MMMM'),
+                        value: (i + 1).toString(),
+                      }))}
+                      onChange={(value) => handleChange('birthMonth', value)}
+                      value={values?.birthMonth || ''}
+                      feedback={errors?.birthMonth}
                     />
                   </div>
                   <div className="ms-0 w-100 position-relative">
                     <Select
                       label="วัน"
-                      name="day"
+                      name="birthDay"
                       firstOptionLabel="เลือกวัน"
-                      options={[]}
-                      onChange={(value) => handleChange('day', value)}
-                      value={values?.day || ''}
-                      feedback={errors?.day}
+                      options={(() => {
+                        const selectedMonth = values?.birthMonth
+                          ? dayjs(values?.birthYear).month(values?.birthMonth - 1)
+                          : dayjs()
+                        const daysInMonth = selectedMonth.daysInMonth()
+                        return Array.from({ length: daysInMonth }, (_, i) => {
+                          const day = i + 1
+                          return {
+                            value: day.toString(),
+                            label: day.toString(),
+                          }
+                        })
+                      })()}
+                      onChange={(value) => handleChange('birthDay', value)}
+                      value={values?.birthDay || ''}
+                      feedback={errors?.birthDay}
                     />
                   </div>
                 </div>
@@ -151,10 +274,8 @@ const CustomerInformationForm: React.FC<FormProps> = ({ data }) => {
                 type="text"
                 maxLength={12}
                 placeholder="กรอกเบอร์โทรศัพท์"
-                onChange={({ target: { name, value } }) =>
-                  handleChange(name, convertStrToFormat(value, 'phone_number'))
-                }
-                value={values?.telephoneNo || ''}
+                onChange={({ target: { name, value } }) => handleChange(name, value)}
+                value={convertStrToFormat(values?.telephoneNo, 'phone_number') || ''}
                 label="เบอร์โทรศัพท์"
                 feedback={errors?.telephoneNo}
               />
@@ -252,13 +373,13 @@ const CustomerInformationForm: React.FC<FormProps> = ({ data }) => {
                 <div className="form-group mb-12 ms-2 w-100">
                   <Select
                     label="จังหวัด"
-                    name="provinceName"
-                    disabled
-                    options={[]}
+                    name="provinceId"
+                    disabled={provinceList?.length === 0}
+                    options={provinceList}
                     onChange={() => {}}
-                    value={values?.provinceName || ''}
+                    value={values?.provinceId || ''}
                     firstOptionLabel="เลือกจังหวัด"
-                    feedback={errors?.provinceName}
+                    feedback={errors?.provinceId}
                   />
                 </div>
               </div>
@@ -266,25 +387,35 @@ const CustomerInformationForm: React.FC<FormProps> = ({ data }) => {
                 <div className="form-group mb-12 me-2 w-100">
                   <Select
                     label="เขต/อำเภอ"
-                    name="districtName"
-                    disabled
-                    options={[]}
-                    onChange={() => {}}
-                    value={values?.districtName || ''}
+                    name="districtId"
+                    disabled={districtList?.length === 0}
+                    options={districtList}
+                    onChange={(value) => {
+                      handleChange('districtId', value)
+                      setSubDistrictList(
+                        addressData?.province?.districts
+                          ?.find((d: any) => d.districtId.toString() === value)
+                          ?.subdistricts?.map((sd: any) => ({
+                            label: sd.subdistrictName,
+                            value: sd.subdistrictId,
+                          })) || [],
+                      )
+                    }}
+                    value={values?.districtId || ''}
                     firstOptionLabel="เลือกเขต/อำเภอ"
-                    feedback={errors?.districtName}
+                    feedback={errors?.districtId}
                   />
                 </div>
                 <div className="form-group mb-12 ms-2 w-100">
                   <Select
                     label="แขวง/ตำบล"
-                    name="subDistrictName"
-                    disabled
-                    options={[]}
-                    onChange={() => {}}
-                    value={values?.subDistrictName || ''}
+                    name="subDistrictId"
+                    disabled={subDistrictList?.length === 0}
+                    options={subDistrictList}
+                    onChange={(value) => handleChange('subDistrictId', value)}
+                    value={values?.subDistrictId || ''}
                     firstOptionLabel="เลือกแขวง/ตำบล"
-                    feedback={errors?.subDistrictName}
+                    feedback={errors?.subDistrictId}
                   />
                 </div>
               </div>
@@ -295,7 +426,7 @@ const CustomerInformationForm: React.FC<FormProps> = ({ data }) => {
       <div className="container">
         <button
           type="button"
-          // onClick={handleSubmit}
+          onClick={() => handleSubmit(handleSubmitForm)}
           className="btn btn-primary fs-6 d-flex justify-content-center align-items-center mx-auto mb-4 f-bd"
         >
           ดำเนินการต่อ

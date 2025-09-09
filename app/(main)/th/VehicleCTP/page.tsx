@@ -27,9 +27,6 @@ export default async function VehicleCTP() {
     <MainWithDynamicStyle primaryColor={configValue?.primaryColor} secondaryColor={configValue?.secondaryColor}>
       <div className="head-bar">
         <div className="container d-flex align-items-center">
-          <a href="/th/intro-channel" className="back-btn">
-            <img alt="กลับ" width="36" height="36" src="/assets/icon/back.png" />
-          </a>
           <p className="text-center mb-0 w-100 fs-18 f-bd">พ.ร.บ.</p>
         </div>
       </div>
@@ -60,7 +57,7 @@ export default async function VehicleCTP() {
             </div>
           </div>
         )}
-        <VehicleType data={{ token: token as string, channelCode: channelData?.channelCode as string }} />
+        <VehicleType data={{ token: token as string, channelData }} />
       </div>
     </MainWithDynamicStyle>
   )

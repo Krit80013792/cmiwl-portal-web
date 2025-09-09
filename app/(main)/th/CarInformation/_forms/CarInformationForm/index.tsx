@@ -9,12 +9,14 @@ import { ChassisDialog } from './ChassisDialog'
 import dayjs from 'dayjs'
 import 'dayjs/locale/th'
 import { useDispatch, useSelector } from 'react-redux'
-import { carUserDetailSlice } from '@/stores/redux/slices/carUserDetailSlice'
 import { useRouter } from 'next/navigation'
 import { Select } from '@/cmi-layout/components/Select'
 import { Input } from '@/cmi-layout/components/Input'
 import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
 import { convertStrToFormat } from '@/helpers/functions/utils'
+import { useForm } from '@/helpers/hooks/useForm'
+import carInformationSchema from '../../_schemas'
+import useLoading from '@/helpers/hooks/useLoading'
 dayjs.locale('th')
 
 interface FormProps {
@@ -22,6 +24,7 @@ interface FormProps {
 }
 
 const CarInformationForm = ({ data }: FormProps) => {
+  const { openLoading, closeLoading } = useLoading()
   const route = useRouter()
   const prefillData = useSelector((state: any) => state.prefillData)
   const dispatch = useDispatch()
@@ -30,47 +33,23 @@ const CarInformationForm = ({ data }: FormProps) => {
   const [carBrandList, setCarBrandList] = useState<any[]>([])
   const [carModelList, setCarModelList] = useState<any[]>([])
   const [carProvinceList, setCarProvinceList] = useState<any[]>([])
-  const [carBrandId, setCarBrandId] = useState<string | null>(null)
-  const [carModelName, setCarModelName] = useState<string | null>(null)
-  const [carColorId, setCarColorId] = useState<string | null>(null)
-  const [chassisNumber, setChassisNumber] = useState<string | null>(null)
-  const [isRedLicense, setIsRedLicense] = useState<boolean>(false)
-  const [licenseNo, setLicenseNo] = useState<string | null>(null)
-  const [yearCoverage, setYearCoverage] = useState<number | null>(null)
-  const [monthCoverage, setMonthCoverage] = useState<number | null>(null)
-  const [dayCoverage, setDayCoverage] = useState<number | null>(null)
-  const [registrationYear, setRegistrationYear] = useState<string>('')
-  const [registrationProvinceId, setRegistrationProvinceId] = useState<string>('')
-
-  useEffect(() => {
-    if (!yearCoverage) setYearCoverage(dayjs().year())
-    if (!monthCoverage) setMonthCoverage(dayjs().month() + 1)
-    if (!dayCoverage) setDayCoverage(dayjs().date())
-    if (!carBrandId) setCarBrandId(prefillData?.productCmiDetail?.carBrandId ?? null)
-    if (!carModelName) setCarModelName(prefillData?.productCmiDetail?.carModelName ?? null)
-    if (!carColorId) setCarColorId(prefillData?.productCmiDetail?.carColorId ?? null)
-    if (!chassisNumber) setChassisNumber(prefillData?.productCmiDetail?.chassisNumber ?? null)
-    if (!licenseNo)
-      setLicenseNo(
-        prefillData?.productCmiDetail?.licenseNo
-          ? `${prefillData?.productCmiDetail?.licensePrefix}${prefillData?.productCmiDetail?.licenseNo}`
-          : null,
-      )
-    if (!registrationYear) setRegistrationYear(prefillData?.productCmiDetail?.registrationYear ?? null)
-    if (!registrationProvinceId)
-      setRegistrationProvinceId(prefillData?.productCmiDetail?.registrationProvinceId ?? null)
-  }, [
-    yearCoverage,
-    monthCoverage,
-    dayCoverage,
-    carBrandId,
-    carModelName,
-    carColorId,
-    chassisNumber,
-    licenseNo,
-    registrationYear,
-    registrationProvinceId,
-  ])
+  const { values, handleChange, errors, handleSubmit } = useForm(
+    {
+      carBrandId: prefillData?.productCmiDetail?.carBrandId ?? null,
+      carModelName: prefillData?.productCmiDetail?.carModelName ?? null,
+      carColorId: prefillData?.productCmiDetail?.carColorId ?? null,
+      chassisNumber: prefillData?.productCmiDetail?.chassisNumber ?? null,
+      isRedLicense: prefillData?.productCmiDetail?.isRedLicense ?? false,
+      licenseNo: prefillData?.productCmiDetail?.licenseNo ?? null,
+      yearCoverage: dayjs().year(),
+      monthCoverage: dayjs().month() + 1,
+      dayCoverage: dayjs().date(),
+      registrationYear: prefillData?.productCmiDetail?.registrationYear ?? null,
+      registrationProvinceId: prefillData?.productCmiDetail?.registrationProvinceId ?? null,
+    },
+    carInformationSchema,
+    { openLoading, closeLoading },
+  )
 
   const fetchCarProvinces = useCallback(async () => {
     const res = await getProvinces({ token: data?.token })
@@ -93,58 +72,74 @@ const CarInformationForm = ({ data }: FormProps) => {
     } catch (error) {
       console.error('Error fetching car brands:', error)
     }
-  }, [data?.token])
+  }, [data?.token, prefillData?.productCmiDetail?.carTypeKey, prefillData?.productCmiDetail?.isEvType])
 
   useEffect(() => {
     fetchCarProvinces()
   }, [fetchCarProvinces])
 
   useEffect(() => {
-    if (carBrandId) {
-      fetchCarModelData(carBrandId as string)
-    }
-  }, [carBrandId])
-
-  useEffect(() => {
     fetchCarColors()
     fetchCarBrands()
   }, [fetchCarColors, fetchCarBrands])
 
-  const fetchCarModelData = async (brandId: string) => {
-    try {
-      const res = await getCarModels({
-        token: data?.token,
-        carBrandId: brandId,
-        carTypeKey: prefillData?.productCmiDetail?.carTypeKey,
-        isEvType: prefillData?.productCmiDetail?.isEvType,
-      })
-      setCarModelList(res?.data?.data)
-      setCarBrandId(brandId)
-    } catch (error) {
-      console.error('Error fetching car model data:', error)
-    }
-  }
+  const fetchCarModelData = useCallback(
+    async (brandId: string) => {
+      try {
+        const res = await getCarModels({
+          token: data?.token,
+          carBrandId: brandId,
+          carTypeKey: prefillData?.productCmiDetail?.carTypeKey,
+          isEvType: prefillData?.productCmiDetail?.isEvType,
+        })
+        setCarModelList(res?.data?.data)
+      } catch (error) {
+        console.error('Error fetching car model data:', error)
+      }
+    },
+    [data?.token, prefillData?.productCmiDetail?.carTypeKey, prefillData?.productCmiDetail?.isEvType],
+  )
 
-  const handleSubmit = async () => {
+  useEffect(() => {
+    if (values?.carBrandId) {
+      fetchCarModelData(values?.carBrandId as string)
+    }
+  }, [values?.carBrandId, fetchCarModelData])
+
+  const handleSubmitForm = async () => {
     try {
-      const prefix = licenseNo?.split('-')[0]
-      const license = licenseNo?.split('-')[1]
+      const prefix = convertStrToFormat(values?.licenseNo as string, 'idcar')?.split('-')[0]
+      const license = convertStrToFormat(values?.licenseNo as string, 'idcar')?.split('-')[1]
       const data = {
-        carBrandId,
-        carModelName,
-        carColorId,
-        chassisNumber,
-        isRedLicense,
+        carBrandId: values?.carBrandId,
+        carBrandName:
+          carBrandList.find((b) => b.carBrandId.toString() === values?.carBrandId?.toString())?.carBrandName || '',
+        carModelName: values?.carModelName,
+        carColorId: values?.carColorId,
+        carColorName:
+          carColorList.find((c) => c.carColorId.toString() === values?.carColorId?.toString())?.carColorNameTh || '',
+        chassisNumber: values?.chassisNumber,
+        isRedLicense: values?.isRedLicense,
         licensePrefix: !license ? null : prefix,
         licenseNo: !license ? prefix : license,
-        yearCoverage: yearCoverage?.toString(),
-        monthCoverage: monthCoverage?.toString(),
-        dayCoverage: dayCoverage?.toString(),
+        yearCoverage: values?.yearCoverage?.toString(),
+        monthCoverage: values?.monthCoverage?.toString(),
+        dayCoverage: values?.dayCoverage?.toString(),
+        coverageStartDate: dayjs(`${values?.yearCoverage}-${values?.monthCoverage}-${values?.dayCoverage}`).format(
+          'YYYY-MM-DD',
+        ),
+        coverageEndDate: dayjs(`${values?.yearCoverage}-${values?.monthCoverage}-${values?.dayCoverage}`)
+          .add(1, 'year')
+          .subtract(1, 'day')
+          .format('YYYY-MM-DD'),
       }
-      !isRedLicense &&
+      !values?.isRedLicense &&
         Object.assign(data, {
-          registrationYear,
-          registrationProvinceId,
+          registrationYear: values?.registrationYear,
+          registrationProvinceId: values?.registrationProvinceId,
+          registrationProvinceName:
+            carProvinceList.find((p) => p.provinceId.toString() === values?.registrationProvinceId?.toString())
+              ?.provinceName || '',
         })
       dispatch(
         prefillDataSlice.actions.setPrefillData({
@@ -167,12 +162,15 @@ const CarInformationForm = ({ data }: FormProps) => {
             ?.sort((a: any, b: any) => a.carBrandRanking - b.carBrandRanking)
             ?.slice(0, 9)
             ?.map((brand: any) => {
-              const isActive = carBrandId === brand.carBrandId
+              const isActive = values?.carBrandId === brand.carBrandId
               return (
                 <div
                   className="col-4 pe-6 mb-12"
                   key={brand.carBrandId}
-                  onClick={() => fetchCarModelData(brand.carBrandId)}
+                  onClick={() => {
+                    handleChange('carBrandId', brand.carBrandId)
+                    fetchCarModelData(brand.carBrandId)
+                  }}
                 >
                   <div className={`rounded-4 text-center js-listdata choice-card h-100${isActive ? ' active' : ''}`}>
                     <Image alt={brand?.carBrandName} width="48" height="48" src={brand?.carBrandImage} />
@@ -194,23 +192,26 @@ const CarInformationForm = ({ data }: FormProps) => {
                 value: brand?.carBrandId,
               }))}
             onChange={(value) => {
+              handleChange('carBrandId', value)
               fetchCarModelData(value)
             }}
-            value={carBrandId || ''}
+            value={values?.carBrandId || ''}
+            feedback={errors?.carBrandId}
           />
         </div>
         <div className="form-group mb-12 carmodel">
           <Select
             label="รุ่นรถ"
-            name="carModel"
+            name="carModelName"
             firstOptionLabel="เลือกรุ่นรถ"
-            disabled={carBrandId === 'NO_VALUE'}
+            disabled={values?.carBrandId === 'NO_VALUE'}
             options={carModelList?.slice()?.map((model: any) => ({
               label: model,
               value: model,
             }))}
-            onChange={(value) => setCarModelName(value)}
-            value={carModelName || ''}
+            onChange={(value) => handleChange('carModelName', value)}
+            value={values?.carModelName || ''}
+            feedback={errors?.carModelName}
           />
         </div>
         <div className="form-group mb-12 carcolor">
@@ -218,12 +219,13 @@ const CarInformationForm = ({ data }: FormProps) => {
             label="สีรถ"
             name="carColorId"
             firstOptionLabel="เลือกสีรถ"
-            value={carColorId || ''}
-            onChange={(value) => setCarColorId(value)}
+            value={values?.carColorId || ''}
+            onChange={(value) => handleChange('carColorId', value)}
             options={carColorList?.slice()?.map((color: any) => ({
               label: color?.carColorNameTh,
               value: color?.carColorId,
             }))}
+            feedback={errors?.carColorId}
           />
         </div>
         <div className="form-group form-vehicle-id mb-12 chassisnumber">
@@ -233,13 +235,14 @@ const CarInformationForm = ({ data }: FormProps) => {
             type="text"
             maxLength={17}
             placeholder="ตัวอย่าง AAAAAA123AA123456"
-            value={chassisNumber || ''}
-            onChange={(e) => setChassisNumber(e.target.value)}
+            value={values?.chassisNumber || ''}
+            onChange={(e) => handleChange('chassisNumber', e.target.value)}
             suffix={
               <button type="button" className="bg-transparent border-0 z-index-2" onClick={() => setOpen(true)}>
                 <Image alt="ตัวช่วย" width="24" height="24" src="/assets/icon/icon-question.png" />
               </button>
             }
+            feedback={errors?.chassisNumber}
           />
         </div>
         <ChassisDialog open={open} onClose={() => setOpen(false)} />
@@ -253,8 +256,8 @@ const CarInformationForm = ({ data }: FormProps) => {
                     inputId="isNotRed"
                     name="isRedLicense"
                     value={false}
-                    onChange={(e) => setIsRedLicense(e.value)}
-                    checked={!isRedLicense}
+                    onChange={(e) => handleChange('isRedLicense', e.value)}
+                    checked={!values?.isRedLicense}
                   />
                   <label htmlFor="isNotRed" className="ml-2">
                     ไม่ใช่
@@ -265,8 +268,8 @@ const CarInformationForm = ({ data }: FormProps) => {
                     inputId="isRedLicense"
                     name="isRedLicense"
                     value={true}
-                    onChange={(e) => setIsRedLicense(e.value)}
-                    checked={isRedLicense}
+                    onChange={(e) => handleChange('isRedLicense', e.value)}
+                    checked={values?.isRedLicense}
                   />
                   <label htmlFor="isRedLicense" className="ml-2">
                     ใช่ ป้ายแดง
@@ -283,33 +286,36 @@ const CarInformationForm = ({ data }: FormProps) => {
             type="text"
             maxLength={13}
             placeholder="ตัวอย่าง 2ขข2222"
-            value={licenseNo?.replaceAll('-', '') || ''}
-            onChange={(e) => setLicenseNo(convertStrToFormat(e.target.value, 'idcar'))}
+            value={values?.licenseNo?.replaceAll('-', '') || ''}
+            onChange={(e) => handleChange('licenseNo', convertStrToFormat(e.target.value, 'idcar'))}
+            feedback={errors?.licenseNo}
           />
         </div>
-        {!isRedLicense && (
+        {!values?.isRedLicense && (
           <div>
             <div className="form-group mb-12 yearregis">
               <Select
                 label="ปีที่จดทะเบียน"
                 name="registrationYear"
-                value={registrationYear}
-                onChange={(value) => setRegistrationYear(value)}
+                value={values?.registrationYear}
+                onChange={(value) => handleChange('registrationYear', value)}
                 options={YEAR_REGISTER}
                 firstOptionLabel="เลือกปีที่จดทะเบียน"
+                feedback={errors?.registrationYear}
               />
             </div>
             <div className="form-group mb-12 province">
               <Select
                 label="จังหวัดที่จดทะเบียน"
                 name="registrationProvinceId"
-                value={registrationProvinceId}
-                onChange={(value) => setRegistrationProvinceId(value)}
+                value={values?.registrationProvinceId}
+                onChange={(value) => handleChange('registrationProvinceId', value)}
                 options={carProvinceList?.map((e) => ({
                   label: e.provinceName,
                   value: e.provinceId,
                 }))}
                 firstOptionLabel="เลือกจังหวัดที่จดทะเบียน"
+                feedback={errors?.registrationProvinceId}
               />
             </div>
           </div>
@@ -327,12 +333,13 @@ const CarInformationForm = ({ data }: FormProps) => {
                   label="ปี"
                   firstOptionLabel="เลือกปี"
                   name="yearCoverage"
-                  value={yearCoverage ? yearCoverage.toString() : ''}
-                  onChange={(value) => setYearCoverage(Number(value))}
+                  value={values?.yearCoverage ? values?.yearCoverage.toString() : ''}
+                  onChange={(value) => handleChange('yearCoverage', Number(value))}
                   options={[dayjs().year()].map((year) => ({
                     label: (year + 543).toString(),
                     value: year.toString(),
                   }))}
+                  feedback={errors?.yearCoverage}
                 />
               </div>
               <div className="ms-2 me-2 w-100 position-relative month">
@@ -340,12 +347,13 @@ const CarInformationForm = ({ data }: FormProps) => {
                   label="เดือน"
                   firstOptionLabel="เลือกเดือน"
                   name="monthCoverage"
-                  value={monthCoverage?.toString() || ''}
-                  onChange={(value) => setMonthCoverage(Number(value))}
+                  value={values?.monthCoverage?.toString() || ''}
+                  onChange={(value) => handleChange('monthCoverage', Number(value))}
                   options={Array.from({ length: 12 }, (_, i) => ({
                     label: dayjs().month(i).format('MMMM'),
                     value: (i + 1).toString(),
                   }))}
+                  feedback={errors?.monthCoverage}
                 />
               </div>
               <div className="ms-0 w-100 position-relative day">
@@ -353,10 +361,12 @@ const CarInformationForm = ({ data }: FormProps) => {
                   label="วัน"
                   firstOptionLabel="เลือกวัน"
                   name="dayCoverage"
-                  value={dayCoverage?.toString() || ''}
-                  onChange={(value) => setDayCoverage(Number(value))}
+                  value={values?.dayCoverage?.toString() || ''}
+                  onChange={(value) => handleChange('dayCoverage', Number(value))}
                   options={(() => {
-                    const selectedMonth = monthCoverage ? dayjs().month(monthCoverage - 1) : dayjs()
+                    const selectedMonth = values?.monthCoverage
+                      ? dayjs(values?.yearCoverage).month(values?.monthCoverage - 1)
+                      : dayjs()
                     const daysInMonth = selectedMonth.daysInMonth()
                     return Array.from({ length: daysInMonth }, (_, i) => {
                       const day = i + 1
@@ -366,8 +376,8 @@ const CarInformationForm = ({ data }: FormProps) => {
                       }
                     })
                   })()}
+                  feedback={errors?.dayCoverage}
                 />
-                {}
               </div>
             </div>
             <div className="feedback d-none">กรุณาเลือก</div>
@@ -378,7 +388,7 @@ const CarInformationForm = ({ data }: FormProps) => {
           <span className="f-md text-grey">วันที่สิ้นสุดความคุ้มครอง</span>
           <span className="f-bd text-grey line-dotted">
             <strong>
-              {`${dayCoverage} ${monthCoverage ? MONTHS_TH[monthCoverage - 1] : ''} ${yearCoverage !== null && yearCoverage !== undefined ? yearCoverage + 543 : ''}`}
+              {`${values?.dayCoverage} ${values?.monthCoverage ? MONTHS_TH[values?.monthCoverage - 1] : ''} ${values?.yearCoverage !== null && values?.yearCoverage !== undefined ? values?.yearCoverage + 543 : ''}`}
             </strong>
           </span>
         </div>
@@ -386,7 +396,7 @@ const CarInformationForm = ({ data }: FormProps) => {
       <div className="container">
         <button
           type="button"
-          onClick={handleSubmit}
+          onClick={() => handleSubmit(handleSubmitForm)}
           className="btn btn-primary fs-6 d-flex justify-content-center align-items-center mx-auto mb-4 f-bd"
         >
           ดำเนินการต่อ

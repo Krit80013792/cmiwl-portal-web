@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 'use client'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import LoadingComponent from '@/layout/components/loading/LoadingComponent'
 import { Toast } from 'primereact/toast'
 import { Dropdown } from 'primereact/dropdown'
@@ -73,7 +73,7 @@ const OrderReportAdminPage = () => {
     }
   }
 
-  const fetchChannelOptions = async () => {
+  const fetchChannelOptions = useCallback(async () => {
     try {
       const apiRoute = await setApiRoute()
       const res = await getMasterDataByEndpoint(apiRoute, apiRoute?.amd, 'channels')
@@ -86,12 +86,11 @@ const OrderReportAdminPage = () => {
     } catch (error) {
       console.error('Error fetching channel options:', error)
     }
-  }
+  }, [])
 
   useEffect(() => {
-    fetchData()
     fetchChannelOptions()
-  }, [])
+  }, [fetchChannelOptions])
 
   const handleSearch = async () => {
     await fetchData()

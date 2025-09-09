@@ -1,58 +1,39 @@
-# Stage 1: Install dependencies
-FROM node:22-alpine AS deps
-
-# Install necessary packages
-RUN apk add --no-cache libc6-compat
-
+FROM node:22-alpine AS base
+FROM base AS deps
+# RUN apk add --no-cache --update libc6-compat python3 py3-pip build-base g++ cairo-dev jpeg-dev pango-dev giflib-dev
 WORKDIR /app
 
-# Copy only package files for dependency installation
-COPY package.json package-lock.json ./
+COPY package.json ./
+RUN yarn install && yarn cache clean
 
-# Install dependencies
-RUN npm install --legacy-peer-deps
-
-# Stage 2: Build the application
-FROM node:22-alpine AS builder
-
+FROM base AS builder
 WORKDIR /app
-
-# Copy all application files
-COPY . .
-
-# Copy node_modules from the previous stage
 COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN yarn build
 
-ARG BUILDCOMMAND=build
-
-# Build the application and install production dependencies
-RUN npm run "$BUILDCOMMAND" && npm install --legacy-peer-deps --production --ignore-scripts --prefer-offline
-
-# Stage 3: Create a minimal runtime image
-FROM node:22-alpine AS runner
-
+FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV=production
+ENV NODE_ENV=local
+ENV APP_ENV=local
 
-# Create a user and group for running the application
-RUN addgroup -g 1001 -S nodejs && adduser -S nextjs -u 1001
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
 
-# Copy necessary files from builder stage
 COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
 
-# Permiss
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
 RUN mkdir -p /app/public/cmi && chown -R nextjs:nodejs /app/public/cmi
 RUN ln -s /media /app/public/cmi
 
-# Switch to non-root user
 USER nextjs
 
-# Expose the application port
 EXPOSE 3000
 
-# Start the application
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
