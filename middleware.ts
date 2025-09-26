@@ -13,35 +13,25 @@ const protectedRoutes = [
   '/cms/order-report-admin',
   '/cms/order-report-channel',
 ]
-const publicRoutes = ['/pw0wl']
+// const publicRoutes = ['/pw0wl']
 
-export default async function middleware(req: NextRequest) {
-  const resNext = NextResponse.next()
+function isClientRoute(path: string) {
+  return path.startsWith('/th/') && !/\.[^/]+$/.test(path)
+}
 
-  const path = req.nextUrl.pathname
-
-  if (path === '/') {
-    return NextResponse.next()
+async function handleClientRoute(req: NextRequest) {
+  const session = await getIronSession(await cookies(), sessionOptions)
+  const sessionData = (session as any)?.usrData?.data
+  const token = sessionData?.jwt
+  if (!token) {
+    return NextResponse.redirect(new URL('https://app.tidlor.com/main', req.url))
   }
+  return null
+}
 
-  //* Client
-  if (path.startsWith('/th/')) {
-    const session = await getIronSession(await cookies(), sessionOptions)
-    const sessionData = (session as any)?.usrData?.data
-    const token = sessionData?.jwt
-    //TODO: Don't forget this 555
-
-    if (!token) {
-      return NextResponse.redirect(new URL('https://app.tidlor.com/main', req.url))
-    }
-  }
-
-  const isProtectedRoute = protectedRoutes.includes(path)
-  // const isPublicRoute = publicRoutes.includes(path)
-
+async function getSessionFromCookie(resNext: NextResponse) {
   const CMIWL_CMS_COOKIE_NAME = `${process.env.APP_ENV}_cmiwl_cms_token`
   const CMIWL_CMS_COOKIE = (await cookies()).get(CMIWL_CMS_COOKIE_NAME)
-
   let session: any = {}
   try {
     if (CMIWL_CMS_COOKIE) {
@@ -58,17 +48,10 @@ export default async function middleware(req: NextRequest) {
   } catch (error) {
     console.error(`Error decrypting session cookie:`, error)
   }
+  return session
+}
 
-  const usrAgent = req.headers.get('user-agent')
-
-  if (isProtectedRoute && session?.uag !== usrAgent) {
-    return NextResponse.redirect(new URL('/pw0wl', req.url))
-  }
-
-  if (path === '/pw0wl' && session?.uag === usrAgent) {
-    return NextResponse.redirect(new URL('/cms/main', req.url))
-  }
-
+function handleRouteAuthorization(path: string, session: any, req: NextRequest) {
   const allowedPaths = session?.routes || []
   if (allowedPaths.length > 0) {
     const isAuthorized = allowedPaths.some((route: string) => path.endsWith(route))
@@ -79,10 +62,54 @@ export default async function middleware(req: NextRequest) {
       return NextResponse.redirect(new URL('/cms/main', req.url))
     }
   }
+  return null
+}
+
+async function checkAllowedPath() {
+  const session = await getIronSession(await cookies(), sessionOptions)
+  const insurers = (session as any)?.insurers || []
+  const checkInsurer = insurers.every((insurer: any) => !insurer.active)
+  return checkInsurer
+}
+
+export default async function middleware(req: NextRequest) {
+  const resNext = NextResponse.next()
+  const path = req.nextUrl.pathname
+
+  const isProtectedRoute = protectedRoutes.includes(path)
+  const session = await getSessionFromCookie(resNext)
+  const usrAgent = req.headers.get('user-agent')
+
+  if (isProtectedRoute && session?.uag !== usrAgent) {
+    return NextResponse.redirect(new URL('/pw0wl', req.url))
+  }
+
+  if (path === '/pw0wl' && session?.uag === usrAgent) {
+    return NextResponse.redirect(new URL('/cms/main', req.url))
+  }
+
+  const routeAuthRedirect = handleRouteAuthorization(path, session, req)
+  if (routeAuthRedirect) return routeAuthRedirect
+
+  if (path !== '/th/VIB-Error' && !path.startsWith('/launch')) {
+    const isAllowed = await checkAllowedPath()
+    if (isAllowed) {
+      return NextResponse.redirect(new URL('/th/VIB-Error', req.url))
+    }
+  }
+
+  if (path === '/') {
+    return NextResponse.redirect(new URL('/th/VehicleCTP', req.url))
+  }
+
+  if (isClientRoute(path)) {
+    const clientRedirect = await handleClientRoute(req)
+    if (clientRedirect) return clientRedirect
+  }
 
   return resNext
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|.*\\.png$).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|_next/data|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)'],
 }

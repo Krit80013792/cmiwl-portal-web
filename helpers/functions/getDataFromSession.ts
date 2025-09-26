@@ -11,6 +11,7 @@ export type SessionData = {
   }
   token: string | null
   prefill: any
+  insurers: any[]
 }
 
 export const getDataFromSession: () => Promise<SessionData> = async () => {
@@ -19,6 +20,7 @@ export const getDataFromSession: () => Promise<SessionData> = async () => {
   const prefill = sessionData?.prefill
   const channel = prefill?.channel
   const token = sessionData?.jwt
+  const insurers = session?.insurers || []
 
   const configs = await getConfigs()
   const channelConfig = configs?.find((c) => c.configByChannel === channel?.channelCode)
@@ -28,5 +30,5 @@ export const getDataFromSession: () => Promise<SessionData> = async () => {
     channelCode: channel?.channelCode,
   }
 
-  return { channelData, token, prefill }
+  return { channelData, token, prefill, insurers }
 }

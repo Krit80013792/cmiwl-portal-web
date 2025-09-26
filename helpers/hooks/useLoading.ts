@@ -2,13 +2,13 @@
 
 import { useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { loadingSlice, loadingState, selectLoading } from '@/stores/redux/slices/loadingSlice'
-import type { ReduxDispatch } from '@/stores/redux/store' // adjust path if needed
+import { loadingSlice, LoadingState, selectLoading } from '@/stores/redux/slices/loadingSlice'
+import type { ReduxDispatch } from '@/stores/redux/store'
 
 export interface UseLoadingHook {
   openLoading: () => void
   closeLoading: () => void
-  loading: loadingState
+  loading: LoadingState
 }
 
 const useLoading = (): UseLoadingHook => {

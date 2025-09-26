@@ -1,6 +1,13 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 export default function LoadingComponent() {
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    setVisible(true)
+    return () => setVisible(false)
+  }, [])
+
   return (
     <>
       <style>
@@ -22,11 +29,18 @@ export default function LoadingComponent() {
               -webkit-backdrop-filter: blur(20px);
               backdrop-filter: blur(20px);
               background-color: rgba(0, 21, 38, 0.5);
+              opacity: 0;
+              visibility: hidden;
+              transition: opacity 0.4s ease, visibility 0.4s;
+          }
+          .modalSpinner.show-fade {
+              opacity: 1;
+              visibility: visible;
           }
         `}
       </style>
       <div
-        className="modal fade modalSpinner show"
+        className={`modal fade modalSpinner${visible ? ' show-fade' : ''}`}
         style={{ display: 'block' }}
         id="ModalLoading"
         data-bs-backdrop="static"

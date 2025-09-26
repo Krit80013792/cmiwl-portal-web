@@ -18,10 +18,13 @@ const VehicleCategory = ({ data }: { data: { token: string; channelData: any } }
 
   const fetchData = useCallback(async () => {
     try {
+      openLoading()
       const res = await getCompulsoryTypes({ token: data.token, channelCode: data?.channelData?.channel?.channelCode })
       setTypeList(res?.data?.data?.compulsoryTypes ?? [])
     } catch (error) {
       console.error('Error fetching compulsory types:', error)
+    } finally {
+      closeLoading()
     }
   }, [data.channelData?.channel?.channelCode, data.token])
 
@@ -35,8 +38,10 @@ const VehicleCategory = ({ data }: { data: { token: string; channelData: any } }
   }, [dispatch])
 
   const handleVehicleCategory = async (type: any, idx: number) => {
+    openLoading()
     setActiveIndex(idx)
     const vehicleCategory = {
+      carTypeName: type.displayName,
       carTypeKey: type.carTypeKey,
       isEvType: type.isEvType,
     }
@@ -56,20 +61,19 @@ const VehicleCategory = ({ data }: { data: { token: string; channelData: any } }
         const isActive = activeIndex === idx
         return (
           <div className="col-6 pe-2 mb-3" key={e.itemOrder}>
-            <div
-              className={`py-12 px-3 rounded-4 choice-card text-center h-100${isActive ? ' active' : ''}`}
-              onClick={() => handleVehicleCategory(e, idx)}
-            >
-              <Image src={`data:image/png;base64,${e.imagePath}`} alt={e.displayName} width={80} height={42} />
-              <p className="mb-0 text-center text-grey">
-                {e.displayName.split(':').map((line: string, index: number) => (
-                  <span key={index}>
-                    {line}
-                    <br />
-                  </span>
-                ))}
-              </p>
-            </div>
+            <button onClick={() => handleVehicleCategory(e, idx)} type="button" className="w-100 h-100">
+              <div className={`py-12 px-3 rounded-4 choice-card text-center h-100${isActive ? ' active' : ''}`}>
+                <Image src={`data:image/png;base64,${e.imagePath}`} alt={e.displayName} width={80} height={42} />
+                <p className="mb-0 text-center text-grey">
+                  {e.displayName.split(':').map((line: string) => (
+                    <span key={line}>
+                      {line}
+                      <br />
+                    </span>
+                  ))}
+                </p>
+              </div>
+            </button>
           </div>
         )
       })}

@@ -11,9 +11,11 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/th'
 import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
 import { useRouter } from 'next/navigation'
-import { getAdressByZipCode } from '../../_actions'
+import { getAdressByZipCode, saveCustomerInformation } from '../../_actions'
 import useLoading from '@/helpers/hooks/useLoading'
 import { useDebounce } from '@/helpers/hooks/useDebounce'
+import Modal from '@/cmi-layout/components/Modal'
+import { useModal } from '@/helpers/hooks/useModal'
 dayjs.locale('th')
 
 interface CustomerInformationFormProps {
@@ -22,6 +24,7 @@ interface CustomerInformationFormProps {
 
 const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token }) => {
   const { openLoading, closeLoading } = useLoading()
+  const { modal, openModal, closeModal } = useModal()
   const route = useRouter()
   const dispatch = useDispatch()
   const prefillData = useSelector((state: any) => state.prefillData)
@@ -67,6 +70,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
             ...prevValues,
             provinceId: data?.province?.provinceId || '',
           }))
+          handleChange({ name: 'provinceId', value: data?.province?.provinceId || '' })
           setProvinceList(
             data?.province ? [{ label: data?.province?.provinceName, value: data?.province?.provinceId }] : [],
           )
@@ -74,6 +78,13 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
             data?.province?.districts?.map((e: any) => {
               return { label: e.districtName, value: e.districtId }
             }),
+          )
+          setSubDistrictList(
+            data?.province?.districts
+              ?.find((d: any) => d.districtId.toString() === values?.districtId?.toString())
+              ?.subdistricts?.map((sd: any) => {
+                return { label: sd.subdistrictName, value: sd.subdistrictId }
+              }) || [],
           )
         }
       } catch (error) {
@@ -86,23 +97,12 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
   useEffect(() => {
     if (zipCodeDebounced.toString().length === 5 && values.zipCode === zipCodeDebounced) {
       fetchAddressByZipCode(zipCodeDebounced.toString())
-    } else {
-      setProvinceList([])
-      setDistrictList([])
-      setSubDistrictList([])
-      setValues((prevValues: any) => ({
-        ...prevValues,
-        provinceId: '',
-        districtId: '',
-        subDistrictId: '',
-      }))
-      setAddressData(null)
     }
   }, [fetchAddressByZipCode, zipCodeDebounced, values.zipCode])
 
-  const handleSubmitForm = () => {
-    dispatch(
-      prefillDataSlice.actions.setPrefillData({
+  const handleSubmitForm = async () => {
+    try {
+      const data = {
         ...prefill,
         customer: {
           ...prefill.customer,
@@ -131,9 +131,66 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
           districtId: values.districtId,
           subDistrictId: values.subDistrictId,
         },
-      }),
-    )
-    route.push('/th/ReviewSummary')
+      }
+      dispatch(prefillDataSlice.actions.setPrefillData(data))
+      const params = {
+        data: {
+          channel: {
+            channelOrderID: data?.channel?.channelOrderID,
+          },
+          productCmiDetail: {
+            carTypeKey: data?.productCmiDetail?.carTypeKey,
+            isEvType: data?.productCmiDetail?.isEvType,
+            subCarType: data?.productCmiDetail?.cmiSubCarTypeCode,
+            cmiCarTypeCode: data?.productCmiDetail?.cmiCarTypeCode,
+            carBrandId: data?.productCmiDetail?.carBrandId,
+            carModelName: data?.productCmiDetail?.carModelName,
+            carColorId: data?.productCmiDetail?.carColorId,
+            chassisNumber: data?.productCmiDetail?.chassisNumber,
+            isRedLicense: data?.productCmiDetail?.isRedLicense,
+            licensePrefix: data?.productCmiDetail?.licensePrefix,
+            licenseNo: data?.productCmiDetail?.licenseNo,
+            yearCoverage: data?.productCmiDetail?.yearCoverage,
+            monthCoverage: data?.productCmiDetail?.monthCoverage,
+            dayCoverage: data?.productCmiDetail?.dayCoverage,
+            registrationYear: data?.productCmiDetail?.registrationYear,
+            registrationProvinceId: data?.productCmiDetail?.registrationProvinceId,
+          },
+          customer: {
+            taxId: data?.customer?.taxId,
+            firstName: data?.customer?.firstName,
+            lastName: data?.customer?.lastName,
+            title: data?.customer?.title,
+            birthDay: data?.customer?.birthDay,
+            birthMonth: data?.customer?.birthMonth,
+            birthYear: data?.customer?.birthYear,
+          },
+          personalInfo: {
+            telephoneNo: data?.personalInfo?.telephoneNo,
+            email: data?.personalInfo?.email,
+          },
+          customerAddress: {
+            houseNumber: data?.customerAddress?.houseNumber,
+            villageNo: data?.customerAddress?.villageNo,
+            buildingVillage: data?.customerAddress?.buildingVillage,
+            alley: data?.customerAddress?.alley,
+            street: data?.customerAddress?.street,
+            zipCode: data?.customerAddress?.zipCode,
+            provinceId: data?.customerAddress?.provinceId,
+            districtId: data?.customerAddress?.districtId,
+            subDistrictId: data?.customerAddress?.subDistrictId,
+          },
+        },
+      }
+      const res = await saveCustomerInformation({ token, body: params })
+      if (res?.data?.data) {
+        route.push('/th/ReviewSummary')
+      } else {
+        openModal({ type: 'error', title: 'เกิดข้อผิดพลาด', message: 'ไม่สามารถบันทึกข้อมูลได้' })
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error)
+    }
   }
 
   useEffect(() => {
@@ -142,6 +199,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
 
   return (
     <form>
+      <Modal {...modal} onClose={closeModal} />
       <div className="content-section fullPage-150">
         <div className="container">
           <div className="d-flex justify-content-between pt-3 pb-12">
@@ -162,10 +220,10 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
                   { label: 'นางสาว', value: 'นางสาว' },
                 ]}
                 feedback={errors?.title}
-                onChange={(value) => handleChange('title', value)}
+                onChange={(value) => handleChange({ name: 'title', value })}
                 value={values?.title || ''}
               />
-              <label className="form-label">คำนำหน้า</label>
+              <label className="form-label">{'คำนำหน้า'}</label>
               <div className="feedback">กรุณาเลือก</div>
             </div>
 
@@ -176,7 +234,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
                 type="text"
                 maxLength={50}
                 placeholder="กรอกชื่อตามบัตรประชาชน"
-                onChange={({ target: { name, value } }) => handleChange(name, value)}
+                onChange={({ target: { name, value } }) => handleChange({ name, value })}
                 value={values?.firstName || ''}
                 feedback={errors?.firstName}
               />
@@ -188,7 +246,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
                 type="text"
                 maxLength={50}
                 placeholder="กรอกนามสกุลตามบัตรประชาชน"
-                onChange={({ target: { name, value } }) => handleChange(name, value)}
+                onChange={({ target: { name, value } }) => handleChange({ name, value })}
                 value={values?.lastName || ''}
                 feedback={errors?.lastName}
               />
@@ -199,7 +257,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
                 type="text"
                 maxLength={17}
                 placeholder="กรอกรหัสบัตรประชาชน 13 หลัก"
-                onChange={({ target: { name, value } }) => handleChange(name, value)}
+                onChange={({ target: { name, value } }) => handleChange({ name, value: value?.replaceAll('-', '') })}
                 value={convertStrToFormat(values?.taxId, 'id_card') || ''}
                 label="เลขบัตรประชาชน"
                 feedback={errors?.taxId}
@@ -222,7 +280,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
                           value: year.toString(),
                         }
                       })}
-                      onChange={(value) => handleChange('birthYear', value)}
+                      onChange={(value) => handleChange({ name: 'birthYear', value })}
                       value={values?.birthYear || ''}
                       feedback={errors?.birthYear}
                     />
@@ -236,7 +294,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
                         label: dayjs().month(i).format('MMMM'),
                         value: (i + 1).toString(),
                       }))}
-                      onChange={(value) => handleChange('birthMonth', value)}
+                      onChange={(value) => handleChange({ name: 'birthMonth', value })}
                       value={values?.birthMonth || ''}
                       feedback={errors?.birthMonth}
                     />
@@ -259,7 +317,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
                           }
                         })
                       })()}
-                      onChange={(value) => handleChange('birthDay', value)}
+                      onChange={(value) => handleChange({ name: 'birthDay', value })}
                       value={values?.birthDay || ''}
                       feedback={errors?.birthDay}
                     />
@@ -274,7 +332,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
                 type="text"
                 maxLength={12}
                 placeholder="กรอกเบอร์โทรศัพท์"
-                onChange={({ target: { name, value } }) => handleChange(name, value)}
+                onChange={({ target: { name, value } }) => handleChange({ name, value: value?.replaceAll('-', '') })}
                 value={convertStrToFormat(values?.telephoneNo, 'phone_number') || ''}
                 label="เบอร์โทรศัพท์"
                 feedback={errors?.telephoneNo}
@@ -287,7 +345,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
                 type="text"
                 maxLength={50}
                 placeholder="กรอกอีเมล"
-                onChange={({ target: { name, value } }) => handleChange(name, value)}
+                onChange={({ target: { name, value } }) => handleChange({ name, value })}
                 value={values?.email || ''}
                 feedback={errors?.email}
               />
@@ -303,7 +361,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
                   type="text"
                   maxLength={15}
                   placeholder="กรอกบ้านเลขที่"
-                  onChange={({ target: { name, value } }) => handleChange(name, value)}
+                  onChange={({ target: { name, value } }) => handleChange({ name, value })}
                   value={values?.houseNumber || ''}
                   feedback={errors?.houseNumber}
                 />
@@ -315,7 +373,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
                   type="text"
                   maxLength={5}
                   placeholder="กรอกหมู่ที่"
-                  onChange={({ target: { name, value } }) => handleChange(name, value)}
+                  onChange={({ target: { name, value } }) => handleChange({ name, value })}
                   value={values?.villageNo || ''}
                 />
               </div>
@@ -327,7 +385,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
                 type="text"
                 maxLength={50}
                 placeholder="กรอกหมู่บ้าน/อาคาร"
-                onChange={({ target: { name, value } }) => handleChange(name, value)}
+                onChange={({ target: { name, value } }) => handleChange({ name, value })}
                 value={values?.buildingVillage || ''}
               />
             </div>
@@ -339,7 +397,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
                   type="text"
                   maxLength={25}
                   placeholder="กรอกซอย/ตรอก"
-                  onChange={({ target: { name, value } }) => handleChange(name, value)}
+                  onChange={({ target: { name, value } }) => handleChange({ name, value })}
                   value={values?.alley || ''}
                 />
               </div>
@@ -350,10 +408,10 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
                   type="text"
                   maxLength={25}
                   placeholder="กรอกถนน"
-                  onChange={({ target: { name, value } }) => handleChange(name, value)}
+                  onChange={({ target: { name, value } }) => handleChange({ name, value })}
                   value={values?.street || ''}
                 />
-                <label className="form-label">ถนน</label>
+                <label className="form-label">{'ถนน'}</label>
               </div>
             </div>
             <div>
@@ -365,7 +423,19 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
                     type="text"
                     maxLength={5}
                     placeholder="กรอกรหัสไปรษณีย์"
-                    onChange={({ target: { name, value } }) => handleChange(name, value)}
+                    onChange={({ target: { name, value } }) => {
+                      handleChange({ name, value })
+                      setProvinceList([])
+                      setDistrictList([])
+                      setSubDistrictList([])
+                      setValues((prevValues: any) => ({
+                        ...prevValues,
+                        provinceId: '',
+                        districtId: '',
+                        subDistrictId: '',
+                      }))
+                      setAddressData(null)
+                    }}
                     value={values?.zipCode || ''}
                     feedback={errors?.zipCode}
                   />
@@ -391,7 +461,11 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
                     disabled={districtList?.length === 0}
                     options={districtList}
                     onChange={(value) => {
-                      handleChange('districtId', value)
+                      handleChange({ name: 'districtId', value })
+                      setValues((prevValues: any) => ({
+                        ...prevValues,
+                        subDistrictId: '',
+                      }))
                       setSubDistrictList(
                         addressData?.province?.districts
                           ?.find((d: any) => d.districtId.toString() === value)
@@ -412,7 +486,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
                     name="subDistrictId"
                     disabled={subDistrictList?.length === 0}
                     options={subDistrictList}
-                    onChange={(value) => handleChange('subDistrictId', value)}
+                    onChange={(value) => handleChange({ name: 'subDistrictId', value })}
                     value={values?.subDistrictId || ''}
                     firstOptionLabel="เลือกแขวง/ตำบล"
                     feedback={errors?.subDistrictId}

@@ -1,13 +1,22 @@
 import { useCallback, useState } from 'react'
 import { ObjectSchema, ValidationError } from 'yup'
-import { UseLoadingHook } from './useLoading' // adjust path if needed
+import { UseLoadingHook } from './useLoading'
 
-export type HandleFormChange = (key: string, value: any, index?: number, arrName?: any) => void
+export interface FormValues {
+  name: string
+  value: any
+  index?: number
+  arrName?: any
+}
+
+export type HandleFormChange = ({ name, value, index, arrName }: FormValues) => void
 export type HandleFormSubmit = (cb: () => void | Promise<void>) => void
+export type HandleFormError = () => boolean
 
 interface UseFormHook<T> {
   handleChange: HandleFormChange
   handleSubmit: HandleFormSubmit
+  handleError: HandleFormError
   errors: Record<string, any>
   values: T
   setValues?: any
@@ -17,8 +26,8 @@ export const useForm = <T>(
   initialState?: T,
   validateSchema?: ObjectSchema<any>,
   loading?: Pick<UseLoadingHook, 'openLoading' | 'closeLoading'>,
-): UseFormHook<T> => {
-  const [values, setValues] = useState<T | any>(initialState)
+): UseFormHook<any> => {
+  const [values, setValues] = useState<any>(initialState)
   const [errors, setErrors] = useState<Record<string, any>>({})
 
   const extractErrors = (error: ValidationError) =>
@@ -30,8 +39,8 @@ export const useForm = <T>(
       {},
     )
 
-  const updateValues = useCallback((name: string, value: any, index?: number, arrName?: any) => {
-    setValues((prevInput: T | any) => {
+  const updateValues = useCallback(({ name, value, index, arrName }: FormValues) => {
+    setValues((prevInput: any) => {
       if (index! >= 0) {
         let newArr = [...prevInput[name]]
         newArr[index!] = { ...newArr[index!], [arrName]: value }
@@ -45,10 +54,23 @@ export const useForm = <T>(
   }, [])
 
   const handleChange = useCallback<HandleFormChange>(
-    (key: any, value: any, index?: number, arrName?: any) => {
-      updateValues(key, value, index, arrName)
+    async ({ name, value, index, arrName }: FormValues) => {
+      updateValues({ name, value, index, arrName })
+
+      if (validateSchema) {
+        try {
+          // Validate only the changed field
+          await validateSchema.validateAt(name, { ...values, [name]: value })
+          setErrors((prev: Record<string, any>) => ({ ...prev, [name]: undefined }))
+        } catch (error: any) {
+          setErrors((prev: Record<string, any>) => ({
+            ...prev,
+            [name]: error.message,
+          }))
+        }
+      }
     },
-    [updateValues],
+    [updateValues, validateSchema, values],
   )
 
   const handleError = useCallback(() => {
@@ -82,5 +104,6 @@ export const useForm = <T>(
     errors,
     values,
     setValues,
+    handleError,
   }
 }

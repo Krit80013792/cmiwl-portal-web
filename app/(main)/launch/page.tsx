@@ -1,13 +1,11 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import LoadingComponent from '@/cmi-layout/components/loading'
-import { useDispatch } from 'react-redux'
+import useLoading from '@/helpers/hooks/useLoading'
 
 const LaunchPage = () => {
-  const dispatch = useDispatch()
-  const [loading, setLoading] = useState(false)
+  const { openLoading, closeLoading } = useLoading()
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -19,7 +17,7 @@ const LaunchPage = () => {
       return
     }
 
-    setLoading(true)
+    openLoading()
 
     const fetchData = async () => {
       try {
@@ -31,20 +29,21 @@ const LaunchPage = () => {
           body: JSON.stringify({ ck, token }),
         })
         if (res?.ok) {
-          router.push('/th/VehicleCTP')
+          router.replace('/th/VehicleCTP')
         } else {
           console.error('Failed to fetch data.')
         }
-        setLoading(false)
       } catch {
         console.error('Error fetching data.')
+      } finally {
+        closeLoading()
       }
     }
 
     fetchData()
-  }, [searchParams, dispatch, router])
+  }, [searchParams, router])
 
-  return <main>{loading && <LoadingComponent />}</main>
+  return <main></main>
 }
 
 export default LaunchPage

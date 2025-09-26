@@ -23,10 +23,7 @@ export const getCarBrands = async ({ token, carTypeKey, isEvType }: CarInfo) => 
   return await getDataFromServer(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/car-brand`, {
     method: 'POST',
     token,
-    body: JSON.stringify({
-      carTypeKey,
-      isEvType,
-    }),
+    body: { carTypeKey, isEvType },
     cacheKey: `CarBrand:${carTypeKey}:${isEvType}`,
   })
 }
@@ -35,11 +32,7 @@ export const getCarModels = async ({ token, carBrandId, carTypeKey, isEvType }: 
   return await getDataFromServer(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/car-model`, {
     method: 'POST',
     token,
-    body: JSON.stringify({
-      carBrandId,
-      carTypeKey,
-      isEvType,
-    }),
+    body: { carBrandId, carTypeKey, isEvType },
     cacheKey: `CarModel:${carBrandId}:${carTypeKey}:${isEvType}`,
   })
 }

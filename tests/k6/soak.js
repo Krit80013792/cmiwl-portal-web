@@ -1,21 +1,20 @@
-import http from 'k6/http';
-import { sleep } from 'k6';
+import http from 'k6/http'
+import { check, sleep } from 'k6'
 
 export const options = {
-    // Key configurations for Soak test in this section
-    stages: [
-        { duration: '5m', target: 100 }, // traffic ramp-up from 1 to 100 users over 5 minutes.
-        { duration: '8h', target: 100 }, // stay at 100 users for 8 hours!!!
-        { duration: '5m', target: 0 }, // ramp-down to 0 users
-    ],
-};
+  vus: 40,
+  duration: '4h',
+  thresholds: {
+    http_req_failed: ['rate<0.01'],
+    http_req_duration: ['p(95)<700'],
+    // Consider adding custom app-level metrics via /health endpoints
+  },
+}
 
-export default () => {
-    const urlRes = http.get('https://cmiwl-pre.tidlortech.com');
-    sleep(1);
-    // MORE STEPS
-    // Here you can have more steps or complex script
-    // Step1
-    // Step2
-    // etc.
-};
+const BASE_URL = __ENV.BASE_URL || 'https://test.k6.io'
+
+export default function () {
+  const res = http.get(`${BASE_URL}/`)
+  check(res, { '200 OK': (r) => r.status === 200 })
+  sleep(1) // keep RPS moderate across many hours
+}

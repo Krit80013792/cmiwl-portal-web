@@ -19,5 +19,6 @@ declare module 'iron-session' {
     vehicleRates?: any
     carInfo?: any
     customerInfo?: any
+    insurers?: any
   }
 }

@@ -8,43 +8,46 @@ export interface Options {
   body?: any
 }
 
-export interface BaseResponse {
+export interface BaseResponse<T = any> {
   message: string
-  data: any
+  data: T
   from: string
 }
 
-export const getDataFromServer = async (url: string, options: Options): Promise<BaseResponse> => {
+export const getDataFromServer = async <T = any>(url: string, options: Options): Promise<BaseResponse<T>> => {
   const { cacheKey, method, body } = options
   try {
-    // Try to get data from Redis cache
-    const cachedData = await redis.get(cacheKey as string)
-    if (cachedData) {
-      try {
+    // Try to get data from Redis cache if cacheKey is provided
+    if (cacheKey) {
+      const cachedData = await redis.get(cacheKey)
+      if (cachedData) {
         return JSON.parse(cachedData)
-      } catch (error) {
-        console.warn('Failed to parse cached data for', cacheKey, error)
       }
     }
 
-    // If not in cache, fetch from API
-    const res = await fetch(url, {
+    // Prepare fetch options
+    const fetchOptions: RequestInit = {
       method,
       headers: {
         Authorization: `Bearer ${options.token}`,
         'Content-Type': 'application/json',
       },
-      body,
-    })
+    }
+
+    // Only attach body for non-GET requests
+    if (method !== 'GET' && body !== undefined) {
+      fetchOptions.body = JSON.stringify(body)
+    }
+
+    const res = await fetch(url, fetchOptions)
     if (!res.ok) {
       return {
         message: 'Failed to fetch data',
-        data: null,
+        data: null as any,
         from: 'API',
       }
     }
     const data = await res.json()
-
     return {
       message: 'Data fetched successfully',
       data,

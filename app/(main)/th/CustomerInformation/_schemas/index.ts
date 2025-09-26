@@ -16,7 +16,7 @@ const customerInformationSchema = object({
   birthDay: string().required('กรุณากรอกวันเกิด').notOneOf(['NO_VALUE'], 'กรุณากรอกวันเกิด'),
   telephoneNo: string()
     .required('กรุณากรอกเบอร์โทรศัพท์')
-    .matches(/^[0-9]{10}$/, 'กรุณากรอกเบอร์โทรศัพท์ 10 หลัก'),
+    .matches(/^\d{10}$/, 'กรุณากรอกเบอร์โทรศัพท์ 10 หลัก'),
   email: string().required('กรุณากรอกอีเมล').email('กรุณากรอกอีเมลให้ถูกต้อง'),
   houseNumber: string().required('กรุณากรอกที่อยู่'),
   zipCode: string().required('กรุณากรอกไปรษณีย์').length(5, 'กรุณากรอกไปรษณีย์ 5 หลัก'),

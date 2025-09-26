@@ -26,15 +26,27 @@ export async function POST(oReq: NextRequest) {
       }),
     })
 
-    const data = await res.json()
     if (!res.ok) {
       return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 })
     }
 
+    const data = await res.json()
+
+    const insurersRes = await fetch(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/insurer`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${data?.data?.jwt}`,
+      },
+    })
+
+    const insurers = await insurersRes.json()
+
     session.usrData = data
+    session.insurers = insurers?.data
+
     await session.save()
 
-    return new NextResponse(JSON.stringify({ message: `Success` }), { status: 200 })
+    return new NextResponse(JSON.stringify({ message: `Success`, data: { insurers } }), { status: 200 })
   } catch (e) {
     console.error('Error in POST /api/v1/launch:', e)
     return new NextResponse(JSON.stringify({ message: `Internal Server Error` }), { status: 500 })

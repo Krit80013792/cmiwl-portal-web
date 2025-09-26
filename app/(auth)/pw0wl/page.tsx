@@ -78,7 +78,7 @@ const LoginPage = () => {
             backgroundColor: '#85b2f9',
           }}
         >
-          <div className="w-full surface-card py-8 px-5 sm:px-8" style={{ borderRadius: '53px' }}>
+          <div className="w-full py-8 px-5 sm:px-8" style={{ borderRadius: '53px', backgroundColor: 'white' }}>
             <div className="text-center mb-5">
               <Image id="js-logo" className="logo" src="/favicon.ico" width={48} height={48} alt="cmi" priority />
             </div>

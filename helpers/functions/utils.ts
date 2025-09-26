@@ -1,6 +1,6 @@
 export const isValidThaiID = (id: string) => {
   // allow only 13 digits
-  if (!/^[0-9]{13}$/.test(id)) return false
+  if (!/^\d{13}$/.test(id)) return false
 
   let sum = 0
   for (let i = 0; i < 12; i++) {
@@ -10,7 +10,10 @@ export const isValidThaiID = (id: string) => {
   return checkDigit === parseInt(id.charAt(12), 10)
 }
 
-export const convertStrToFormat = (str: string | number, format: 'phone_number' | 'id_card' | 'idcar'): string => {
+export const convertStrToFormat = (
+  str: string | number | null,
+  format: 'phone_number' | 'id_card' | 'idcar',
+): string => {
   if (!str) {
     return ''
   }
@@ -28,11 +31,11 @@ export const convertStrToFormat = (str: string | number, format: 'phone_number' 
         .replace(/\D/g, '')
         .replace(/^(\d)(\d{4})(\d{5})(\d{2})(\d)$/, '$1-$2-$3-$4-$5')
       break
-    case 'idcar':
+    case 'idcar': {
       str = str.toString().replace(/-/g, '')
       let newString = str
       let index = 0
-      const regexp2 = /[A-Za-zก-ฮ]/gi
+      const regexp2 = /[A-zก-ฮ]/gi
       const result2 = regexp2.exec(str)
       if (result2 !== null) {
         if (result2.index !== 0) {
@@ -41,7 +44,7 @@ export const convertStrToFormat = (str: string | number, format: 'phone_number' 
           }
         }
 
-        const regexp = /[0-9]/gi
+        const regexp = /\d/gi
         const result = regexp.exec(newString)
         if (result !== null) {
           index = result.index
@@ -49,6 +52,7 @@ export const convertStrToFormat = (str: string | number, format: 'phone_number' 
         }
       }
       break
+    }
     default:
       str = str.toString()
       break

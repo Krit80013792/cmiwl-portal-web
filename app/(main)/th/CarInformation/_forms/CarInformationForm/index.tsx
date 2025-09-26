@@ -40,10 +40,12 @@ const CarInformationForm = ({ data }: FormProps) => {
       carColorId: prefillData?.productCmiDetail?.carColorId ?? null,
       chassisNumber: prefillData?.productCmiDetail?.chassisNumber ?? null,
       isRedLicense: prefillData?.productCmiDetail?.isRedLicense ?? false,
-      licenseNo: prefillData?.productCmiDetail?.licenseNo ?? null,
-      yearCoverage: dayjs().year(),
-      monthCoverage: dayjs().month() + 1,
-      dayCoverage: dayjs().date(),
+      licenseNo: prefillData?.productCmiDetail?.licenseNo
+        ? `${prefillData?.productCmiDetail?.licensePrefix}-${prefillData?.productCmiDetail?.licenseNo}`
+        : null,
+      yearCoverage: prefillData?.productCmiDetail?.yearCoverage ?? dayjs().year(),
+      monthCoverage: prefillData?.productCmiDetail?.monthCoverage ?? dayjs().month() + 1,
+      dayCoverage: prefillData?.productCmiDetail?.dayCoverage ?? dayjs().date(),
       registrationYear: prefillData?.productCmiDetail?.registrationYear ?? null,
       registrationProvinceId: prefillData?.productCmiDetail?.registrationProvinceId ?? null,
     },
@@ -63,6 +65,7 @@ const CarInformationForm = ({ data }: FormProps) => {
 
   const fetchCarBrands = useCallback(async () => {
     try {
+      openLoading()
       const res = await getCarBrands({
         token: data?.token,
         carTypeKey: prefillData?.productCmiDetail?.carTypeKey,
@@ -71,8 +74,16 @@ const CarInformationForm = ({ data }: FormProps) => {
       setCarBrandList(res?.data?.data)
     } catch (error) {
       console.error('Error fetching car brands:', error)
+    } finally {
+      closeLoading()
     }
-  }, [data?.token, prefillData?.productCmiDetail?.carTypeKey, prefillData?.productCmiDetail?.isEvType])
+  }, [
+    data?.token,
+    prefillData?.productCmiDetail?.carTypeKey,
+    prefillData?.productCmiDetail?.isEvType,
+    openLoading,
+    closeLoading,
+  ])
 
   useEffect(() => {
     fetchCarProvinces()
@@ -108,8 +119,8 @@ const CarInformationForm = ({ data }: FormProps) => {
 
   const handleSubmitForm = async () => {
     try {
-      const prefix = convertStrToFormat(values?.licenseNo as string, 'idcar')?.split('-')[0]
-      const license = convertStrToFormat(values?.licenseNo as string, 'idcar')?.split('-')[1]
+      const prefix = convertStrToFormat(values?.licenseNo, 'idcar')?.split('-')[0]
+      const license = convertStrToFormat(values?.licenseNo, 'idcar')?.split('-')[1]
       const data = {
         carBrandId: values?.carBrandId,
         carBrandName:
@@ -125,13 +136,6 @@ const CarInformationForm = ({ data }: FormProps) => {
         yearCoverage: values?.yearCoverage?.toString(),
         monthCoverage: values?.monthCoverage?.toString(),
         dayCoverage: values?.dayCoverage?.toString(),
-        coverageStartDate: dayjs(`${values?.yearCoverage}-${values?.monthCoverage}-${values?.dayCoverage}`).format(
-          'YYYY-MM-DD',
-        ),
-        coverageEndDate: dayjs(`${values?.yearCoverage}-${values?.monthCoverage}-${values?.dayCoverage}`)
-          .add(1, 'year')
-          .subtract(1, 'day')
-          .format('YYYY-MM-DD'),
       }
       !values?.isRedLicense &&
         Object.assign(data, {
@@ -144,7 +148,20 @@ const CarInformationForm = ({ data }: FormProps) => {
       dispatch(
         prefillDataSlice.actions.setPrefillData({
           ...prefillData,
-          productCmiDetail: { ...prefillData?.productCmiDetail, ...data },
+          productCmiDetail: {
+            ...prefillData?.productCmiDetail,
+            ...data,
+          },
+          customer: {
+            ...prefillData?.customer,
+            coverageStartDate: dayjs(`${values?.yearCoverage}-${values?.monthCoverage}-${values?.dayCoverage}`).format(
+              'YYYY-MM-DD',
+            ),
+            coverageEndDate: dayjs(`${values?.yearCoverage}-${values?.monthCoverage}-${values?.dayCoverage}`)
+              .add(1, 'year')
+              .subtract(1, 'day')
+              .format('YYYY-MM-DD'),
+          },
         }),
       )
       route.push(`/th/CustomerInformation`)
@@ -164,18 +181,19 @@ const CarInformationForm = ({ data }: FormProps) => {
             ?.map((brand: any) => {
               const isActive = values?.carBrandId === brand.carBrandId
               return (
-                <div
+                <button
+                  type="button"
                   className="col-4 pe-6 mb-12"
                   key={brand.carBrandId}
                   onClick={() => {
-                    handleChange('carBrandId', brand.carBrandId)
+                    handleChange({ name: 'carBrandId', value: brand.carBrandId })
                     fetchCarModelData(brand.carBrandId)
                   }}
                 >
                   <div className={`rounded-4 text-center js-listdata choice-card h-100${isActive ? ' active' : ''}`}>
                     <Image alt={brand?.carBrandName} width="48" height="48" src={brand?.carBrandImage} />
                   </div>
-                </div>
+                </button>
               )
             })}
         </div>
@@ -192,7 +210,7 @@ const CarInformationForm = ({ data }: FormProps) => {
                 value: brand?.carBrandId,
               }))}
             onChange={(value) => {
-              handleChange('carBrandId', value)
+              handleChange({ name: 'carBrandId', value })
               fetchCarModelData(value)
             }}
             value={values?.carBrandId || ''}
@@ -209,7 +227,7 @@ const CarInformationForm = ({ data }: FormProps) => {
               label: model,
               value: model,
             }))}
-            onChange={(value) => handleChange('carModelName', value)}
+            onChange={(value) => handleChange({ name: 'carModelName', value })}
             value={values?.carModelName || ''}
             feedback={errors?.carModelName}
           />
@@ -220,7 +238,7 @@ const CarInformationForm = ({ data }: FormProps) => {
             name="carColorId"
             firstOptionLabel="เลือกสีรถ"
             value={values?.carColorId || ''}
-            onChange={(value) => handleChange('carColorId', value)}
+            onChange={(value) => handleChange({ name: 'carColorId', value })}
             options={carColorList?.slice()?.map((color: any) => ({
               label: color?.carColorNameTh,
               value: color?.carColorId,
@@ -236,7 +254,7 @@ const CarInformationForm = ({ data }: FormProps) => {
             maxLength={17}
             placeholder="ตัวอย่าง AAAAAA123AA123456"
             value={values?.chassisNumber || ''}
-            onChange={(e) => handleChange('chassisNumber', e.target.value)}
+            onChange={(e) => handleChange({ name: 'chassisNumber', value: e.target.value })}
             suffix={
               <button type="button" className="bg-transparent border-0 z-index-2" onClick={() => setOpen(true)}>
                 <Image alt="ตัวช่วย" width="24" height="24" src="/assets/icon/icon-question.png" />
@@ -256,7 +274,7 @@ const CarInformationForm = ({ data }: FormProps) => {
                     inputId="isNotRed"
                     name="isRedLicense"
                     value={false}
-                    onChange={(e) => handleChange('isRedLicense', e.value)}
+                    onChange={(e) => handleChange({ name: 'isRedLicense', value: e.value })}
                     checked={!values?.isRedLicense}
                   />
                   <label htmlFor="isNotRed" className="ml-2">
@@ -268,7 +286,7 @@ const CarInformationForm = ({ data }: FormProps) => {
                     inputId="isRedLicense"
                     name="isRedLicense"
                     value={true}
-                    onChange={(e) => handleChange('isRedLicense', e.value)}
+                    onChange={(e) => handleChange({ name: 'isRedLicense', value: e.value })}
                     checked={values?.isRedLicense}
                   />
                   <label htmlFor="isRedLicense" className="ml-2">
@@ -287,7 +305,7 @@ const CarInformationForm = ({ data }: FormProps) => {
             maxLength={13}
             placeholder="ตัวอย่าง 2ขข2222"
             value={values?.licenseNo?.replaceAll('-', '') || ''}
-            onChange={(e) => handleChange('licenseNo', convertStrToFormat(e.target.value, 'idcar'))}
+            onChange={(e) => handleChange({ name: 'licenseNo', value: convertStrToFormat(e.target.value, 'idcar') })}
             feedback={errors?.licenseNo}
           />
         </div>
@@ -298,7 +316,7 @@ const CarInformationForm = ({ data }: FormProps) => {
                 label="ปีที่จดทะเบียน"
                 name="registrationYear"
                 value={values?.registrationYear}
-                onChange={(value) => handleChange('registrationYear', value)}
+                onChange={(value) => handleChange({ name: 'registrationYear', value })}
                 options={YEAR_REGISTER}
                 firstOptionLabel="เลือกปีที่จดทะเบียน"
                 feedback={errors?.registrationYear}
@@ -309,7 +327,7 @@ const CarInformationForm = ({ data }: FormProps) => {
                 label="จังหวัดที่จดทะเบียน"
                 name="registrationProvinceId"
                 value={values?.registrationProvinceId}
-                onChange={(value) => handleChange('registrationProvinceId', value)}
+                onChange={(value) => handleChange({ name: 'registrationProvinceId', value })}
                 options={carProvinceList?.map((e) => ({
                   label: e.provinceName,
                   value: e.provinceId,
@@ -331,10 +349,9 @@ const CarInformationForm = ({ data }: FormProps) => {
               <div className="w-100 position-relative year">
                 <Select
                   label="ปี"
-                  firstOptionLabel="เลือกปี"
                   name="yearCoverage"
                   value={values?.yearCoverage ? values?.yearCoverage.toString() : ''}
-                  onChange={(value) => handleChange('yearCoverage', Number(value))}
+                  onChange={(value) => handleChange({ name: 'yearCoverage', value: Number(value) })}
                   options={[dayjs().year()].map((year) => ({
                     label: (year + 543).toString(),
                     value: year.toString(),
@@ -345,10 +362,9 @@ const CarInformationForm = ({ data }: FormProps) => {
               <div className="ms-2 me-2 w-100 position-relative month">
                 <Select
                   label="เดือน"
-                  firstOptionLabel="เลือกเดือน"
                   name="monthCoverage"
                   value={values?.monthCoverage?.toString() || ''}
-                  onChange={(value) => handleChange('monthCoverage', Number(value))}
+                  onChange={(value) => handleChange({ name: 'monthCoverage', value: Number(value) })}
                   options={Array.from({ length: 12 }, (_, i) => ({
                     label: dayjs().month(i).format('MMMM'),
                     value: (i + 1).toString(),
@@ -359,10 +375,9 @@ const CarInformationForm = ({ data }: FormProps) => {
               <div className="ms-0 w-100 position-relative day">
                 <Select
                   label="วัน"
-                  firstOptionLabel="เลือกวัน"
                   name="dayCoverage"
                   value={values?.dayCoverage?.toString() || ''}
-                  onChange={(value) => handleChange('dayCoverage', Number(value))}
+                  onChange={(value) => handleChange({ name: 'dayCoverage', value: Number(value) })}
                   options={(() => {
                     const selectedMonth = values?.monthCoverage
                       ? dayjs(values?.yearCoverage).month(values?.monthCoverage - 1)
@@ -388,7 +403,7 @@ const CarInformationForm = ({ data }: FormProps) => {
           <span className="f-md text-grey">วันที่สิ้นสุดความคุ้มครอง</span>
           <span className="f-bd text-grey line-dotted">
             <strong>
-              {`${values?.dayCoverage} ${values?.monthCoverage ? MONTHS_TH[values?.monthCoverage - 1] : ''} ${values?.yearCoverage !== null && values?.yearCoverage !== undefined ? values?.yearCoverage + 543 : ''}`}
+              {`${values?.dayCoverage} ${values?.monthCoverage ? MONTHS_TH[values?.monthCoverage - 1] : ''} ${values?.yearCoverage !== null && values?.yearCoverage !== undefined ? (+values?.yearCoverage + 543).toString() : ''}`}
             </strong>
           </span>
         </div>

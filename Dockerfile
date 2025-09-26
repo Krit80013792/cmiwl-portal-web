@@ -18,19 +18,18 @@ WORKDIR /app
 ENV NODE_ENV=local
 ENV APP_ENV=local
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
+RUN addgroup --system --gid 1001 nodejs \
+  && adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
 
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
+RUN mkdir .next && chown nextjs:nodejs .next
 
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-RUN mkdir -p /app/public/cmi && chown -R nextjs:nodejs /app/public/cmi
-RUN ln -s /media /app/public/cmi
+RUN mkdir -p /app/public/cmi && chown -R nextjs:nodejs /app/public/cmi \
+  && ln -s /media /app/public/cmi
 
 USER nextjs
 

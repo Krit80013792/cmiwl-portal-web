@@ -1,17 +1,19 @@
-import http from 'k6/http';
-import { check, sleep } from 'k6';
+import http from 'k6/http'
+import { check, sleep } from 'k6'
 
 export const options = {
-    vus: 3, // Key for Smoke test. Keep it at 2, 3, max 5 VUs
-    duration: '1m', // This can be shorter or just a few iterations
-};
+  vus: 1,
+  duration: '15s',
+  thresholds: {
+    http_req_failed: ['rate<0.01'],
+    http_req_duration: ['p(95)<800'],
+  },
+}
 
-export default () => {
-    const urlRes = http.get('https://cmiwl-pre.tidlortech.com');
-    sleep(1);
-    // MORE STEPS
-    // Here you can have more steps or complex script
-    // Step1
-    // Step2
-    // etc.
-};
+const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000/pw0wl'
+
+export default function () {
+  const res = http.get(BASE_URL, { headers: { Authorization: `Bearer ${__ENV.TOKEN}` } })
+  check(res, { 'status is 200': (r) => r.status === 200 })
+  sleep(1)
+}

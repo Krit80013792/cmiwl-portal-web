@@ -1,21 +1,22 @@
-import http from 'k6/http';
-import { sleep } from 'k6';
+import http from 'k6/http'
+import { check, sleep } from 'k6'
 
 export const options = {
-    // Key configurations for spike in this section
-    stages: [
-        { duration: '2m', target: 2000 }, // fast ramp-up to a high point
-        // No plateau
-        { duration: '1m', target: 0 }, // quick ramp-down to 0 users
-    ],
-};
+  stages: [
+    { duration: '10s', target: 300 }, // spike up fast
+    { duration: '40s', target: 300 }, // brief hold
+    { duration: '10s', target: 0 }, // drop
+  ],
+  thresholds: {
+    http_req_failed: ['rate<0.02'],
+    http_req_duration: ['p(99)<1000'],
+  },
+}
 
-export default () => {
-    const urlRes = http.get('https://cmiwl-pre.tidlortech.com');
-    sleep(1);
-    // MORE STEPS
-    // Add only the processes that will be on high demand
-    // Step1
-    // Step2
-    // etc.
-};
+const BASE_URL = __ENV.BASE_URL || 'http://localhost:3000/pw0wl'
+
+export default function () {
+  const res = http.get(`${BASE_URL}/`)
+  check(res, { '200 OK': (r) => r.status === 200 })
+  sleep(1)
+}

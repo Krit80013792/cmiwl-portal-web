@@ -44,8 +44,14 @@ const Page = async () => {
             <Image
               alt="เลือกประเภทการใช้งาน"
               src="/cmisite/media/assets/regist-book-type-group.png"
-              width="320"
-              height="235"
+              width={320}
+              height={235}
+              priority
+              fetchPriority="high"
+              loading="eager"
+              decoding="async"
+              sizes="(max-width: 768px) 90vw, 320px"
+              style={{ width: '320px', height: 'auto', maxWidth: '100%' }}
             />
           </div>
         </div>

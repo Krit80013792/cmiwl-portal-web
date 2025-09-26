@@ -14,6 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function VehicleCTP() {
   const { channelData, token, prefill } = await getDataFromSession()
+
   let configValue: any = {}
   try {
     configValue = JSON.parse(channelData?.channelConfig?.configValue ?? '{}')

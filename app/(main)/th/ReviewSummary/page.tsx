@@ -140,13 +140,13 @@ export default async function ReviewSummary() {
                 ไม่สามารถทำรายการได้ในขณะนี้
               </h5>
               <p className="text-black mb-20">กรุณาลองใหม่อีกครั้ง</p>
-              <a
+              <button
                 className="btn btn-primary w-100 fs-6 d-flex justify-content-center align-items-center me-2 closePopup-btn"
                 data-bs-dismiss="modal"
                 aria-label="Close"
               >
                 <strong className="f-bd text-payment-error-btn">ปิด</strong>
-              </a>
+              </button>
             </div>
           </div>
         </div>

@@ -1,11 +1,14 @@
 'use client'
 
+import Modal from '@/cmi-layout/components/Modal'
+import { useModal } from '@/helpers/hooks/useModal'
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 const Footer = () => {
   const prefillData = useSelector((state: any) => state.prefillData)
   const [prefill, setPrefill] = useState<any>({})
+  const { modal, openModal, closeModal } = useModal()
 
   useEffect(() => {
     setPrefill(prefillData)
@@ -19,12 +22,9 @@ const Footer = () => {
           <span className="mb-0 text-start f-bd fs-26">{prefill?.productCmiDetail?.cmiCoverage?.total}</span>
           <span className="fs-6 f-bd"> บาท</span>
         </div>
-        <a
-          href="/th/PaymentChannel"
-          className="btn btn-primary submit-summary fs-6 d-flex justify-content-center align-items-center me-0"
-        >
+        <button className="btn btn-primary submit-summary fs-6 d-flex justify-content-center align-items-center me-0">
           <strong>ยืนยัน</strong>
-        </a>
+        </button>
       </div>
     </div>
   )

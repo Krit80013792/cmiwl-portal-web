@@ -4,6 +4,8 @@ import { GoogleAnalytics } from '@next/third-parties/google'
 import { LayoutProvider } from '../../cmi-layout/context/layoutcontext'
 import { PrimeReactProvider } from 'primereact/api'
 import Providers from '@/stores/providers'
+import { getDataFromSession } from '@/helpers/functions/getDataFromSession'
+import MainWithDynamicStyle from '@/cmi-layout/components/MainWithDynamicStyle'
 
 interface AppLayoutProps {
   readonly children: React.ReactNode
@@ -45,7 +47,9 @@ export const metadata: Metadata = {
   },
 }
 
-export default function AppLayout({ children }: AppLayoutProps) {
+export default async function AppLayout({ children }: AppLayoutProps) {
+  const { channelData } = await getDataFromSession()
+  const configValue: Record<string, any> = JSON.parse(channelData?.channelConfig?.configValue ?? '{}')
   return (
     <html lang="en-US" suppressHydrationWarning>
       <head>
@@ -59,11 +63,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <link id="select2-css" href={`/custom/plugin/select2/css/select2.min.css`} rel="stylesheet" />
       </head>
       <body className="LTR Chrome THTH ContentBody" data-scroll-behavior="smooth">
-        <Providers>
-          <PrimeReactProvider>
-            <LayoutProvider>{children}</LayoutProvider>
-          </PrimeReactProvider>
-        </Providers>
+        <MainWithDynamicStyle primaryColor={configValue?.primaryColor} secondaryColor={configValue?.secondaryColor}>
+          <Providers>
+            <PrimeReactProvider>
+              <LayoutProvider>{children}</LayoutProvider>
+            </PrimeReactProvider>
+          </Providers>
+        </MainWithDynamicStyle>
       </body>
     </html>
   )

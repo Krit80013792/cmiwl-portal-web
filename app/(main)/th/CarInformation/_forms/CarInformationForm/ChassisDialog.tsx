@@ -9,7 +9,7 @@ interface ChassisDialogProps {
 
 const TabButton = styled.button.withConfig({
   shouldForwardProp: (prop) => prop !== 'active',
-}) <{ active?: boolean }>`
+})<{ active?: boolean }>`
   color: #3e3e3e;
   padding: 8px 16px;
   border-radius: 50px;
@@ -57,37 +57,27 @@ export const ChassisDialog: React.FC<ChassisDialogProps> = ({ open, onClose }) =
 
   if (!open) return null
 
-  const currentTab = TABS.find(tab => tab.key === activeTab)
+  const currentTab = TABS.find((tab) => tab.key === activeTab)
 
   return (
     <div
       className="modal fade show"
       style={{ display: 'block', background: 'rgba(0,0,0,0.5)' }}
       tabIndex={-1}
-      role="dialog"
       aria-modal="true"
-      onClick={onClose}
     >
-      <div
-        className="modal-dialog modal-dialog-centered"
-        onClick={e => e.stopPropagation()}
-      >
+      <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content" style={{ borderRadius: '16px', border: 'none' }}>
           <div className="modal-header">
             <h5 className="modal-title f-bd fs-18" id="exampleModalLongTitle">
               หมายเลขตัวถังดูได้จากที่ไหนบ้าง
             </h5>
-            <button
-              type="button"
-              className="btn-close"
-              aria-label="Close"
-              onClick={onClose}
-            />
+            <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
           </div>
           <div className="modal-body" style={{ maxHeight: '314px' }}>
             <nav>
               <div className="nav nav-tabs border-0" id="nav-tab" role="tablist">
-                {TABS.map(tab => (
+                {TABS.map((tab) => (
                   <TabButton
                     key={tab.key}
                     type="button"

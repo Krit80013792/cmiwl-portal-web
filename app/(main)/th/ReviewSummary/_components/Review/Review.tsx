@@ -14,18 +14,18 @@ const Review = ({ reviewType }: { reviewType: string }) => {
   useEffect(() => {
     setPrefill(prefillData)
   }, [prefillData])
+
   switch (reviewType) {
     case 'vehicle_category':
       return (
-        // TODO: Implement dynamic rendering
         <div className="info-box bg-lightgrey rounded-4 pt-12 px-3 pb-12 mb-4">
           <div className="d-flex justify-content-between mb-12">
             <span className="f-md text-grey">ประเภทรถ</span>
-            <span className="f-bd text-grey">รถกระบะ 2 ประตู</span>
+            <span className="f-bd text-grey">{prefill?.productCmiDetail?.carTypeName?.replace(':', '/')}</span>
           </div>
           <div className="d-flex justify-content-between mb-0">
             <span className="f-md text-grey">ประเภทการใช้รถ</span>
-            <span className="f-bd text-grey">ไม่เกิน 3 ตัน</span>
+            <span className="f-bd text-grey">{prefill?.productCmiDetail?.compulsoryText}</span>
           </div>
         </div>
       )
@@ -50,7 +50,10 @@ const Review = ({ reviewType }: { reviewType: string }) => {
           </div>
           <div className="d-flex justify-content-between mb-12">
             <span className="f-md text-grey">ทะเบียนรถ</span>
-            <span className="f-bd text-grey">{`${prefill?.productCmiDetail?.licensePrefix ? `${prefill?.productCmiDetail?.licensePrefix}-` : ''}${prefill?.productCmiDetail?.licenseNo}`}</span>
+            <span className="f-bd text-grey">
+              {(prefill?.productCmiDetail?.licensePrefix ? prefill?.productCmiDetail?.licensePrefix + '-' : '') +
+                prefill?.productCmiDetail?.licenseNo}
+            </span>
           </div>
           <div className="d-flex justify-content-between mb-12">
             <span className="f-md text-grey">ปีที่จดทะเบียน</span>
@@ -67,15 +70,11 @@ const Review = ({ reviewType }: { reviewType: string }) => {
         <div className="info-box bg-lightgrey rounded-4 pt-12 px-3 pb-12 mb-4">
           <div className="d-flex justify-content-between mb-12">
             <span className="f-md text-grey">วันที่เริ่มความคุ้มครอง</span>
-            <span className="f-bd text-grey">
-              {dayjs(prefill?.productCmiDetail?.coverageStartDate).format('DD MMMM YYYY')}
-            </span>
+            <span className="f-bd text-grey">{dayjs(prefill?.customer?.coverageStartDate).format('DD MMMM YYYY')}</span>
           </div>
           <div className="d-flex justify-content-between mb-0">
             <span className="f-md text-grey">วันที่สิ้นสุดความคุ้มครอง</span>
-            <span className="f-bd text-grey">
-              {dayjs(prefill?.productCmiDetail?.coverageEndDate).format('DD MMMM YYYY')}
-            </span>
+            <span className="f-bd text-grey">{dayjs(prefill?.customer?.coverageEndDate).format('DD MMMM YYYY')}</span>
           </div>
         </div>
       )
@@ -105,14 +104,16 @@ const Review = ({ reviewType }: { reviewType: string }) => {
           <div className="d-flex justify-content-between mb-12">
             <span className="f-md text-grey w-100">ที่อยู่ปัจจุบัน</span>
             <span className="f-bd text-grey text-end">
-              {`${prefill?.customerAddress?.houseNumber} ${prefill?.customerAddress?.alley ? `ซ.${prefill?.customerAddress?.alley}` : ''} ${prefill?.customerAddress?.street ? `ถ.${prefill?.customerAddress?.street}` : ''} ${prefill?.customerAddress?.subDistrictName} ${prefill?.customerAddress?.districtName} ${prefill?.customerAddress?.provinceName} ${prefill?.customerAddress?.zipCode}`}
-              {/* 1 1 1 ซ.1 ถ.1 อำเภอพระนครศรีอยุธยา ตำบลประตูชัย จังหวัดพระนครศรีอยุธยา 13000 */}
+              {`${prefill?.customerAddress?.houseNumber} ซ.${prefill?.customerAddress?.alley ? prefill?.customerAddress?.alley : ''} ถ.${prefill?.customerAddress?.street ? prefill?.customerAddress?.street : ''} ${prefill?.customerAddress?.subDistrictName} ${prefill?.customerAddress?.districtName} ${prefill?.customerAddress?.provinceName} ${prefill?.customerAddress?.zipCode}`}
             </span>
           </div>
           <div className="d-flex justify-content-between mb-0">
             <span className="f-md text-grey">ช่องทางการจัดส่งเอกสาร</span>
-            {/* TODO: Implement dynamic rendering */}
-            <span className="f-bd text-grey">อีเมล</span>
+            <span className="f-bd text-grey">
+              {[prefill?.deliveryType?.isEmail && 'อีเมล', prefill?.deliveryType?.isSms && 'SMS']
+                .filter(Boolean)
+                .join(', ') || '-'}
+            </span>
           </div>
         </div>
       )
