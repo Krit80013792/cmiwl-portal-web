@@ -19,11 +19,7 @@ import carInformationSchema from '../../_schemas'
 import useLoading from '@/helpers/hooks/useLoading'
 dayjs.locale('th')
 
-interface FormProps {
-  data: any
-}
-
-const CarInformationForm = ({ data }: FormProps) => {
+const CarInformationForm = () => {
   const { openLoading, closeLoading } = useLoading()
   const route = useRouter()
   const prefillData = useSelector((state: any) => state.prefillData)
@@ -54,20 +50,19 @@ const CarInformationForm = ({ data }: FormProps) => {
   )
 
   const fetchCarProvinces = useCallback(async () => {
-    const res = await getProvinces({ token: data?.token })
+    const res = await getProvinces()
     setCarProvinceList(res.data.data)
-  }, [data?.token])
+  }, [])
 
   const fetchCarColors = useCallback(async () => {
-    const res = await getCarColors({ token: data?.token })
+    const res = await getCarColors()
     setCarColorList(res.data.data)
-  }, [data?.token])
+  }, [])
 
   const fetchCarBrands = useCallback(async () => {
     try {
       openLoading()
       const res = await getCarBrands({
-        token: data?.token,
         carTypeKey: prefillData?.productCmiDetail?.carTypeKey,
         isEvType: prefillData?.productCmiDetail?.isEvType,
       })
@@ -77,13 +72,7 @@ const CarInformationForm = ({ data }: FormProps) => {
     } finally {
       closeLoading()
     }
-  }, [
-    data?.token,
-    prefillData?.productCmiDetail?.carTypeKey,
-    prefillData?.productCmiDetail?.isEvType,
-    openLoading,
-    closeLoading,
-  ])
+  }, [prefillData?.productCmiDetail?.carTypeKey, prefillData?.productCmiDetail?.isEvType, openLoading, closeLoading])
 
   useEffect(() => {
     fetchCarProvinces()
@@ -98,7 +87,6 @@ const CarInformationForm = ({ data }: FormProps) => {
     async (brandId: string) => {
       try {
         const res = await getCarModels({
-          token: data?.token,
           carBrandId: brandId,
           carTypeKey: prefillData?.productCmiDetail?.carTypeKey,
           isEvType: prefillData?.productCmiDetail?.isEvType,
@@ -108,7 +96,7 @@ const CarInformationForm = ({ data }: FormProps) => {
         console.error('Error fetching car model data:', error)
       }
     },
-    [data?.token, prefillData?.productCmiDetail?.carTypeKey, prefillData?.productCmiDetail?.isEvType],
+    [prefillData?.productCmiDetail?.carTypeKey, prefillData?.productCmiDetail?.isEvType],
   )
 
   useEffect(() => {

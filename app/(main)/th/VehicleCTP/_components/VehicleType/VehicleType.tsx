@@ -9,7 +9,7 @@ import { getCompulsoryTypes } from '../../_actions'
 import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
 import useLoading from '@/helpers/hooks/useLoading'
 
-const VehicleCategory = ({ data }: { data: { token: string; channelData: any } }) => {
+const VehicleCategory = ({ data }: { data: { channelData: any } }) => {
   const router = useRouter()
   const { openLoading, closeLoading } = useLoading()
   const dispatch = useDispatch()
@@ -19,14 +19,14 @@ const VehicleCategory = ({ data }: { data: { token: string; channelData: any } }
   const fetchData = useCallback(async () => {
     try {
       openLoading()
-      const res = await getCompulsoryTypes({ token: data.token, channelCode: data?.channelData?.channel?.channelCode })
+      const res = await getCompulsoryTypes({ channelCode: data?.channelData?.channel?.channelCode })
       setTypeList(res?.data?.data?.compulsoryTypes ?? [])
     } catch (error) {
       console.error('Error fetching compulsory types:', error)
     } finally {
       closeLoading()
     }
-  }, [data.channelData?.channel?.channelCode, data.token])
+  }, [data.channelData?.channel?.channelCode])
 
   useEffect(() => {
     fetchData()

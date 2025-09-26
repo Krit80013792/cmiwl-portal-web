@@ -1,21 +1,20 @@
 'use server'
 
 import { getDataFromServer } from '@/helpers/functions/getDataFromServer'
+import { getDataFromSession } from '@/helpers/functions/getDataFromSession'
 
-interface Token {
-  token: string
-}
-
-export const getAdressByZipCode = async ({ token, zipCode }: Token & { zipCode: string }) => {
+export const getAdressByZipCode = async ({ zipCode }: { zipCode: string }) => {
+  const { token } = await getDataFromSession()
   return await getDataFromServer(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/zipcode/${zipCode}`, {
     method: 'GET',
-    token,
+    token: token as string,
     cacheKey: `Zipcode:${zipCode}`,
   })
 }
 
-export const saveCustomerInformation = async ({ token, body }: Token & { body: any }) => {
+export const saveCustomerInformation = async ({ body }: { body: any }) => {
   try {
+    const { token } = await getDataFromSession()
     const res = await fetch(`${process.env.TIDLOR_TECH_URI}/api/selling/v1/save`, {
       method: 'POST',
       headers: {

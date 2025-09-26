@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const Page = async () => {
-  const { channelData, token } = await getDataFromSession()
+  const { channelData } = await getDataFromSession()
   const configValue: Record<string, any> = JSON.parse(channelData?.channelConfig?.configValue ?? '{}')
 
   return (
@@ -57,7 +57,7 @@ const Page = async () => {
         </div>
       </div>
 
-      <CustomerInformationForm token={token as string} />
+      <CustomerInformationForm />
 
       <div
         className="modal fade modalSpinner"

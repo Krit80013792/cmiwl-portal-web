@@ -1,5 +1,5 @@
-/* eslint-disable @next/next/no-img-element */
 'use client'
+
 import React, { useEffect, useRef, useState } from 'react'
 import LoadingComponent from '@/layout/components/loading/LoadingComponent'
 import { Toast } from 'primereact/toast'

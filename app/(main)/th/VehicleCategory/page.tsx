@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const Page = async () => {
-  const { channelData, token } = await getDataFromSession()
+  const { channelData } = await getDataFromSession()
   const configValue: Record<string, any> = JSON.parse(channelData?.channelConfig?.configValue ?? '{}')
 
   return (
@@ -39,7 +39,7 @@ const Page = async () => {
               เลือกประเภทการใช้งาน
             </strong>
           </h1>
-          <VehicleCategory data={{ token: token as string, channelCode: channelData?.channelCode as string }} />
+          <VehicleCategory data={{ channelCode: channelData?.channelCode as string }} />
           <div className="d-flex justify-content-center">
             <Image
               alt="เลือกประเภทการใช้งาน"

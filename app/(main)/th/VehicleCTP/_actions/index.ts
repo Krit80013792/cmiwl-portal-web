@@ -1,21 +1,14 @@
 'use server'
 
 import { getDataFromServer } from '@/helpers/functions/getDataFromServer'
+import { getDataFromSession } from '@/helpers/functions/getDataFromSession'
 
-interface Token {
-  token: string
-}
+export const getCompulsoryTypes = async ({ channelCode }: { channelCode: string }) => {
+  const { token } = await getDataFromSession()
 
-interface CarInfo extends Token {
-  carBrandId?: string
-  carTypeKey: string
-  isEvType: boolean
-}
-
-export const getCompulsoryTypes = async ({ token, channelCode }: Token & { channelCode: string }) => {
   return await getDataFromServer(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/compulsory-type`, {
     method: 'GET',
-    token,
+    token: token as string,
     cacheKey: `${channelCode}:CompulsoryTypes`,
   })
 }

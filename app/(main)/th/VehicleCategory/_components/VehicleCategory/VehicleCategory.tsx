@@ -7,7 +7,7 @@ import { getCompulsoryRates } from '../../_actions'
 import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
 import useLoading from '@/helpers/hooks/useLoading'
 
-const VehicleCategoryComponent = ({ data }: { data: { token: string; channelCode: string } }) => {
+const VehicleCategoryComponent = ({ data }: { data: { channelCode: string } }) => {
   const { openLoading, closeLoading } = useLoading()
   const prefillData = useSelector((state: any) => state.prefillData)
   const dispatch = useDispatch()
@@ -23,14 +23,14 @@ const VehicleCategoryComponent = ({ data }: { data: { token: string; channelCode
   const fetchData = useCallback(async () => {
     try {
       openLoading()
-      const res = await getCompulsoryRates({ token: data.token, carTypeKey: prefill?.productCmiDetail?.carTypeKey })
+      const res = await getCompulsoryRates({ carTypeKey: prefill?.productCmiDetail?.carTypeKey })
       setCompulsoryRateList(res?.data?.data?.compulsoryRates ?? [])
     } catch (error) {
       console.error('Error fetching compulsory rates:', error)
     } finally {
       closeLoading()
     }
-  }, [data.token, prefill?.productCmiDetail?.carTypeKey, openLoading, closeLoading])
+  }, [prefill?.productCmiDetail?.carTypeKey, openLoading, closeLoading])
 
   useEffect(() => {
     fetchData()

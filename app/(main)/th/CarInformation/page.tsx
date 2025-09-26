@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 const Page = async () => {
-  const { channelData, token } = await getDataFromSession()
+  const { channelData } = await getDataFromSession()
   const configValue: Record<string, any> = JSON.parse(channelData?.channelConfig?.configValue ?? '{}')
   return (
     <MainWithDynamicStyle primaryColor={configValue?.primaryColor} secondaryColor={configValue?.secondaryColor}>
@@ -61,7 +61,7 @@ const Page = async () => {
               <strong>บอกข้อมูลรถของคุณกับเราหน่อย</strong>
             </h2>
           </div>
-          <CarInformationForm data={{ token }} />
+          <CarInformationForm />
         </div>
       </div>
       <div

@@ -1,15 +1,13 @@
 'use server'
 
 import { getDataFromServer } from '@/helpers/functions/getDataFromServer'
+import { getDataFromSession } from '@/helpers/functions/getDataFromSession'
 
-interface Token {
-  token: string
-}
-
-export const getCompulsoryRates = async ({ token, carTypeKey }: Token & { carTypeKey: string }) => {
+export const getCompulsoryRates = async ({ carTypeKey }: { carTypeKey: string }) => {
+  const { token } = await getDataFromSession()
   return await getDataFromServer(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/compulsory-rate/${carTypeKey}`, {
     method: 'GET',
-    token,
+    token: token as string,
     cacheKey: `compulsoryRate:${carTypeKey}`,
   })
 }

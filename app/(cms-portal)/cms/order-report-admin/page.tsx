@@ -1,5 +1,5 @@
-/* eslint-disable @next/next/no-img-element */
 'use client'
+
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import LoadingComponent from '@/layout/components/loading/LoadingComponent'
 import { Toast } from 'primereact/toast'
@@ -14,7 +14,6 @@ import { formatDateToYMD } from '@/src/shared/utils/utils'
 import { getCmiApiLogs } from '@/services/client/cmiLogsApi.service'
 import { dataColumns } from './_constants'
 import FormDialog, { FormDialogRef } from '@/modules/FormDialog'
-import 'primeicons/primeicons.css'
 import { getMasterDataByEndpoint } from '@/services/client/master-data.service'
 
 interface ChannelOptions {

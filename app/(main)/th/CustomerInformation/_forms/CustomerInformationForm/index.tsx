@@ -18,11 +18,7 @@ import Modal from '@/cmi-layout/components/Modal'
 import { useModal } from '@/helpers/hooks/useModal'
 dayjs.locale('th')
 
-interface CustomerInformationFormProps {
-  token: string
-}
-
-const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token }) => {
+const CustomerInformationForm: React.FC = () => {
   const { openLoading, closeLoading } = useLoading()
   const { modal, openModal, closeModal } = useModal()
   const route = useRouter()
@@ -62,7 +58,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
   const fetchAddressByZipCode = useCallback(
     async (zipCode: string) => {
       try {
-        const res = await getAdressByZipCode({ token, zipCode })
+        const res = await getAdressByZipCode({ zipCode })
         const data = res?.data?.data[0] || null
         setAddressData(data)
         if (data) {
@@ -91,7 +87,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
         console.error('Error fetching address by zip code:', error)
       }
     },
-    [token, setValues],
+    [setValues],
   )
 
   useEffect(() => {
@@ -182,7 +178,7 @@ const CustomerInformationForm: React.FC<CustomerInformationFormProps> = ({ token
           },
         },
       }
-      const res = await saveCustomerInformation({ token, body: params })
+      const res = await saveCustomerInformation({ body: params })
       if (res?.data?.data) {
         route.push('/th/ReviewSummary')
       } else {

@@ -13,7 +13,7 @@ const protectedRoutes = [
   '/cms/order-report-admin',
   '/cms/order-report-channel',
 ]
-// const publicRoutes = ['/pw0wl']
+const publicRoutes = ['/pw0wl']
 
 function isClientRoute(path: string) {
   return path.startsWith('/th/') && !/\.[^/]+$/.test(path)
@@ -65,7 +65,7 @@ function handleRouteAuthorization(path: string, session: any, req: NextRequest) 
   return null
 }
 
-async function checkAllowedPath() {
+async function checkInsurer() {
   const session = await getIronSession(await cookies(), sessionOptions)
   const insurers = (session as any)?.insurers || []
   const checkInsurer = insurers.every((insurer: any) => !insurer.active)
@@ -91,8 +91,12 @@ export default async function middleware(req: NextRequest) {
   const routeAuthRedirect = handleRouteAuthorization(path, session, req)
   if (routeAuthRedirect) return routeAuthRedirect
 
+  if (publicRoutes.includes(path) || path.startsWith('/cms/')) {
+    return resNext
+  }
+
   if (path !== '/th/VIB-Error' && !path.startsWith('/launch')) {
-    const isAllowed = await checkAllowedPath()
+    const isAllowed = await checkInsurer()
     if (isAllowed) {
       return NextResponse.redirect(new URL('/th/VIB-Error', req.url))
     }

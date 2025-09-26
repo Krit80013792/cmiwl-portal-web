@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function VehicleCTP() {
-  const { channelData, token, prefill } = await getDataFromSession()
+  const { channelData, prefill } = await getDataFromSession()
 
   let configValue: any = {}
   try {
@@ -58,7 +58,7 @@ export default async function VehicleCTP() {
             </div>
           </div>
         )}
-        <VehicleType data={{ token: token as string, channelData }} />
+        <VehicleType data={{ channelData }} />
       </div>
     </MainWithDynamicStyle>
   )
