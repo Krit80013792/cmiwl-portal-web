@@ -7,7 +7,6 @@ import { RadioButton } from 'primereact/radiobutton'
 import { MONTHS_TH, YEAR_REGISTER } from '../../_constants'
 import { ChassisDialog } from './ChassisDialog'
 import dayjs from 'dayjs'
-import 'dayjs/locale/th'
 import { useDispatch, useSelector } from 'react-redux'
 import { useRouter } from 'next/navigation'
 import { Select } from '@/cmi-layout/components/Select'
@@ -17,6 +16,7 @@ import { convertStrToFormat } from '@/helpers/functions/utils'
 import { useForm } from '@/helpers/hooks/useForm'
 import carInformationSchema from '../../_schemas'
 import useLoading from '@/helpers/hooks/useLoading'
+import 'dayjs/locale/th'
 dayjs.locale('th')
 
 const CarInformationForm = () => {
@@ -56,7 +56,7 @@ const CarInformationForm = () => {
 
   const fetchCarColors = useCallback(async () => {
     const res = await getCarColors()
-    setCarColorList(res.data.data)
+    setCarColorList((res.data.data ?? []).sort((a: any, b: any) => a.carColorId.localeCompare(b.carColorId)))
   }, [])
 
   const fetchCarBrands = useCallback(async () => {

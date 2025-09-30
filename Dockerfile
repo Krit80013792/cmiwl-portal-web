@@ -4,7 +4,7 @@ FROM base AS deps
 WORKDIR /app
 
 COPY package.json ./
-RUN yarn install && yarn cache clean
+RUN yarn install --ignore-scripts && yarn cache clean
 
 FROM base AS builder
 WORKDIR /app

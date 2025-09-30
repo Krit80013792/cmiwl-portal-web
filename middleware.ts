@@ -15,8 +15,11 @@ const protectedRoutes = [
 ]
 const publicRoutes = ['/pw0wl']
 
-function isClientRoute(path: string) {
-  return path.startsWith('/th/') && !/\.[^/]+$/.test(path)
+function isClientRoute(path: string): boolean {
+  if (!path.startsWith('/th/')) return false
+
+  const lastSegment = path.split('/').pop() ?? ''
+  return !lastSegment.includes('.')
 }
 
 async function handleClientRoute(req: NextRequest) {

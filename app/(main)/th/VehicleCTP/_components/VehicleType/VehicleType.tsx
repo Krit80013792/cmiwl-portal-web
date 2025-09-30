@@ -20,7 +20,7 @@ const VehicleCategory = ({ data }: { data: { channelData: any } }) => {
     try {
       openLoading()
       const res = await getCompulsoryTypes({ channelCode: data?.channelData?.channel?.channelCode })
-      setTypeList(res?.data?.data?.compulsoryTypes ?? [])
+      setTypeList((res?.data?.data?.compulsoryTypes ?? []).sort((a: any, b: any) => a.itemOrder - b.itemOrder))
     } catch (error) {
       console.error('Error fetching compulsory types:', error)
     } finally {
