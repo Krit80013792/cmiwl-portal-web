@@ -51,7 +51,7 @@ const CarInformationForm = () => {
 
   const fetchCarProvinces = useCallback(async () => {
     const res = await getProvinces()
-    setCarProvinceList(res.data.data)
+    setCarProvinceList((res.data.data ?? []).sort((a: any, b: any) => a.provinceId - b.provinceId))
   }, [])
 
   const fetchCarColors = useCallback(async () => {

@@ -22,9 +22,10 @@ const typeConfig: Record<ModalType, { imageSrc: string; imageAlt: string; colorC
 
 interface Props extends ModalOptions {
   onClose: () => void
+  callNumber?: string
 }
 
-const Modal: React.FC<Props> = ({ isOpen, title = '', message = '', type = 'error', onClose }) => {
+const Modal: React.FC<Props> = ({ isOpen, title = '', message = '', type = 'error', onClose, callNumber }) => {
   if (!isOpen) return null
 
   const { imageSrc, imageAlt, colorClass } = typeConfig[type]
@@ -46,7 +47,17 @@ const Modal: React.FC<Props> = ({ isOpen, title = '', message = '', type = 'erro
                 )
               })}
             </h5>
-            <p className="text-black mb-20">{message}</p>
+            <p className="text-black mb-20">
+              {message.split(':').map((line, i) => {
+                const key = `${line} + ${i}`
+                return (
+                  <React.Fragment key={key}>
+                    {line}
+                    <br />
+                  </React.Fragment>
+                )
+              })}
+            </p>
             <div className="d-flex">
               <Link
                 className="btn btn-secondary w-100 fs-6 d-flex justify-content-center align-items-center me-2 backtoMain-btn"
@@ -54,12 +65,26 @@ const Modal: React.FC<Props> = ({ isOpen, title = '', message = '', type = 'erro
               >
                 กลับหน้าหลัก
               </Link>
-              <button
-                className="btn btn-primary w-100 fs-6 d-flex justify-content-center align-items-center ms-2 call-btn"
-                onClick={onClose}
-              >
-                <strong className="f-bd text-payment-3Terror-call">ยกเลิก</strong>
-              </button>
+              {callNumber ? (
+                <button
+                  className="btn btn-primary w-100 fs-6 d-flex justify-content-center align-items-center ms-2 call-btn"
+                  onClick={() => {
+                    window.open(`tel:${callNumber}`, '_self')
+                    onClose()
+                  }}
+                  type="button"
+                >
+                  <strong className="f-bd text-payment-3Terror-call">โทร</strong>
+                </button>
+              ) : (
+                <button
+                  className="btn btn-primary w-100 fs-6 d-flex justify-content-center align-items-center ms-2 call-btn"
+                  onClick={onClose}
+                  type="button"
+                >
+                  <strong className="f-bd text-payment-3Terror-call">ยกเลิก</strong>
+                </button>
+              )}
             </div>
           </div>
         </div>

@@ -20,7 +20,7 @@ dayjs.locale('th')
 
 const CustomerInformationForm: React.FC = () => {
   const { openLoading, closeLoading } = useLoading()
-  const { modal, openModal, closeModal } = useModal()
+  const { openModal, closeModal } = useModal()
   const route = useRouter()
   const dispatch = useDispatch()
   const prefillData = useSelector((state: any) => state.prefillData)
@@ -128,7 +128,6 @@ const CustomerInformationForm: React.FC = () => {
           subDistrictId: values.subDistrictId,
         },
       }
-      dispatch(prefillDataSlice.actions.setPrefillData(data))
       const params = {
         data: {
           channel: {
@@ -180,6 +179,7 @@ const CustomerInformationForm: React.FC = () => {
       }
       const res = await saveCustomerInformation({ body: params })
       if (res?.data?.data) {
+        dispatch(prefillDataSlice.actions.setPrefillData(data))
         route.push('/th/ReviewSummary')
       } else {
         openModal({ type: 'error', title: 'เกิดข้อผิดพลาด', message: 'ไม่สามารถบันทึกข้อมูลได้' })
@@ -195,7 +195,13 @@ const CustomerInformationForm: React.FC = () => {
 
   return (
     <form>
-      <Modal {...modal} onClose={closeModal} />
+      <Modal
+        title="ขออภัย:ไม่สามารถทำรายการได้ในขณะนี้"
+        message={`กรุณาทำรายการใหม่ภายหลัง:หรือติดต่อเจ้าหน้าที่หากพบปัญหาการใช้งาน:(เลขที่อ้างอิง ${prefillData?.channel?.channelOrderID || '-'})`}
+        // isOpen={true}
+        isOpen={false}
+        onClose={closeModal}
+      />
       <div className="content-section fullPage-150">
         <div className="container">
           <div className="d-flex justify-content-between pt-3 pb-12">

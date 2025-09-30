@@ -23,6 +23,8 @@ export const convertStrToFormat = (
       str = str
         .toString()
         .replace(/\D/g, '')
+        .replace(/^(?!0)(\d)/, '')
+        .replace(/^0(?![689])(\d)/, '0')
         .replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3')
       break
     case 'id_card':

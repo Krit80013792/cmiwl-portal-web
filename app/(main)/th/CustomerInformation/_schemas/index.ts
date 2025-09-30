@@ -1,3 +1,4 @@
+import { isValidThaiID } from '@/helpers/functions/utils'
 import { object, string } from 'yup'
 
 const customerInformationSchema = object({
@@ -10,7 +11,13 @@ const customerInformationSchema = object({
     .required('กรุณากรอกนามสกุล')
     .matches(/^[ก-๏\s]+$/, 'กรุณากรอกนามสกุลเป็นภาษาไทยเท่านั้น')
     .max(50, 'กรุณากรอกนามสกุลไม่เกิน 50 ตัวอักษร'),
-  taxId: string().required('กรุณากรอกเลขบัตรประชาชน').length(13, 'กรุณากรอกเลขบัตรประชาชน 13 หลัก'),
+  taxId: string()
+    .required('กรุณากรอกเลขบัตรประชาชน')
+    .length(13, 'กรุณากรอกเลขบัตรประชาชน 13 หลัก')
+    .test('is-valid-thai-id', 'กรุณากรอกเลขบัตรประชาชนให้ถูกต้อง', (value) => {
+      if (!value) return false
+      return isValidThaiID(value)
+    }),
   birthYear: string().required('กรุณากรอกปีเกิด').notOneOf(['NO_VALUE'], 'กรุณากรอกปีเกิด'),
   birthMonth: string().required('กรุณากรอกเดือนเกิด').notOneOf(['NO_VALUE'], 'กรุณากรอกเดือนเกิด'),
   birthDay: string().required('กรุณากรอกวันเกิด').notOneOf(['NO_VALUE'], 'กรุณากรอกวันเกิด'),
