@@ -1,12 +1,21 @@
 import { useState, useCallback } from 'react'
 
-export type ModalType = 'error' | 'success' | 'warning'
+export type ModalType = 'error' | 'success' | 'warning' | 'confirm'
+
+export interface ConfirmModalOptions {
+  confirmText?: string
+  cancelText?: string
+  onConfirm?: () => void
+  onCancel?: () => void
+}
 
 export interface ModalOptions {
   isOpen: boolean
   title?: string
   message?: string
   type?: ModalType
+  confirmOptions?: ConfirmModalOptions
+  hasImg?: boolean
 }
 
 export function useModal(initial?: Omit<ModalOptions, 'isOpen'>) {
@@ -26,5 +35,33 @@ export function useModal(initial?: Omit<ModalOptions, 'isOpen'>) {
     setModal((prev) => ({ ...prev, isOpen: false }))
   }, [])
 
-  return { modal, openModal, closeModal }
+  const openConfirmModal = useCallback(
+    (options: {
+      title?: string
+      message?: string
+      confirmText?: string
+      cancelText?: string
+      onConfirm?: () => void
+      onCancel?: () => void
+      hasImg?: boolean
+    }) => {
+      setModal({
+        ...modal,
+        isOpen: true,
+        type: 'confirm',
+        title: options.title,
+        message: options.message,
+        confirmOptions: {
+          confirmText: options.confirmText,
+          cancelText: options.cancelText,
+          onConfirm: options.onConfirm,
+          onCancel: options.onCancel,
+        },
+        hasImg: options.hasImg,
+      })
+    },
+    [modal],
+  )
+
+  return { modal, openModal, closeModal, openConfirmModal }
 }

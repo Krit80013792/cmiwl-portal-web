@@ -40,6 +40,7 @@ const VehicleCategoryComponent = ({ data }: { data: { channelCode: string } }) =
     openLoading()
     setActiveIndex(idx)
     const compulsoryData = {
+      compulsoryText: data?.rate?.compulsoryText,
       cmiCarTypeCode: data?.rate?.cmiCarTypeCode,
       cmiSubCarTypeCode: data?.cmiSubCarTypeCode,
       cmiCoverage: {

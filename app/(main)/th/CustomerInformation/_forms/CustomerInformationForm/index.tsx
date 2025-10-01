@@ -11,16 +11,13 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/th'
 import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
 import { useRouter } from 'next/navigation'
-import { getAdressByZipCode, saveCustomerInformation } from '../../_actions'
+import { getAdressByZipCode } from '../../_actions'
 import useLoading from '@/helpers/hooks/useLoading'
 import { useDebounce } from '@/helpers/hooks/useDebounce'
-import Modal from '@/cmi-layout/components/Modal'
-import { useModal } from '@/helpers/hooks/useModal'
 dayjs.locale('th')
 
 const CustomerInformationForm: React.FC = () => {
   const { openLoading, closeLoading } = useLoading()
-  const { openModal, closeModal } = useModal()
   const route = useRouter()
   const dispatch = useDispatch()
   const prefillData = useSelector((state: any) => state.prefillData)
@@ -97,96 +94,38 @@ const CustomerInformationForm: React.FC = () => {
   }, [fetchAddressByZipCode, zipCodeDebounced, values.zipCode])
 
   const handleSubmitForm = async () => {
-    try {
-      const data = {
-        ...prefill,
-        customer: {
-          ...prefill.customer,
-          taxId: values.taxId,
-          firstName: values.firstName,
-          lastName: values.lastName,
-          title: values.title,
-          birthDay: values.birthDay,
-          birthMonth: values.birthMonth,
-          birthYear: values.birthYear,
-        },
-        personalInfo: { ...prefill.personalInfo, telephoneNo: values.telephoneNo, email: values.email },
-        customerAddress: {
-          ...prefill.customerAddress,
-          houseNumber: values.houseNumber,
-          villageNo: values.villageNo,
-          buildingVillage: values.buildingVillage,
-          alley: values.alley,
-          street: values.street,
-          zipCode: values.zipCode,
-          provinceId: values.provinceId,
-          provinceName: provinceList.find((p) => p.value?.toString() === values.provinceId?.toString())?.label || '',
-          districtName: districtList.find((d) => d.value?.toString() === values.districtId?.toString())?.label || '',
-          subDistrictName:
-            subDistrictList.find((sd) => sd.value?.toString() === values.subDistrictId?.toString())?.label || '',
-          districtId: values.districtId,
-          subDistrictId: values.subDistrictId,
-        },
-      }
-      const params = {
-        data: {
-          channel: {
-            channelOrderID: data?.channel?.channelOrderID,
-          },
-          productCmiDetail: {
-            carTypeKey: data?.productCmiDetail?.carTypeKey,
-            isEvType: data?.productCmiDetail?.isEvType,
-            subCarType: data?.productCmiDetail?.cmiSubCarTypeCode,
-            cmiCarTypeCode: data?.productCmiDetail?.cmiCarTypeCode,
-            carBrandId: data?.productCmiDetail?.carBrandId,
-            carModelName: data?.productCmiDetail?.carModelName,
-            carColorId: data?.productCmiDetail?.carColorId,
-            chassisNumber: data?.productCmiDetail?.chassisNumber,
-            isRedLicense: data?.productCmiDetail?.isRedLicense,
-            licensePrefix: data?.productCmiDetail?.licensePrefix,
-            licenseNo: data?.productCmiDetail?.licenseNo,
-            yearCoverage: data?.productCmiDetail?.yearCoverage,
-            monthCoverage: data?.productCmiDetail?.monthCoverage,
-            dayCoverage: data?.productCmiDetail?.dayCoverage,
-            registrationYear: data?.productCmiDetail?.registrationYear,
-            registrationProvinceId: data?.productCmiDetail?.registrationProvinceId,
-          },
-          customer: {
-            taxId: data?.customer?.taxId,
-            firstName: data?.customer?.firstName,
-            lastName: data?.customer?.lastName,
-            title: data?.customer?.title,
-            birthDay: data?.customer?.birthDay,
-            birthMonth: data?.customer?.birthMonth,
-            birthYear: data?.customer?.birthYear,
-          },
-          personalInfo: {
-            telephoneNo: data?.personalInfo?.telephoneNo,
-            email: data?.personalInfo?.email,
-          },
-          customerAddress: {
-            houseNumber: data?.customerAddress?.houseNumber,
-            villageNo: data?.customerAddress?.villageNo,
-            buildingVillage: data?.customerAddress?.buildingVillage,
-            alley: data?.customerAddress?.alley,
-            street: data?.customerAddress?.street,
-            zipCode: data?.customerAddress?.zipCode,
-            provinceId: data?.customerAddress?.provinceId,
-            districtId: data?.customerAddress?.districtId,
-            subDistrictId: data?.customerAddress?.subDistrictId,
-          },
-        },
-      }
-      const res = await saveCustomerInformation({ body: params })
-      if (res?.data?.data) {
-        dispatch(prefillDataSlice.actions.setPrefillData(data))
-        route.push('/th/ReviewSummary')
-      } else {
-        openModal({ type: 'error', title: 'เกิดข้อผิดพลาด', message: 'ไม่สามารถบันทึกข้อมูลได้' })
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error)
+    const data = {
+      ...prefill,
+      customer: {
+        ...prefill.customer,
+        taxId: values.taxId,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        title: values.title,
+        birthDay: values.birthDay,
+        birthMonth: values.birthMonth,
+        birthYear: values.birthYear,
+      },
+      personalInfo: { ...prefill.personalInfo, telephoneNo: values.telephoneNo, email: values.email },
+      customerAddress: {
+        ...prefill.customerAddress,
+        houseNumber: values.houseNumber,
+        villageNo: values.villageNo,
+        buildingVillage: values.buildingVillage,
+        alley: values.alley,
+        street: values.street,
+        zipCode: values.zipCode,
+        provinceId: values.provinceId,
+        provinceName: provinceList.find((p) => p.value?.toString() === values.provinceId?.toString())?.label || '',
+        districtName: districtList.find((d) => d.value?.toString() === values.districtId?.toString())?.label || '',
+        subDistrictName:
+          subDistrictList.find((sd) => sd.value?.toString() === values.subDistrictId?.toString())?.label || '',
+        districtId: values.districtId,
+        subDistrictId: values.subDistrictId,
+      },
     }
+    dispatch(prefillDataSlice.actions.setPrefillData(data))
+    route.push('/th/ReviewSummary')
   }
 
   useEffect(() => {
@@ -195,13 +134,6 @@ const CustomerInformationForm: React.FC = () => {
 
   return (
     <form>
-      <Modal
-        title="ขออภัย:ไม่สามารถทำรายการได้ในขณะนี้"
-        message={`กรุณาทำรายการใหม่ภายหลัง:หรือติดต่อเจ้าหน้าที่หากพบปัญหาการใช้งาน:(เลขที่อ้างอิง ${prefillData?.channel?.channelOrderID || '-'})`}
-        // isOpen={true}
-        isOpen={false}
-        onClose={closeModal}
-      />
       <div className="content-section fullPage-150">
         <div className="container">
           <div className="d-flex justify-content-between pt-3 pb-12">
@@ -276,7 +208,7 @@ const CustomerInformationForm: React.FC = () => {
                       name="birthYear"
                       firstOptionLabel="เลือกปี"
                       options={Array.from({ length: 80 }, (_, i) => {
-                        const year = dayjs().year() - i
+                        const year = dayjs().year() - 20 - i
                         return {
                           label: (year + 543).toString(),
                           value: year.toString(),

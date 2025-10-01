@@ -353,10 +353,13 @@ const CarInformationForm = () => {
                   name="monthCoverage"
                   value={values?.monthCoverage?.toString() || ''}
                   onChange={(value) => handleChange({ name: 'monthCoverage', value: Number(value) })}
-                  options={Array.from({ length: 12 }, (_, i) => ({
-                    label: dayjs().month(i).format('MMMM'),
-                    value: (i + 1).toString(),
-                  }))}
+                  options={Array.from({ length: 3 }, (_, i) => {
+                    const month = dayjs().add(i, 'month')
+                    return {
+                      label: month.format('MMMM'),
+                      value: (month.month() + 1).toString(),
+                    }
+                  })}
                   feedback={errors?.monthCoverage}
                 />
               </div>

@@ -3,27 +3,38 @@
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from 'primereact/button'
+import { useModal } from '@/helpers/hooks/useModal'
+import Modal from '@/cmi-layout/components/Modal'
 
 interface Props {
   readonly psAction: string
 }
 
 export default function EditReview({ psAction }: Props) {
+  const { modal, closeModal, openConfirmModal } = useModal()
   const router = useRouter()
 
   const handleBackToEdit = () => {
-    switch (psAction) {
-      case 'vehicle_category':
-        router.push('/th/VehicleCategory')
-        break
-      case 'coverage_date':
-      case 'car_info':
-        router.push('/th/CarInformation')
-        break
-      case 'customer_info':
-        router.push('/th/CustomerInformation')
-        break
-    }
+    openConfirmModal({
+      title: 'คุณต้องการแก้ไขข้อมูลหรือไม่?',
+      confirmText: 'แก้ไข',
+      cancelText: 'ยกเลิก',
+      hasImg: false,
+      onConfirm: () => {
+        switch (psAction) {
+          case 'vehicle_category':
+            router.push('/th/VehicleCategory')
+            break
+          case 'coverage_date':
+          case 'car_info':
+            router.push('/th/CarInformation')
+            break
+          case 'customer_info':
+            router.push('/th/CustomerInformation')
+            break
+        }
+      },
+    })
   }
 
   return (
@@ -31,6 +42,7 @@ export default function EditReview({ psAction }: Props) {
       <Button onClick={handleBackToEdit} className="p-button-text p-button-plain p-0">
         <img className="img-fluid me-1" alt="แก้ไข" width="63" height="24" src="/assets/icon/edit-text.png" />
       </Button>
+      <Modal {...modal} onClose={closeModal} />
 
       <div className="modal confirm-modal fade" aria-hidden="true">
         <div className="modal-dialog modal-dialog-centered mx-4 mx-sm-auto">
