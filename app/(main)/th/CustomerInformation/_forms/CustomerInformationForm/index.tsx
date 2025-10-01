@@ -63,7 +63,6 @@ const CustomerInformationForm: React.FC = () => {
             ...prevValues,
             provinceId: data?.province?.provinceId || '',
           }))
-          handleChange({ name: 'provinceId', value: data?.province?.provinceId || '' })
           setProvinceList(
             data?.province ? [{ label: data?.province?.provinceName, value: data?.province?.provinceId }] : [],
           )
@@ -84,7 +83,7 @@ const CustomerInformationForm: React.FC = () => {
         console.error('Error fetching address by zip code:', error)
       }
     },
-    [setValues, handleChange, values?.districtId],
+    [setValues, values?.districtId],
   )
 
   useEffect(() => {
