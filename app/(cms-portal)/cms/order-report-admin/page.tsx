@@ -11,7 +11,7 @@ import { DataTable } from 'primereact/datatable'
 import { Column } from 'primereact/column'
 import { ApiRoute } from '@/src/shared/utils/profile'
 import { formatDateToYMD } from '@/src/shared/utils/utils'
-import { getCmiApiLogs } from '@/services/client/cmiLogsApi.service'
+import { getCMIApiLogs } from '@/services/client/cmiLogsApi.service'
 import { dataColumns } from './_constants'
 import FormDialog, { FormDialogRef } from '@/modules/FormDialog'
 import { getMasterDataByEndpoint } from '@/services/client/master-data.service'
@@ -24,7 +24,7 @@ interface ChannelOptions {
 const OrderReportAdminPage = () => {
   const toastRef = useRef<Toast>(null)
   const dialogViewRef = useRef<FormDialogRef>(null)
-  const [channel, setChannel] = useState<string>('')
+  const [channel, setChannel] = useState<string>('all')
   const [channelOptions, setChannelOptions] = useState<ChannelOptions[]>([])
   const [startDate, setStartDate] = useState<Date | null>(new Date())
   const [endDate, setEndDate] = useState<Date | null>(new Date())
@@ -46,12 +46,13 @@ const OrderReportAdminPage = () => {
       const apiRoute = await setApiRoute()
       const sStartDate = formatDateToYMD(new Date(startDate || new Date()))
       const sEndDate = formatDateToYMD(new Date(endDate || new Date()))
-      const res = await getCmiApiLogs(
+
+      const res = await getCMIApiLogs(
         apiRoute,
         `channel=${channel}&startDate=${sStartDate}&endDate=${sEndDate}&name=${name}&licensePlate=${licensePlate}&orderNo=${orderNo}`,
       )
       const data = await res.json()
-      if (data.data.length > 0) {
+      if (data?.data?.length > 0) {
         setData(data.data)
       } else {
         toastRef.current &&
@@ -77,10 +78,12 @@ const OrderReportAdminPage = () => {
       const apiRoute = await setApiRoute()
       const res = await getMasterDataByEndpoint(apiRoute, apiRoute?.amd, 'channels')
       const data = await res.json()
-      const options: ChannelOptions[] = data.data.map((channel: { displayName: string; keyCode: string }) => ({
-        label: channel.displayName,
-        value: channel.keyCode,
-      }))
+      const options: ChannelOptions[] = data.data
+        .filter((channel: { active: boolean }) => channel.active)
+        .map((channel: { displayName: string; keyCode: string }) => ({
+          label: channel.displayName,
+          value: channel.keyCode,
+        }))
       setChannelOptions(options)
     } catch (error) {
       console.error('Error fetching channel options:', error)
@@ -96,14 +99,13 @@ const OrderReportAdminPage = () => {
   }
 
   const handleResetSearch = async () => {
-    setChannel('')
+    setChannel('all')
     setStartDate(new Date())
     setEndDate(new Date())
     setName('')
     setLicensePlate('')
     setOrderNo('')
     setData([])
-    await fetchData()
   }
 
   const logsData = useMemo(() => {
@@ -235,7 +237,7 @@ const OrderReportAdminPage = () => {
                 inputId="channel"
                 value={channel}
                 onChange={(e) => setChannel(e.value)}
-                options={channelOptions}
+                options={[{ label: 'All', value: 'all' }, ...channelOptions]}
                 placeholder="Select Channel"
               />
             </div>
