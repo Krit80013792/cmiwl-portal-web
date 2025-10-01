@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDispatch } from 'react-redux'
-import { carUserDetailSlice } from '@/stores/redux/slices/carUserDetailSlice'
+import { carUserDetailSlice } from '@/stores/redux/slices/userSlice'
 import Image from 'next/image'
 import { getCompulsoryTypes } from '../../_actions'
 import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'

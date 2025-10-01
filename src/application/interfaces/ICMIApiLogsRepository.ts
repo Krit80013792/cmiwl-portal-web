@@ -5,8 +5,9 @@ export interface IFindAllParams {
   pdEndDate: Date
   psChannel: string
   psName: string
-  psLicensePlate?: string
-  psOrderNo?: string
+  psLicensePlate: string
+  psOrderNo: string
+  psOrderStatus?: string
 }
 
 export interface ICMIApiLogsRepository {

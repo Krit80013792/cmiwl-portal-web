@@ -16,7 +16,7 @@ import { dataColumns } from './_constants'
 import FormDialog, { FormDialogRef } from '@/modules/FormDialog'
 import { getMasterDataByEndpoint } from '@/services/client/master-data.service'
 
-interface ChannelOptions {
+interface Options {
   label: string
   value: string
 }
@@ -25,7 +25,8 @@ const OrderReportAdminPage = () => {
   const toastRef = useRef<Toast>(null)
   const dialogViewRef = useRef<FormDialogRef>(null)
   const [channel, setChannel] = useState<string>('all')
-  const [channelOptions, setChannelOptions] = useState<ChannelOptions[]>([])
+  const [channelOptions, setChannelOptions] = useState<Options[]>([])
+  const [orderStatus, setOrderStatus] = useState<string>('all')
   const [startDate, setStartDate] = useState<Date | null>(new Date())
   const [endDate, setEndDate] = useState<Date | null>(new Date())
   const [name, setName] = useState<string>('')
@@ -46,15 +47,18 @@ const OrderReportAdminPage = () => {
       const apiRoute = await setApiRoute()
       const sStartDate = formatDateToYMD(new Date(startDate || new Date()))
       const sEndDate = formatDateToYMD(new Date(endDate || new Date()))
-
+      const channelParam = channel === 'all' ? channelOptions.map((option) => option.value).join(',') : channel
+      const orderStatusParam = orderStatus === 'all' ? 'pending,completed,failed' : orderStatus
       const res = await getCMIApiLogs(
         apiRoute,
-        `channel=${channel}&startDate=${sStartDate}&endDate=${sEndDate}&name=${name}&licensePlate=${licensePlate}&orderNo=${orderNo}`,
+        `channel=${channelParam}&startDate=${sStartDate}&endDate=${sEndDate}&name=${name}&licensePlate=${licensePlate}&orderNo=${orderNo}&orderStatus=${orderStatusParam}`,
       )
       const data = await res.json()
+
       if (data?.data?.length > 0) {
         setData(data.data)
       } else {
+        setData([])
         toastRef.current &&
           toastRef.current.show({
             severity: 'warn',
@@ -78,11 +82,11 @@ const OrderReportAdminPage = () => {
       const apiRoute = await setApiRoute()
       const res = await getMasterDataByEndpoint(apiRoute, apiRoute?.amd, 'channels')
       const data = await res.json()
-      const options: ChannelOptions[] = data.data
+      const options: Options[] = data.data
         .filter((channel: { active: boolean }) => channel.active)
         .map((channel: { displayName: string; keyCode: string }) => ({
           label: channel.displayName,
-          value: channel.keyCode,
+          value: channel.displayName.toLocaleUpperCase(),
         }))
       setChannelOptions(options)
     } catch (error) {
@@ -95,7 +99,17 @@ const OrderReportAdminPage = () => {
   }, [fetchChannelOptions])
 
   const handleSearch = async () => {
-    await fetchData()
+    if (name || licensePlate || orderNo) {
+      await fetchData()
+    } else {
+      toastRef.current &&
+        toastRef.current.show({
+          severity: 'warn',
+          summary: 'Warning',
+          detail: 'กรุณากรอกข้อมูลอย่างน้อยหนึ่งรายการ (ชื่อ, ทะเบียนรถ หรือ หมายเลข Order)',
+          life: 3000,
+        })
+    }
   }
 
   const handleResetSearch = async () => {
@@ -105,6 +119,7 @@ const OrderReportAdminPage = () => {
     setName('')
     setLicensePlate('')
     setOrderNo('')
+    setOrderStatus('all')
     setData([])
   }
 
@@ -275,7 +290,13 @@ const OrderReportAdminPage = () => {
               ชื่อ:{' '}
             </label>
             <div className="col-12 md:col-6">
-              <InputText id="name" name="name" placeholder="ชื่อ" onChange={(e) => setName(e.target.value)} />
+              <InputText
+                id="name"
+                name="name"
+                value={name}
+                placeholder="ชื่อ"
+                onChange={(e) => setName(e.target.value)}
+              />
             </div>
           </div>
           <div className="field grid">
@@ -286,6 +307,7 @@ const OrderReportAdminPage = () => {
               <InputText
                 id="licensePlate"
                 name="licensePlate"
+                value={licensePlate}
                 placeholder="ทะเบียนรถ"
                 onChange={(e) => setLicensePlate(e.target.value)}
               />
@@ -299,8 +321,28 @@ const OrderReportAdminPage = () => {
               <InputText
                 id="orderNo"
                 name="orderNo"
+                value={orderNo}
                 placeholder="หมายเลข Order"
                 onChange={(e) => setOrderNo(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="field grid">
+            <label htmlFor="channel" className="col-12 mb-2 md:col-2 md:mb-0">
+              Order Status:
+            </label>
+            <div className="col-12 md:col-6">
+              <Dropdown
+                inputId="orderStatus"
+                value={orderStatus}
+                onChange={(e) => setOrderStatus(e.value)}
+                options={[
+                  { label: 'All', value: 'all' },
+                  { label: 'pending', value: 'pending' },
+                  { label: 'completed', value: 'completed' },
+                  { label: 'failed', value: 'failed' },
+                ]}
+                placeholder="Select Order Status"
               />
             </div>
           </div>
@@ -324,10 +366,7 @@ const OrderReportAdminPage = () => {
 
         <div className="card">
           <DataTable
-            //ref={dt}
             value={logsData}
-            //selection={selectedNewss}
-            //onSelectionChange={(e) => setSelectedNewss(e.value)}
             dataKey="itemID"
             paginator
             rows={20}
@@ -340,7 +379,6 @@ const OrderReportAdminPage = () => {
             loading={loading}
             globalFilterFields={['newsPageName', 'newsHeaderContent']}
             emptyMessage="Data not found."
-            //header={tableHeader}
           >
             {dataColumns.map((col, index) => (
               <Column

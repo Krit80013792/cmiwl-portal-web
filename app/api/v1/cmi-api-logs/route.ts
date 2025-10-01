@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { serializeRequest } from '@/src/shared/utils/serializeRequest'
 import { CMIApiLogsService } from '../../../../src/application/services/CMIApiLogsService'
 import { CMIApiLogsRepository } from '../../../../src/infrastructure/database/mongodb/repositories/CMILogsApiRepository'
-import { permissionGuard } from '@/src/shared/middleware/permission.guard'
+import { permissionSomeGuard } from '@/src/shared/middleware/permission.guard'
 import { authGuard } from '@/src/shared/middleware/auth.guard'
 import { TxActivityLogger } from '@/src/shared/middleware/logging/TxActivityLogger'
 
@@ -33,7 +33,7 @@ export async function GET(poReq: NextRequest) {
     const auth = await authGuard()
     user = auth?.user
     permissions = auth?.permissions
-    permissionGuard(permissions, 'users:read')
+    permissionSomeGuard(permissions, ['order-report-admin:read', 'order-report-channel:read'])
   } catch {
     return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 })
   }
@@ -48,6 +48,7 @@ export async function GET(poReq: NextRequest) {
     const sName = oUrl.searchParams.get('name') ?? ''
     const sLicensePlate = oUrl.searchParams.get('licensePlate') ?? ''
     const sOrderNo = oUrl.searchParams.get('orderNo') ?? ''
+    const sOrderStatus = oUrl.searchParams.get('orderStatus') ?? ''
     const CMIApiLogsService = await CMIApiLogsServiceInstance()
     const resources = await CMIApiLogsService.getCMIApiLogs({
       pdStartDate: new Date(sStartDate),
@@ -56,6 +57,7 @@ export async function GET(poReq: NextRequest) {
       psName: sName,
       psLicensePlate: sLicensePlate,
       psOrderNo: sOrderNo,
+      psOrderStatus: sOrderStatus,
     })
 
     return new NextResponse(JSON.stringify({ message: 'Success', data: resources?.data }), { status: 200 })

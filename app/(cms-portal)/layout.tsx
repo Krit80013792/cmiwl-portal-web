@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import React, { Suspense } from 'react'
 import { LayoutProvider } from '../../layout/context/layoutcontext'
 import { PrimeReactProvider } from 'primereact/api'
+import Providers from '@/stores/providers'
 import 'primereact/resources/themes/lara-light-cyan/theme.css'
 import 'primeflex/primeflex.css'
 import 'primeicons/primeicons.css'
@@ -26,11 +27,13 @@ export default function RootLayout({ children }: RootLayoutProps) {
       </head>
       <body>
         <Suspense>
-          <PrimeReactProvider>
-            <LayoutProvider>
-              <Layout>{children}</Layout>
-            </LayoutProvider>
-          </PrimeReactProvider>
+          <Providers>
+            <PrimeReactProvider>
+              <LayoutProvider>
+                <Layout>{children}</Layout>
+              </LayoutProvider>
+            </PrimeReactProvider>
+          </Providers>
         </Suspense>
       </body>
     </html>

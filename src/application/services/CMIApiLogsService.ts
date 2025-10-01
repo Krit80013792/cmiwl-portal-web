@@ -40,7 +40,7 @@ export class CMIApiLogsService {
 
   async getCMIApiLogs(params: IFindAllParams): Promise<BaseResponse<CMIApiLogsDTO[] | null>> {
     try {
-      const { pdStartDate, pdEndDate, psChannel, psName, psLicensePlate, psOrderNo } = params
+      const { pdStartDate, pdEndDate, psChannel, psName, psLicensePlate, psOrderNo, psOrderStatus } = params
       await MongoDBConnectionService()
       const oCMILogs = await this.CMIApiLogsRepository.findAll({
         pdStartDate,
@@ -49,6 +49,7 @@ export class CMIApiLogsService {
         psName,
         psLicensePlate,
         psOrderNo,
+        psOrderStatus,
       })
       return {
         statusCode: oCMILogs ? 200 : 404,

@@ -13,8 +13,11 @@ import { classNames } from 'primereact/utils'
 import { config } from '@/src/shared/utils/config'
 import { signIn } from '@/services/client/auth.service'
 import forge from 'node-forge'
+import { useDispatch } from 'react-redux'
+import { userSlice } from '@/stores/redux/slices/userSlice'
 
 const LoginPage = () => {
+  const dispatch = useDispatch()
   const [loading, setLoading] = useState(false)
   const [usr, setUsr] = useState('')
   const [pw, setPw] = useState('')
@@ -49,7 +52,10 @@ const LoginPage = () => {
       const encryptedData = publicKey.encrypt(JSON.stringify(authModel), 'RSA-OAEP')
       const encrypted = Buffer.from(encryptedData, 'binary').toString('base64')
       const res = await signIn(conf, encrypted)
+      const data = await res.json()
       if (res.ok) {
+        const { userName, userGroupName } = data.data
+        dispatch(userSlice.actions.setUserSlice({ userGroupName, userName }))
         const cmsm = Buffer.from(conf?.cmsm, 'base64').toString('binary')
         router.push(cmsm)
       } else {
@@ -58,6 +64,8 @@ const LoginPage = () => {
       }
     } catch {
       toast.current?.show({ severity: 'error', summary: 'Error', detail: 'Failed to authentication', life: 5000 })
+    } finally {
+      setLoading(false)
     }
   }
 

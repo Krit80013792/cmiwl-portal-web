@@ -97,6 +97,7 @@ export async function POST(oReq: NextRequest) {
 
     const publicUserData = {
       userName: user?.data?.userName,
+      userGroupName: user?.data?.userGroupName,
       perms: userRole?.data?.userRolePermissions,
     }
     const base64PublicUserData = Buffer.from(JSON.stringify(publicUserData), 'binary').toString('base64')
@@ -147,8 +148,10 @@ export async function POST(oReq: NextRequest) {
       sResponseMsg: JSON.stringify(safeUser),
       sChannel: 'CMS',
     } as any)
-
-    return response
+    return new NextResponse(JSON.stringify({ message: 'Success', data: publicUserData }), {
+      status: 200,
+      headers: response.headers,
+    })
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : JSON.stringify(error)
     console.error(`Error ${METHOD} :`, errorMsg)

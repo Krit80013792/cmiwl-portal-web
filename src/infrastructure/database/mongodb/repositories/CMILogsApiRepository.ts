@@ -4,14 +4,15 @@ import { ICMIApiLogsRepository, IFindAllParams } from '../../../../application/i
 
 export class CMIApiLogsRepository implements ICMIApiLogsRepository {
   async findAll(params: IFindAllParams): Promise<ICMIApiLogs[]> {
-    const { pdStartDate, pdEndDate, psChannel, psName, psLicensePlate, psOrderNo } = params
+    const { pdStartDate, pdEndDate, psChannel, psName, psLicensePlate, psOrderNo, psOrderStatus } = params
     const targetStartDate = new Date(pdStartDate)
     const targetEndDate = new Date(pdEndDate)
     const startOfDay = new Date(targetStartDate.setUTCHours(0, 0, 0, 0))
     const endOfDay = new Date(targetEndDate.setUTCHours(23, 59, 59, 999))
     const query: any = {
-      sChannel: psChannel,
+      sChannel: { $in: [...psChannel.split(',')] },
       dRequestDate: { $gte: startOfDay, $lte: endOfDay },
+      sOrderStatus: { $in: psOrderStatus ? [...psOrderStatus.split(',')] : [] },
       $or: [
         { sName: { $regex: psName, $options: 'i' } },
         { sLicensePlate: { $regex: psLicensePlate, $options: 'i' } },
