@@ -26,7 +26,7 @@ const VehicleCategory = ({ data }: { data: { channelData: any } }) => {
     } finally {
       closeLoading()
     }
-  }, [data.channelData?.channel?.channelCode])
+  }, [data.channelData?.channel?.channelCode, openLoading, closeLoading])
 
   useEffect(() => {
     fetchData()

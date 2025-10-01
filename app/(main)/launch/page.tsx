@@ -41,7 +41,7 @@ const LaunchPage = () => {
     }
 
     fetchData()
-  }, [searchParams, router])
+  }, [searchParams, router, openLoading, closeLoading])
 
   return <main></main>
 }

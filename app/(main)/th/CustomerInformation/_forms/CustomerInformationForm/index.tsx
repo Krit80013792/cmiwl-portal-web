@@ -84,7 +84,7 @@ const CustomerInformationForm: React.FC = () => {
         console.error('Error fetching address by zip code:', error)
       }
     },
-    [setValues],
+    [setValues, handleChange, values?.districtId],
   )
 
   useEffect(() => {
