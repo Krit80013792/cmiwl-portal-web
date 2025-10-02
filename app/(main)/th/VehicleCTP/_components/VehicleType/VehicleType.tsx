@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDispatch } from 'react-redux'
-import { carUserDetailSlice } from '@/stores/redux/slices/userSlice'
 import Image from 'next/image'
 import { getCompulsoryTypes } from '../../_actions'
 import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
@@ -34,7 +33,6 @@ const VehicleCategory = ({ data }: { data: { channelData: any } }) => {
 
   useEffect(() => {
     dispatch(prefillDataSlice.actions.clearPrefillData())
-    dispatch(carUserDetailSlice.actions.clearCarUserDetail())
   }, [dispatch])
 
   const handleVehicleCategory = async (type: any, idx: number) => {
