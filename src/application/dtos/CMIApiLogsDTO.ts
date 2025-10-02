@@ -24,4 +24,37 @@ export interface CMIApiLogsDTO {
   updatedBy: string
   createdAt: Date
   updatedAt: Date
+  detail?: {
+    chassisNo?: string
+    carType?: string
+    carBrandName?: string
+    carModelName?: string
+    provinceName?: string
+    effectiveDate?: Date
+    expiredDate?: Date
+    techMessage?: string
+    paymentDate?: Date
+    paymentChannel?: string
+    paymentStatus?: string
+    paymentMessage?: string
+    paymentResultDate?: Date
+    paymentResultStatus?: string
+    paymentNo?: string
+    amount?: number
+    policyResultDate?: Date
+    policyNo?: string
+    covernote?: string
+    partnerCode?: string
+    partnerRefNo?: string
+    insOrderNo?: string
+    crossRunningNo?: string
+    runningNo?: string
+    documentResultDate?: Date
+    documentNo?: string
+    transactionNo?: string
+    fileAttatchmentNo?: string
+    fileAttatchmentCode?: string
+    fileAttatchmentName?: string
+    fileIndex?: string
+  }
 }

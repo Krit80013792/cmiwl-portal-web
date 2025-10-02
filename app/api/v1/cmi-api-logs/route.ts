@@ -41,23 +41,23 @@ export async function GET(poReq: NextRequest) {
   const reqLog = await serializeRequest(poReq, {})
 
   try {
-    const oUrl = new URL(poReq.url)
-    const sStartDate = oUrl.searchParams.get('startDate') ?? ''
-    const sEndDate = oUrl.searchParams.get('endDate') ?? ''
-    const sChannel = oUrl.searchParams.get('channel') ?? ''
-    const sName = oUrl.searchParams.get('name') ?? ''
-    const sLicensePlate = oUrl.searchParams.get('licensePlate') ?? ''
-    const sOrderNo = oUrl.searchParams.get('orderNo') ?? ''
-    const sOrderStatus = oUrl.searchParams.get('orderStatus') ?? ''
+    const url = new URL(poReq.url)
+    const startDate = url.searchParams.get('startDate') ?? ''
+    const endDate = url.searchParams.get('endDate') ?? ''
+    const channel = url.searchParams.get('channel') ?? ''
+    const name = url.searchParams.get('name') ?? ''
+    const licensePlate = url.searchParams.get('licensePlate') ?? ''
+    const orderNo = url.searchParams.get('orderNo') ?? ''
+    const orderStatus = url.searchParams.get('orderStatus') ?? ''
     const CMIApiLogsService = await CMIApiLogsServiceInstance()
     const resources = await CMIApiLogsService.getCMIApiLogs({
-      pdStartDate: new Date(sStartDate),
-      pdEndDate: new Date(sEndDate),
-      psChannel: sChannel,
-      psName: sName,
-      psLicensePlate: sLicensePlate,
-      psOrderNo: sOrderNo,
-      psOrderStatus: sOrderStatus,
+      pdStartDate: new Date(startDate),
+      pdEndDate: new Date(endDate),
+      psChannel: channel,
+      psName: name,
+      psLicensePlate: licensePlate,
+      psOrderNo: orderNo,
+      psOrderStatus: orderStatus,
     })
 
     return new NextResponse(JSON.stringify({ message: 'Success', data: resources?.data }), { status: 200 })

@@ -11,30 +11,63 @@ export class CMIApiLogsService {
   private mapToDTO(data: ICMIApiLogs): CMIApiLogsDTO {
     return {
       id: data?._id.toString(),
-      itemID: data.sItemID,
-      refNo: data.sRefNo,
-      apiName: data.sApiName,
-      headerStatus: data.sHeaderStatus,
-      requestDate: data.dRequestDate,
-      request: data.sRequest,
-      name: data.sName,
-      lastName: data.sLastName,
-      email: data.sEmail,
-      tel: data.sTel,
-      licensePlate: data.sLicensePlate,
-      channel: data.sChannel,
-      orderNo: data.sOrderNo,
-      orderStatus: data.sOrderStatus,
-      paymentNo: data.sPaymentNo,
-      insOrderNo: data.sInsOrderNo,
-      message: data.sMessage,
-      responseDate: data.dResponseDate,
-      response: data.sResponse,
-      remark: data.sRemark,
+      itemID: data.itemID,
+      refNo: data.refNo,
+      apiName: data.apiName,
+      headerStatus: data.headerStatus,
+      requestDate: data.requestDate,
+      request: data.request,
+      name: data.name,
+      lastName: data.lastName,
+      email: data.email,
+      tel: data.tel,
+      licensePlate: data.licensePlate,
+      channel: data.channel,
+      orderNo: data.orderNo,
+      orderStatus: data.orderStatus,
+      paymentNo: data.paymentNo,
+      insOrderNo: data.insOrderNo,
+      message: data.message,
+      responseDate: data.responseDate,
+      response: data.response,
+      remark: data.remark,
       createdBy: data.createdBy,
       updatedBy: data.updatedBy,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
+      detail: {
+        chassisNo: data?.detail?.chassisNo,
+        carType: data?.detail?.carType,
+        carBrandName: data?.detail?.carBrandName,
+        carModelName: data?.detail?.carModelName,
+        provinceName: data?.detail?.provinceName,
+        effectiveDate: data?.detail?.effectiveDate,
+        expiredDate: data?.detail?.expiredDate,
+        techMessage: data?.detail?.techMessage,
+        paymentDate: data?.detail?.paymentDate,
+        paymentChannel: data?.detail?.paymentChannel,
+        paymentStatus: data?.detail?.paymentStatus,
+        paymentMessage: data?.detail?.paymentMessage,
+        paymentResultDate: data?.detail?.paymentResultDate,
+        paymentResultStatus: data?.detail?.paymentResultStatus,
+        paymentNo: data?.detail?.paymentNo,
+        amount: data?.detail?.amount,
+        policyResultDate: data?.detail?.policyResultDate,
+        policyNo: data?.detail?.policyNo,
+        covernote: data?.detail?.covernote,
+        partnerCode: data?.detail?.partnerCode,
+        partnerRefNo: data?.detail?.partnerRefNo,
+        insOrderNo: data?.detail?.insOrderNo,
+        crossRunningNo: data?.detail?.crossRunningNo,
+        runningNo: data?.detail?.runningNo,
+        documentResultDate: data?.detail?.documentResultDate,
+        documentNo: data?.detail?.documentNo,
+        transactionNo: data?.detail?.transactionNo,
+        fileAttatchmentNo: data?.detail?.fileAttatchmentNo,
+        fileAttatchmentCode: data?.detail?.fileAttatchmentCode,
+        fileAttatchmentName: data?.detail?.fileAttatchmentName,
+        fileIndex: data?.detail?.fileIndex,
+      },
     }
   }
 
@@ -42,7 +75,7 @@ export class CMIApiLogsService {
     try {
       const { pdStartDate, pdEndDate, psChannel, psName, psLicensePlate, psOrderNo, psOrderStatus } = params
       await MongoDBConnectionService()
-      const oCMILogs = await this.CMIApiLogsRepository.findAll({
+      const oCMILogs: ICMIApiLogs[] = await this.CMIApiLogsRepository.findAll({
         pdStartDate,
         pdEndDate,
         psChannel,
@@ -51,10 +84,12 @@ export class CMIApiLogsService {
         psOrderNo,
         psOrderStatus,
       })
+
+      const plainCMILogs = oCMILogs.map((doc) => (doc.toObject ? doc.toObject() : doc))
       return {
-        statusCode: oCMILogs ? 200 : 404,
-        message: oCMILogs ? 'CMILogs found' : 'CMILogs not found',
-        data: oCMILogs ? oCMILogs.map(this.mapToDTO.bind(this)) : null,
+        statusCode: plainCMILogs ? 200 : 404,
+        message: plainCMILogs ? 'CMILogs found' : 'CMILogs not found',
+        data: plainCMILogs ? plainCMILogs.map(this.mapToDTO.bind(this)) : null,
       }
     } catch (error) {
       console.error(`Error getCMIApiLogs:`, error)

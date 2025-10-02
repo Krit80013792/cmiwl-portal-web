@@ -10,13 +10,13 @@ export class CMIApiLogsRepository implements ICMIApiLogsRepository {
     const startOfDay = new Date(targetStartDate.setUTCHours(0, 0, 0, 0))
     const endOfDay = new Date(targetEndDate.setUTCHours(23, 59, 59, 999))
     const query: any = {
-      sChannel: { $in: [...psChannel.split(',')] },
-      dRequestDate: { $gte: startOfDay, $lte: endOfDay },
-      sOrderStatus: { $in: psOrderStatus ? [...psOrderStatus.split(',')] : [] },
+      channel: { $in: [...psChannel.split(',')] },
+      requestDate: { $gte: startOfDay, $lte: endOfDay },
+      orderStatus: { $in: psOrderStatus ? [...psOrderStatus.split(',')] : [] },
       $or: [
-        { sName: { $regex: psName, $options: 'i' } },
-        { sLicensePlate: { $regex: psLicensePlate, $options: 'i' } },
-        { sOrderNo: { $regex: psOrderNo, $options: 'i' } },
+        { name: { $regex: psName, $options: 'i' } },
+        { licensePlate: { $regex: psLicensePlate, $options: 'i' } },
+        { orderNo: { $regex: psOrderNo, $options: 'i' } },
       ],
     }
 

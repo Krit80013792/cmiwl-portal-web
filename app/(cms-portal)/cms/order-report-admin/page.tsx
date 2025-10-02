@@ -15,6 +15,9 @@ import { getCMIApiLogs } from '@/services/client/cmiLogsApi.service'
 import { dataColumns } from './_constants'
 import FormDialog, { FormDialogRef } from '@/modules/FormDialog'
 import { getMasterDataByEndpoint } from '@/services/client/master-data.service'
+import dayjs from 'dayjs'
+import Section from './_components/Section'
+import InfoRow from './_components/Info'
 
 interface Options {
   label: string
@@ -124,107 +127,134 @@ const OrderReportAdminPage = () => {
   }
 
   const logsData = useMemo(() => {
+    const fmt = (v?: string | number | null) => ((v ?? !v) ? String(v) : '-')
+    const statusColor = (v?: string) => {
+      const s = (v || '').toLowerCase()
+      if (['success', 'paid', 'completed', 'ok'].includes(s)) return '#2e7d32'
+      if (['pending', 'processing', 'inprogress'].includes(s)) return '#f59e0b'
+      if (!s || s === '-') return '#6b7280'
+      return '#dc2626'
+    }
+
     return data.map((item) => {
       const handleView = () => {
         dialogViewRef.current?.open({
           title: 'Log Detail',
           draggable: false,
-          style: { width: '400px' },
+          // Match dialog width to content; keep it responsive
+          style: { width: 'min(960px, 92vw)' },
           children: (
-            <div style={{ minWidth: 350, background: '#f8f9fa', borderRadius: 8, padding: 20 }}>
-              <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
-                <label
-                  htmlFor={`orderNo-detail-${item.orderNo}`}
-                  className="font-bold"
-                  style={{ width: 130, color: '#495057' }}
-                >
-                  Order No:
-                </label>
-                <span id={`orderNo-detail-${item.orderNo}`} style={{ color: '#212529' }}>
-                  {item.orderNo || '-'}
-                </span>
-              </div>
-              <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
-                <label
-                  htmlFor={`channel-detail-${item.orderNo}`}
-                  className="font-bold"
-                  style={{ width: 130, color: '#495057' }}
-                >
-                  Channel:
-                </label>
-                <span id={`channel-detail-${item.orderNo}`} style={{ color: '#212529' }}>
-                  {item.channel || '-'}
-                </span>
-              </div>
-              <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
-                <label
-                  htmlFor={`name-detail-${item.orderNo}`}
-                  className="font-bold"
-                  style={{ width: 130, color: '#495057' }}
-                >
-                  Name:
-                </label>
-                <span id={`name-detail-${item.orderNo}`} style={{ color: '#212529' }}>
-                  {item.name || '-'}
-                </span>
-              </div>
-              <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
-                <label
-                  htmlFor={`licensePlate-detail-${item.orderNo}`}
-                  className="font-bold"
-                  style={{ width: 130, color: '#495057' }}
-                >
-                  License Plate:
-                </label>
-                <span id={`licensePlate-detail-${item.orderNo}`} style={{ color: '#212529' }}>
-                  {item.licensePlate || '-'}
-                </span>
-              </div>
-              <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
-                <label
-                  htmlFor={`date-detail-${item.orderNo}`}
-                  className="font-bold"
-                  style={{ width: 130, color: '#495057' }}
-                >
-                  Date:
-                </label>
-                <span id={`date-detail-${item.orderNo}`} style={{ color: '#212529' }}>
-                  {item.date || '-'}
-                </span>
-              </div>
-              <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
-                <label
-                  htmlFor={`status-detail-${item.orderNo}`}
-                  className="font-bold"
-                  style={{ width: 130, color: '#495057' }}
-                >
-                  Status:
-                </label>
-                <span
-                  id={`status-detail-${item.orderNo}`}
-                  style={{ color: item.status === 'success' ? '#28a745' : '#dc3545', fontWeight: 500 }}
-                >
-                  {item.status || '-'}
-                </span>
-              </div>
-              <div className="p-field mb-3" style={{ display: 'flex', marginBottom: 12 }}>
-                <label
-                  htmlFor={`message-detail-${item.orderNo}`}
-                  className="font-bold"
-                  style={{ width: 130, color: '#495057' }}
-                >
-                  Message:
-                </label>
-                <span id={`message-detail-${item.orderNo}`} style={{ color: '#212529' }}>
-                  {item.message || '-'}
-                </span>
-              </div>
+            <div
+              style={{
+                background: '#f8fafc',
+                borderRadius: 12,
+                padding: 20,
+                maxHeight: '70vh',
+                overflowY: 'auto',
+                boxShadow: 'inset 0 0 0 1px #e5e7eb',
+              }}
+            >
+              {/* หมายเลข Order */}
+              <Section title={`หมายเลข Order: ${fmt(item?.orderNo)}`} accent="#3b82f6">
+                <div>
+                  <InfoRow label="เลขตัวถัง:" value={fmt(item?.detail?.chassisNo)} />
+                  <InfoRow label="ทะเบียนรถ:" value={fmt(item?.licensePlate)} />
+                  <InfoRow label="รายละเอียดรถ:" value={fmt(item?.detail?.carType)} />
+                  <InfoRow label="ยี่ห้อรถ:" value={fmt(item?.detail?.carBrandName)} />
+                </div>
+                <div>
+                  <InfoRow label="รุ่นรถ:" value={fmt(item?.detail?.carModelName)} />
+                  <InfoRow label="จังหวัดที่จดทะเบียนรถ:" value={fmt(item?.detail?.provinceName)} />
+                  <InfoRow label="วันที่เริ่มคุ้มครอง:" value={fmt(item?.detail?.effectiveDate)} />
+                  <InfoRow label="วันที่สิ้นสุดวันคุ้มครอง:" value={fmt(item?.detail?.expiredDate)} />
+                </div>
+              </Section>
+
+              {/* Business Validation */}
+              <Section title="Business Validation" accent="#ef4444">
+                <div>
+                  <InfoRow label="วันที่ทำรายการ:" value={fmt(item?.requestDate)} />
+                  <InfoRow label="Status:" value={fmt(item?.orderStatus)} valueColor={statusColor(item?.orderStatus)} />
+                </div>
+                <div>
+                  <InfoRow label="Message:" value={fmt(item?.message)} />
+                  <InfoRow label="Tech Message:" value={fmt(item?.detail?.techMessage)} />
+                </div>
+              </Section>
+
+              {/* การส่งข้อมูลการชำระเงิน */}
+              <Section title="การส่งข้อมูลการชำระเงิน" accent="#f59e0b">
+                <div>
+                  <InfoRow label="วันที่ทำรายการ:" value={fmt(item?.detail?.paymentDate)} />
+                  <InfoRow label="ช่องทางการชำระเงิน:" value={fmt(item?.detail?.paymentChannel)} />
+                  <InfoRow
+                    label="Status:"
+                    value={fmt(item?.detail?.paymentStatus)}
+                    valueColor={statusColor(item?.detail?.paymentStatus)}
+                  />
+                </div>
+                <div>
+                  <InfoRow label="Message:" value={fmt(item?.detail?.paymentMessage)} />
+                </div>
+              </Section>
+
+              {/* ผลการชำระเงิน (hook payment) */}
+              <Section title="ผลการชำระเงิน (hook payment)" accent="#0baff5ff">
+                <div>
+                  <InfoRow label="วันที่ทำรายการ:" value={fmt(item?.detail?.paymentResultDate)} />
+                  <InfoRow
+                    label="สถานะการชำระเงิน:"
+                    value={fmt(item?.detail?.paymentResultStatus)}
+                    valueColor={statusColor(item?.detail?.paymentResultStatus)}
+                  />
+                </div>
+                <div>
+                  <InfoRow label="Payment No:" value={fmt(item?.detail?.paymentNo)} />
+                  <InfoRow label="Amount:" value={fmt(item?.detail?.amount)} />
+                </div>
+              </Section>
+
+              {/* ผลการออก e-policy */}
+              <Section title="ผลการออก e-policy (hook policy)" accent="#a855f7">
+                <div>
+                  <InfoRow label="วันที่ทำรายการ:" value={fmt(item?.detail?.policyResultDate)} />
+                  <InfoRow label="Policy No:" value={fmt(item?.detail?.policyNo)} />
+                  <InfoRow label="Cover Note:" value={fmt(item?.detail?.covernote)} />
+                  <InfoRow label="Partner Code:" value={fmt(item?.detail?.partnerCode)} />
+                </div>
+                <div>
+                  <InfoRow label="Partner Ref No:" value={fmt(item?.detail?.partnerRefNo)} />
+                  <InfoRow label="Ins Order No:" value={fmt(item?.detail?.insOrderNo)} />
+                  <InfoRow label="Cross Running No:" value={fmt(item?.detail?.crossRunningNo)} />
+                  <InfoRow label="Running No:" value={fmt(item?.detail?.runningNo)} />
+                </div>
+              </Section>
+
+              {/* ผลการออกเอกสาร */}
+              <Section title="ผลการออกเอกสาร (hook document)" accent="#10b981">
+                <div>
+                  <InfoRow label="วันที่ทำรายการ:" value={fmt(item?.detail?.documentResultDate)} />
+                  <InfoRow label="Document No:" value={fmt(item?.detail?.documentNo)} />
+                  <InfoRow label="Transaction No:" value={fmt(item?.detail?.transactionNo)} />
+                  <InfoRow label="Partner Code:" value={fmt(item?.detail?.partnerCode)} />
+                  <InfoRow label="Partner Ref No:" value={fmt(item?.detail?.partnerRefNo)} />
+                </div>
+                <div>
+                  <InfoRow label="File Attachment No:" value={fmt(item?.detail?.fileAttatchmentNo)} />
+                  <InfoRow label="File Attachment Code:" value={fmt(item?.detail?.fileAttatchmentCode)} />
+                  <InfoRow label="File Attachment Name:" value={fmt(item?.detail?.fileAttatchmentName)} />
+                  <InfoRow label="File Index:" value={fmt(item?.detail?.fileIndex)} />
+                </div>
+              </Section>
             </div>
           ),
         })
       }
+
       return {
         ...item,
+        requestDate: item?.requestDate ? dayjs(item?.requestDate).format('YYYY-MM-DD HH:mm:ss') : '-',
+        tel: item?.tel?.replace('+66', '0') || '-',
         actions: <Button label="View" icon="pi pi-eye" onClick={handleView} className="p-button-text" />,
       }
     })
