@@ -80,8 +80,8 @@ export async function PATCH(poReq: NextRequest) {
       default:
         break
     }
-    const apiURI = process.env.APP_ENV === 'local' ? `${process.env.TIDLOR_TECH_URI}` : ''
-    const res = await fetch(`${apiURI}${url}`, {
+
+    const res = await fetch(`${process.env.TIDLOR_TECH_URI}${url}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -24,12 +24,12 @@ const Payment = () => {
     } finally {
       closeLoading()
     }
-  }, [])
+  }, [openLoading, closeLoading])
 
   useEffect(() => {
     setData(prefillData)
     fetchData()
-  }, [fetchData])
+  }, [fetchData, prefillData])
 
   return (
     <>
