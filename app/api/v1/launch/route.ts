@@ -31,14 +31,12 @@ export async function POST(oReq: NextRequest) {
     }
 
     const data = await res.json()
-
     const insurersRes = await fetch(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/insurer`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${data?.data?.jwt}`,
       },
     })
-
     const insurers = await insurersRes.json()
 
     session.usrData = data
