@@ -83,7 +83,7 @@ const MasterDataPage = () => {
         { field: 'cmiCarTypeCode', header: 'Type Code' },
         { field: 'cmiCarTypeName', header: 'Type Name' },
         { field: 'cmiCarTypeRoryor', header: 'Type Roryor' },
-        { field: 'cmiSubCarTypeCode', header: 'Sub Car Type Code' },
+        { field: 'subCarType', header: 'Sub Car Type Code' },
         { field: 'typeOfUseCode', header: 'Use Code' },
         { field: 'typeOfUseDetail', header: 'Detail' },
         { field: 'cmiCategorySubType', header: 'Sub Type' },

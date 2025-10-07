@@ -52,37 +52,36 @@ export async function PATCH(poReq: NextRequest) {
 
   try {
     let url: string = ''
-    //TODO: Change base, endpoint to env
     switch (sModuleEndpoint) {
       case 'car-brands':
         url = `/api/background-job/v1/car-brand`
         break
       case 'car-brands-ranking':
-        url = `${process.env.TIDLOR_TECH_URI}/api/background-job/v1/car-brand-ranking`
+        url = `/api/background-job/v1/car-brand-ranking`
         break
       case 'car-colors':
-        url = `${process.env.TIDLOR_TECH_URI}/api/background-job/v1/car-color`
+        url = `/api/background-job/v1/car-color`
         break
       case 'channels':
-        url = `${process.env.TIDLOR_TECH_URI}/api/background-job/v1/channel`
+        url = `/api/background-job/v1/channel`
         break
       case 'compulsory-groups':
-        url = `${process.env.TIDLOR_TECH_URI}/api/background-job/v1/compulsory-group`
+        url = `/api/background-job/v1/compulsory-group`
         break
       case 'compulsory-rates':
-        url = `${process.env.TIDLOR_TECH_URI}/api/background-job/v1/compulsory-rate`
+        url = `/api/background-job/v1/compulsory-rate`
         break
       case 'compulsory-types':
-        url = `${process.env.TIDLOR_TECH_URI}/api/background-job/v1/compulsory-type`
+        url = `/api/background-job/v1/compulsory-type`
         break
       case 'insurers':
-        url = `${process.env.TIDLOR_TECH_URI}/api/background-job/v1/insurer`
+        url = `/api/background-job/v1/insurer`
         break
       default:
         break
     }
-
-    const res = await fetch(url, {
+    const apiURI = process.env.APP_ENV === 'local' ? `${process.env.TIDLOR_TECH_URI}` : ''
+    const res = await fetch(`${apiURI}${url}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

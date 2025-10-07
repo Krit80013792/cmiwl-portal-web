@@ -14,8 +14,8 @@ export async function POST(oReq: NextRequest) {
     if (!ck || !token) {
       return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 })
     }
-
-    const res = await fetch(`${process.env.TIDLOR_TECH_URI}/api/auth/v1/authorize`, {
+    const apiURI = process.env.APP_ENV === 'local' ? `${process.env.TIDLOR_TECH_URI}` : ''
+    const res = await fetch(`${apiURI}/api/auth/v1/authorize`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ export async function POST(oReq: NextRequest) {
 
     const data = await res.json()
 
-    const insurersRes = await fetch(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/insurer`, {
+    const insurersRes = await fetch(`${apiURI}/api/master-data/v1/insurer`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${data?.data?.jwt}`,

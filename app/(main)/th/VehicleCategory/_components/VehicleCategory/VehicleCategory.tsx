@@ -42,7 +42,7 @@ const VehicleCategoryComponent = ({ data }: { data: { channelCode: string } }) =
     const compulsoryData = {
       compulsoryText: data?.rate?.compulsoryText,
       cmiCarTypeCode: data?.rate?.cmiCarTypeCode,
-      cmiSubCarTypeCode: data?.cmiSubCarTypeCode,
+      subCarType: data?.cmiSubCarTypeCode,
       cmiCoverage: {
         netPremium: data?.rate?.netPremium,
         stamp: data?.rate?.stamp,

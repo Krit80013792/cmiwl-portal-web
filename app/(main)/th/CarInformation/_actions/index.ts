@@ -11,7 +11,7 @@ interface CarInfo {
 
 export const getCarColors = async () => {
   const { token } = await getDataFromSession()
-  return await getDataFromServer(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/car-color`, {
+  return await getDataFromServer(`/api/master-data/v1/car-color`, {
     method: 'GET',
     token: token as string,
   })
@@ -19,7 +19,7 @@ export const getCarColors = async () => {
 
 export const getCarBrands = async ({ carTypeKey, isEvType }: CarInfo) => {
   const { token } = await getDataFromSession()
-  return await getDataFromServer(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/car-brand`, {
+  return await getDataFromServer(`/api/master-data/v1/car-brand`, {
     method: 'POST',
     token: token as string,
     body: { carTypeKey, isEvType },
@@ -29,7 +29,7 @@ export const getCarBrands = async ({ carTypeKey, isEvType }: CarInfo) => {
 
 export const getCarModels = async ({ carBrandId, carTypeKey, isEvType }: CarInfo) => {
   const { token } = await getDataFromSession()
-  return await getDataFromServer(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/car-model`, {
+  return await getDataFromServer(`/api/master-data/v1/car-model`, {
     method: 'POST',
     token: token as string,
     body: { carBrandId, carTypeKey, isEvType },
@@ -39,7 +39,7 @@ export const getCarModels = async ({ carBrandId, carTypeKey, isEvType }: CarInfo
 
 export const getProvinces = async () => {
   const { token } = await getDataFromSession()
-  return await getDataFromServer(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/province`, {
+  return await getDataFromServer(`/api/master-data/v1/province`, {
     method: 'GET',
     token: token as string,
   })

@@ -30,7 +30,7 @@ const Footer = () => {
           productCmiDetail: {
             carTypeKey: prefill?.productCmiDetail?.carTypeKey,
             isEvType: prefill?.productCmiDetail?.isEvType,
-            subCarType: prefill?.productCmiDetail?.cmiSubCarTypeCode,
+            subCarType: prefill?.productCmiDetail?.subCarType,
             cmiCarTypeCode: prefill?.productCmiDetail?.cmiCarTypeCode,
             carBrandId: prefill?.productCmiDetail?.carBrandId,
             carModelName: prefill?.productCmiDetail?.carModelName,
