@@ -35,20 +35,22 @@ const Feedback = styled.span`
 
 export const Input = ({ name, type, maxLength, placeholder, onChange, value, label, feedback, suffix }: InputProps) => {
   return (
-    <div>
-      <StyledInput
-        name={name}
-        type={type}
-        maxLength={maxLength}
-        className={`form-control`}
-        placeholder={placeholder}
-        onChange={onChange}
-        value={value}
-        error={!!feedback}
-      />
-      <label className="form-label">{label}</label>
-      {suffix}
+    <>
+      <div className="position-relative">
+        <StyledInput
+          name={name}
+          type={type}
+          maxLength={maxLength}
+          className={`form-control`}
+          placeholder={placeholder}
+          onChange={onChange}
+          value={value}
+          error={!!feedback}
+        />
+        {suffix && <div className="position-absolute top-50 end-0 translate-middle-y me-3">{suffix}</div>}
+        <label className="form-label">{label}</label>
+      </div>
       {feedback && <Feedback>{feedback}</Feedback>}
-    </div>
+    </>
   )
 }

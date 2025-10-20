@@ -2,7 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 import { ModalOptions, ModalType } from '@/helpers/hooks/useModal'
 
-const typeConfig: Record<ModalType, { imageSrc: string; imageAlt: string; colorClass: string }> = {
+const typeConfig: Record<ModalType, { imageSrc?: string; imageAlt: string; colorClass: string }> = {
   error: {
     imageSrc: '/assets/icon/icon-error.png',
     imageAlt: 'เกิดข้อผิดพลาด',
@@ -23,6 +23,10 @@ const typeConfig: Record<ModalType, { imageSrc: string; imageAlt: string; colorC
     imageAlt: 'ยืนยัน',
     colorClass: 'text-primary',
   },
+  info: {
+    imageAlt: 'ข้อมูล',
+    colorClass: 'text-info',
+  },
 }
 
 interface Props extends ModalOptions {
@@ -34,6 +38,7 @@ const Modal: React.FC<Props> = ({
   isOpen,
   title = '',
   message = '',
+  content = null,
   type = 'error',
   confirmOptions,
   onClose,
@@ -75,6 +80,18 @@ const Modal: React.FC<Props> = ({
             type="button"
           >
             <strong>{confirmOptions?.confirmText || 'ยืนยัน'}</strong>
+          </button>
+        </div>
+      )
+    } else if (type === 'info') {
+      return (
+        <div className="d-flex">
+          <button
+            className="btn btn-primary w-100 fs-6 d-flex justify-content-center align-items-center"
+            onClick={onClose}
+            type="button"
+          >
+            <strong>ตกลง</strong>
           </button>
         </div>
       )
@@ -130,17 +147,21 @@ const Modal: React.FC<Props> = ({
                 )
               })}
             </h5>
-            <p className="text-black mb-20">
-              {message.split(':').map((line, i) => {
-                const key = `${line} + ${i}`
-                return (
-                  <React.Fragment key={key}>
-                    {line}
-                    <br />
-                  </React.Fragment>
-                )
-              })}
-            </p>
+            {message ? (
+              <p className="text-black mb-20">
+                {message.split(':').map((line, i) => {
+                  const key = `${line} + ${i}`
+                  return (
+                    <React.Fragment key={key}>
+                      {line}
+                      <br />
+                    </React.Fragment>
+                  )
+                })}
+              </p>
+            ) : (
+              content
+            )}
             {renderButtons()}
           </div>
         </div>

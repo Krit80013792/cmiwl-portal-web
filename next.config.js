@@ -9,6 +9,11 @@ const nextConfig = {
         hostname: 'productfact-storage-nonprod.areegator.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'api.omise.co',
+        pathname: '/**',
+      },
     ],
   },
   env: {

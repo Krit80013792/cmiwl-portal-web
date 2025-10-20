@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
 import { getCarBrands, getCarColors, getCarModels, getProvinces } from '../../_actions'
 import { RadioButton } from 'primereact/radiobutton'
-import { MONTHS_TH, YEAR_REGISTER } from '../../_constants'
+import { YEAR_REGISTER } from '../../_constants'
 import { ChassisDialog } from './ChassisDialog'
 import dayjs from 'dayjs'
 import { useDispatch, useSelector } from 'react-redux'
@@ -29,6 +29,8 @@ const CarInformationForm = () => {
   const [carBrandList, setCarBrandList] = useState<any[]>([])
   const [carModelList, setCarModelList] = useState<any[]>([])
   const [carProvinceList, setCarProvinceList] = useState<any[]>([])
+  const [dayList, setDayList] = useState<any[]>([])
+  const [coverageEndDateDisplay, setCoverageEndDateDisplay] = useState<string>('')
   const { values, handleChange, errors, handleSubmit } = useForm(
     {
       carBrandId: prefillData?.productCmiDetail?.carBrandId ?? null,
@@ -48,6 +50,30 @@ const CarInformationForm = () => {
     carInformationSchema,
     { openLoading, closeLoading },
   )
+
+  useEffect(() => {
+    const days = () => {
+      const selectedMonth = values?.monthCoverage
+        ? dayjs(values?.yearCoverage).month(values?.monthCoverage - 1)
+        : dayjs()
+      const daysInMonth = selectedMonth.daysInMonth()
+      return Array.from({ length: daysInMonth }, (_, i) => {
+        const day = i + 1
+        return {
+          value: day.toString(),
+          label: day.toString(),
+        }
+      })
+    }
+    setDayList(days())
+    setCoverageEndDateDisplay(
+      dayjs(`${values?.yearCoverage}-${values?.monthCoverage}-${values?.dayCoverage}`)
+        .add(1, 'year')
+        .subtract(1, 'day')
+        .format('D MMMM YYYY')
+        .replace(/\d{4}/, (year) => (parseInt(year) + 543).toString()),
+    )
+  }, [values?.monthCoverage, values?.yearCoverage, values?.dayCoverage])
 
   const fetchCarProvinces = useCallback(async () => {
     const res = await getProvinces()
@@ -244,9 +270,13 @@ const CarInformationForm = () => {
             value={values?.chassisNumber || ''}
             onChange={(e) => handleChange({ name: 'chassisNumber', value: e.target.value })}
             suffix={
-              <button type="button" className="bg-transparent border-0 z-index-2" onClick={() => setOpen(true)}>
-                <Image alt="ตัวช่วย" width="24" height="24" src="/assets/icon/icon-question.png" />
-              </button>
+              <Image
+                alt="ตัวช่วย"
+                width="24"
+                height="24"
+                src="/assets/icon/icon-question.png"
+                onClick={() => setOpen(true)}
+              />
             }
             feedback={errors?.chassisNumber}
           />
@@ -369,19 +399,7 @@ const CarInformationForm = () => {
                   name="dayCoverage"
                   value={values?.dayCoverage?.toString() || ''}
                   onChange={(value) => handleChange({ name: 'dayCoverage', value: Number(value) })}
-                  options={(() => {
-                    const selectedMonth = values?.monthCoverage
-                      ? dayjs(values?.yearCoverage).month(values?.monthCoverage - 1)
-                      : dayjs()
-                    const daysInMonth = selectedMonth.daysInMonth()
-                    return Array.from({ length: daysInMonth }, (_, i) => {
-                      const day = i + 1
-                      return {
-                        value: day.toString(),
-                        label: day.toString(),
-                      }
-                    })
-                  })()}
+                  options={dayList}
                   feedback={errors?.dayCoverage}
                 />
               </div>
@@ -393,9 +411,7 @@ const CarInformationForm = () => {
         <div className="d-flex justify-content-between mt-2 mb-4">
           <span className="f-md text-grey">วันที่สิ้นสุดความคุ้มครอง</span>
           <span className="f-bd text-grey line-dotted">
-            <strong>
-              {`${values?.dayCoverage} ${values?.monthCoverage ? MONTHS_TH[values?.monthCoverage - 1] : ''} ${values?.yearCoverage !== null && values?.yearCoverage !== undefined ? (+values?.yearCoverage + 543).toString() : ''}`}
-            </strong>
+            <strong>{coverageEndDateDisplay}</strong>
           </span>
         </div>
       </div>

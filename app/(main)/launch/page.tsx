@@ -32,6 +32,7 @@ const LaunchPage = () => {
           router.replace('/th/VehicleCTP')
         } else {
           console.error('Failed to fetch data.')
+          router.replace('https://app.tidlor.com/main')
         }
       } catch {
         console.error('Error fetching data.')

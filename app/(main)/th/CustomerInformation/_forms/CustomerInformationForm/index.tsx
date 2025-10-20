@@ -26,6 +26,7 @@ const CustomerInformationForm: React.FC = () => {
   const [districtList, setDistrictList] = useState<any[]>([])
   const [subDistrictList, setSubDistrictList] = useState<any[]>([])
   const [addressData, setAddressData] = useState<any>(null)
+  const [birthDayList, setBirthDayList] = useState<any[]>([])
   const { handleChange, handleSubmit, errors, values, setValues } = useForm(
     {
       title: prefillData?.customer?.title || '',
@@ -51,6 +52,21 @@ const CustomerInformationForm: React.FC = () => {
     { openLoading, closeLoading },
   )
   const zipCodeDebounced = useDebounce(values?.zipCode, 1000)
+
+  useEffect(() => {
+    const birthDays = () => {
+      const selectedMonth = values?.birthMonth ? dayjs(values?.birthYear).month(values?.birthMonth - 1) : dayjs()
+      const daysInMonth = selectedMonth.daysInMonth()
+      return Array.from({ length: daysInMonth }, (_, i) => {
+        const day = i + 1
+        return {
+          value: day.toString(),
+          label: day.toString(),
+        }
+      })
+    }
+    setBirthDayList(birthDays())
+  }, [values?.birthMonth, values?.birthYear])
 
   const fetchAddressByZipCode = useCallback(
     async (zipCode: string) => {
@@ -132,7 +148,7 @@ const CustomerInformationForm: React.FC = () => {
   }, [prefillData])
 
   return (
-    <form>
+    <div>
       <div className="content-section fullPage-150">
         <div className="container">
           <div className="d-flex justify-content-between pt-3 pb-12">
@@ -237,19 +253,7 @@ const CustomerInformationForm: React.FC = () => {
                       label="วัน"
                       name="birthDay"
                       firstOptionLabel="เลือกวัน"
-                      options={(() => {
-                        const selectedMonth = values?.birthMonth
-                          ? dayjs(values?.birthYear).month(values?.birthMonth - 1)
-                          : dayjs()
-                        const daysInMonth = selectedMonth.daysInMonth()
-                        return Array.from({ length: daysInMonth }, (_, i) => {
-                          const day = i + 1
-                          return {
-                            value: day.toString(),
-                            label: day.toString(),
-                          }
-                        })
-                      })()}
+                      options={birthDayList}
                       onChange={(value) => handleChange({ name: 'birthDay', value })}
                       value={values?.birthDay || ''}
                       feedback={errors?.birthDay}
@@ -439,7 +443,7 @@ const CustomerInformationForm: React.FC = () => {
           ดำเนินการต่อ
         </button>
       </div>
-    </form>
+    </div>
   )
 }
 
