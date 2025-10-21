@@ -1,23 +1,21 @@
 'use client'
 
 import useLoading from '@/helpers/hooks/useLoading'
-import Modal from '@/cmi-layout/components/Modal'
 import Image from 'next/image'
 import { Button } from 'primereact/button'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
-import { getPaymentQrCode } from '../_actions'
+import { getPaymentQrCode, getPaymentQrStatus } from '../_actions'
 import dayjs from 'dayjs'
 import 'dayjs/locale/th'
-import { useModal } from '@/helpers/hooks/useModal'
 dayjs.locale('th')
 
 const PaymentQRComponents = () => {
-  const { modal, openModal, closeModal } = useModal()
   const { openLoading, closeLoading } = useLoading()
   const prefillData = useSelector((state: any) => state.prefillData)
   const [data, setData] = useState<any>({})
   const [qrData, setQrData] = useState<any>({})
+  const [paymentStatus, setPaymentStatus] = useState<string>('idle')
 
   useEffect(() => {
     setData(prefillData)
@@ -45,9 +43,101 @@ const PaymentQRComponents = () => {
     fetchPayment()
   }, [fetchPayment])
 
-  return (
+  const handleCheckPaymentStatus = useCallback(async () => {
+    try {
+      const res = await getPaymentQrStatus({ paymentNo: qrData?.paymentNo })
+      const data = res?.data?.data
+      if (data?.isPaymentSuccess) {
+        setPaymentStatus('success')
+      }
+    } catch (error) {
+      console.error('Error checking payment status:', error)
+    }
+  }, [qrData?.paymentNo])
+
+  useEffect(() => {
+    if (paymentStatus === 'idle') {
+      const interval = setInterval(() => {
+        handleCheckPaymentStatus()
+      }, 10000)
+
+      const timeout = setTimeout(
+        () => {
+          clearInterval(interval)
+        },
+        30 * 60 * 1000,
+      )
+
+      return () => {
+        clearInterval(interval)
+        clearTimeout(timeout)
+      }
+    }
+  }, [paymentStatus, handleCheckPaymentStatus])
+
+  return paymentStatus === 'success' ? (
     <div>
-      <Modal {...modal} onClose={closeModal} />
+      <div className="content-section fullPage-92 pt-48">
+        <div className="container text-center my-4">
+          {/* Success Icon */}
+          <div className="d-flex justify-content-center mb-4">
+            <Image alt="Success" width="80" height="80" src="/assets/icon/icon-success.png" />
+          </div>
+
+          {/* Success Message */}
+          <h1 className="f-bd mb-4" style={{ color: '#4CAF50', fontSize: '24px' }}>
+            ขอบคุณที่ชื่อประกันกับเรา
+          </h1>
+
+          {/* Email Confirmation Box */}
+          <div className="bg-lightgrey rounded-4 p-4 mb-3 mx-auto" style={{ maxWidth: '500px' }}>
+            <p className="text-grey mb-2 fs-14">
+              {`บริษัท วิริยะประกันภัย จำกัด (มหาชน) จะจัดส่งเอกสารกรมธรรม์ และรายละเอียดอื่นๆ ให้คุณทาง ${
+                [data?.channel?.isPolicyEmail && 'อีเมล', data?.channel?.isPolicySms && 'SMS']
+                  .filter(Boolean)
+                  .join(', ') || '-'
+              }`}
+            </p>
+            <p className="f-bd mb-2" style={{ fontSize: '18px', color: '#333' }}>
+              {[
+                data?.channel?.isPolicyEmail && `${data?.channel?.policyEmail}`,
+                data?.channel?.isPolicySms && `${data?.channel?.policySms}`,
+              ]
+                .filter(Boolean)
+                .join(', ') || '-'}
+            </p>
+            <p className="text-grey mb-0 fs-14">
+              ภายใน 15 นาที หากไม่พบเอกสาร
+              <br />
+              สามารถตรวจสอบได้ใน Junk Email
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer Buttons */}
+      <div className="btn-footer-wraper py-3 px-3 bg-white" style={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}>
+        <div className="container">
+          <Button
+            type="button"
+            outlined
+            className="btn btn-outline-primary fs-6 w-100 mb-2 d-flex text-center align-items-center justify-content-center"
+            style={{ padding: '12px' }}
+          >
+            ดูผลิตภัณฑ์ของฉัน
+          </Button>
+          <Button
+            type="button"
+            className="btn btn-primary fs-6 w-100 d-flex text-center align-items-center justify-content-center"
+            style={{ padding: '12px' }}
+          >
+            กลับหน้าหลัก
+          </Button>
+        </div>
+      </div>
+    </div>
+  ) : paymentStatus === 'idle' ? (
+    <div>
       <div className="content-section fullPage-92 pt-48">
         <div className="container">
           <h1 className="typ-of-vehicle fs-6 text-grey mb-0 mt-3 f-bd">
@@ -98,6 +188,14 @@ const PaymentQRComponents = () => {
         >
           กลับหน้าหลัก
         </Button>
+      </div>
+    </div>
+  ) : (
+    <div className="content-section fullPage-116 pt-48">
+      <div className="container text-center py-48">
+        <div>
+          <Image alt="Pending" width="80" height="80" src="/assets/icon/icon-pending.png" className="mb-3" />
+        </div>
       </div>
     </div>
   )

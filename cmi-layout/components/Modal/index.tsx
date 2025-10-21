@@ -44,6 +44,7 @@ const Modal: React.FC<Props> = ({
   onClose,
   callNumber,
   hasImg = true,
+  renderActions,
 }) => {
   if (!isOpen) return null
 
@@ -95,6 +96,30 @@ const Modal: React.FC<Props> = ({
           </button>
         </div>
       )
+    } else if (type === 'warning') {
+      return (
+        <div className="d-flex">
+          <button
+            className="btn btn-secondary w-100 fs-6 d-flex justify-content-center align-items-center me-2"
+            onClick={handleCancel}
+            type="button"
+          >
+            <strong>{confirmOptions?.cancelText || 'ยกเลิก'}</strong>
+          </button>
+          <button
+            className="btn btn-primary w-100 fs-6 d-flex justify-content-center align-items-center ms-2 call-btn"
+            onClick={() => {
+              window.location.href = ''
+              onClose()
+            }}
+            type="button"
+          >
+            <strong className="f-bd text-payment-3Terror-call">โทร</strong>
+          </button>
+        </div>
+      )
+    } else if (renderActions) {
+      return renderActions()
     }
 
     // Original button logic for other modal types

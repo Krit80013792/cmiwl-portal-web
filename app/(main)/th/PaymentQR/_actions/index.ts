@@ -15,3 +15,11 @@ export const getPaymentQrCode = async ({ channelOrderID }: { channelOrderID: str
     },
   })
 }
+
+export const getPaymentQrStatus = async ({ paymentNo }: { paymentNo: string }) => {
+  const { token } = await getDataFromSession()
+  return await getDataFromServer(`/api/payment/v1/status/${paymentNo}`, {
+    method: 'GET',
+    token: token as string,
+  })
+}

@@ -9,8 +9,16 @@ const carInformationSchema = object({
   yearCoverage: string().required('กรุณาเลือกปีที่ครอบคลุมรถยนต์'),
   monthCoverage: string().required('กรุณาเลือกเดือนที่ครอบคลุมรถยนต์'),
   dayCoverage: string().required('กรุณาเลือกวันที่ครอบคลุมรถยนต์'),
-  registrationYear: string().required('กรุณาเลือกปีที่จดทะเบียนรถยนต์'),
-  registrationProvinceId: string().required('กรุณาเลือกจังหวัดที่จดทะเบียนรถยนต์'),
+  registrationYear: string().when('isRedLicense', {
+    is: (value: any) => value === false,
+    then: (schema) => schema.required('กรุณาเลือกปีที่จดทะเบียนรถยนต์'),
+    otherwise: (schema) => schema.optional().nullable(),
+  }),
+  registrationProvinceId: string().when('isRedLicense', {
+    is: (value: any) => value === false,
+    then: (schema) => schema.required('กรุณาเลือกจังหวัดที่จดทะเบียนรถยนต์'),
+    otherwise: (schema) => schema.optional().nullable(),
+  }),
 })
 
 export default carInformationSchema

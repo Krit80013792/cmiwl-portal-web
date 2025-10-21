@@ -30,6 +30,18 @@ const customerInformationSchema = object({
   provinceId: string().required('กรุณาเลือกจังหวัด').notOneOf(['NO_VALUE'], 'กรุณาเลือกจังหวัด'),
   districtId: string().required('กรุณาเลือกอำเภอ').notOneOf(['NO_VALUE'], 'กรุณาเลือกอำเภอ'),
   subDistrictId: string().required('กรุณาเลือกตำบล').notOneOf(['NO_VALUE'], 'กรุณาเลือกตำบล'),
+  isPolicyEmail: string(),
+  policyEmail: string().when('isPolicyEmail', {
+    is: true,
+    then: (schema) => schema.required('กรุณากรอกอีเมล').email('กรุณากรอกอีเมลให้ถูกต้อง'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  isPolicySms: string(),
+  policySms: string().when('isPolicySms', {
+    is: true,
+    then: (schema) => schema.required('กรุณากรอกเบอร์โทรศัพท์').matches(/^\d{10}$/, 'กรุณากรอกเบอร์โทรศัพท์ 10 หลัก'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 })
 
 export default customerInformationSchema

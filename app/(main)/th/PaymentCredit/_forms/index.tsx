@@ -9,12 +9,18 @@ import { Input } from '@/cmi-layout/components/Input'
 import { convertStrToFormat, getCreditCardType } from '@/helpers/functions/utils'
 import Modal from '@/cmi-layout/components/Modal'
 import { useModal } from '@/helpers/hooks/useModal'
+import useLoading from '@/helpers/hooks/useLoading'
+import { Button } from 'primereact/button'
+import { useRouter } from 'next/navigation'
 
 const PaymentCreditForm = () => {
+  const route = useRouter()
+  const { openLoading, closeLoading } = useLoading()
   const { modal, openModal, closeModal } = useModal()
   const prefillData = useSelector((state: any) => state.prefillData)
   const [data, setData] = useState<any>({})
   const [cardType, setCardType] = useState<string>('unknown')
+  const [status, setStatus] = useState<string>('idle')
   const { handleChange, values, errors } = useForm(
     {
       creditCardNo: '',
@@ -29,7 +35,31 @@ const PaymentCreditForm = () => {
     setData(prefillData)
   }, [prefillData])
 
-  return (
+  const handlePayment = () => {
+    try {
+      openLoading()
+      openModal({
+        title: 'ชำระเงินไม่สำเร็จ',
+        content: <p>กรุณาตรวจสอบข้อมูลหรือพบปัญหาการชำระเงิน กรุณาติดต่อเจ้าหน้าที่</p>,
+        type: 'warning',
+        hasImg: true,
+        confirmOptions: {
+          confirmText: 'ติดต่อเจ้าหน้าที่',
+          onConfirm: () => {
+            window.location.href = 'tel:02-710-3100'
+          },
+          onCancel: () => {},
+          cancelText: 'ตรวจสอบข้อมูล',
+        },
+      })
+    } catch (error) {
+      console.log(error)
+    } finally {
+      closeLoading()
+    }
+  }
+
+  return status === 'idle' ? (
     <div>
       <div className="content-section fullPage-116 pt-48">
         <form className="container">
@@ -147,9 +177,130 @@ const PaymentCreditForm = () => {
         <button
           type="button"
           className="btn btn-primary fs-6 mx-auto d-flex text-center align-items-center justify-content-center"
+          onClick={handlePayment}
         >
           ชำระเงิน
         </button>
+      </div>
+    </div>
+  ) : (
+    <div className="content-section fullPage-116 pt-48">
+      <div className="container text-center py-48">
+        {status === 'success' && (
+          <div>
+            <div className="content-section fullPage-92 pt-48">
+              <div className="container text-center my-4">
+                {/* Success Icon */}
+                <div className="d-flex justify-content-center mb-4">
+                  <Image alt="Success" width="80" height="80" src="/assets/icon/icon-success.png" />
+                </div>
+
+                {/* Success Message */}
+                <h1 className="f-bd mb-4" style={{ color: '#4CAF50', fontSize: '24px' }}>
+                  ขอบคุณที่ชื่อประกันกับเรา
+                </h1>
+
+                {/* Email Confirmation Box */}
+                <div className="bg-lightgrey rounded-4 p-4 mb-3 mx-auto" style={{ maxWidth: '500px' }}>
+                  <p className="text-grey mb-2 fs-14">
+                    {`บริษัท วิริยะประกันภัย จำกัด (มหาชน) จะจัดส่งเอกสารกรมธรรม์ และรายละเอียดอื่นๆ ให้คุณทาง ${
+                      [data?.channel?.isPolicyEmail && 'อีเมล', data?.channel?.isPolicySms && 'SMS']
+                        .filter(Boolean)
+                        .join(', ') || '-'
+                    }`}
+                  </p>
+                  <p className="f-bd mb-2" style={{ fontSize: '18px', color: '#333' }}>
+                    {[
+                      data?.channel?.isPolicyEmail && `${data?.channel?.policyEmail}`,
+                      data?.channel?.isPolicySms && `${data?.channel?.policySms}`,
+                    ]
+                      .filter(Boolean)
+                      .join(', ') || '-'}
+                  </p>
+                  <p className="text-grey mb-0 fs-14">
+                    ภายใน 15 นาที หากไม่พบเอกสาร
+                    <br />
+                    สามารถตรวจสอบได้ใน Junk Email
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Buttons */}
+            <div
+              className="btn-footer-wraper py-3 px-3 bg-white"
+              style={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}
+            >
+              <div className="container">
+                <Button
+                  type="button"
+                  outlined
+                  className="btn btn-outline-primary fs-6 w-100 mb-2 d-flex text-center align-items-center justify-content-center"
+                  style={{ padding: '12px' }}
+                  // TODO: Update link to user's products page
+                  onClick={() => route.replace('https://app.tidlor.com/main')}
+                >
+                  ดูผลิตภัณฑ์ของฉัน
+                </Button>
+                <Button
+                  type="button"
+                  className="btn btn-primary fs-6 w-100 d-flex text-center align-items-center justify-content-center"
+                  style={{ padding: '12px' }}
+                  onClick={() => route.replace('https://app.tidlor.com/main')}
+                >
+                  กลับหน้าหลัก
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+        {status === 'error' && (
+          <div>
+            <div className="content-section fullPage-92 pt-48">
+              <div className="container text-center my-4">
+                {/* Error Icon */}
+                <div className="d-flex justify-content-center mb-4">
+                  <Image alt="Error" width="80" height="80" src="/assets/icon/icon-error.png" />
+                </div>
+
+                {/* Error Message */}
+                <h1 className="f-bd mb-4" style={{ color: '#F44336', fontSize: '24px' }}>
+                  ชำระเงินไม่สำเร็จ
+                </h1>
+                <div>
+                  <h5 className="f-md text-grey">กรุณาลองใหม่อีกครั้ง</h5>
+                  <h5 className="f-md text-grey">หรือเลือกช่องทางการชำระเงินอื่น</h5>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer Buttons */}
+            <div
+              className="btn-footer-wraper py-3 px-3 bg-white"
+              style={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}
+            >
+              <div className="container">
+                <Button
+                  type="button"
+                  outlined
+                  className="btn btn-outline-primary fs-6 w-100 mb-2 d-flex text-center align-items-center justify-content-center"
+                  style={{ padding: '12px' }}
+                  onClick={() => route.push('/th/PaymentChannel')}
+                >
+                  เลือกช่องทางอื่น
+                </Button>
+                <Button
+                  type="button"
+                  className="btn btn-primary fs-6 w-100 d-flex text-center align-items-center justify-content-center"
+                  style={{ padding: '12px' }}
+                  onClick={() => setStatus('idle')}
+                >
+                  ลองอีกครั้ง
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

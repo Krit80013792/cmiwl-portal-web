@@ -24,6 +24,7 @@ const CarInformationForm = () => {
   const route = useRouter()
   const prefillData = useSelector((state: any) => state.prefillData)
   const dispatch = useDispatch()
+  const [data, setData] = useState<any>({})
   const [open, setOpen] = useState<boolean>(false)
   const [carColorList, setCarColorList] = useState<any[]>([])
   const [carBrandList, setCarBrandList] = useState<any[]>([])
@@ -31,8 +32,13 @@ const CarInformationForm = () => {
   const [carProvinceList, setCarProvinceList] = useState<any[]>([])
   const [dayList, setDayList] = useState<any[]>([])
   const [coverageEndDateDisplay, setCoverageEndDateDisplay] = useState<string>('')
-  const { values, handleChange, errors, handleSubmit } = useForm(
-    {
+  const { values, handleChange, errors, handleSubmit, setValues } = useForm({}, carInformationSchema, {
+    openLoading,
+    closeLoading,
+  })
+
+  useEffect(() => {
+    setValues({
       carBrandId: prefillData?.productCmiDetail?.carBrandId ?? null,
       carModelName: prefillData?.productCmiDetail?.carModelName ?? null,
       carColorId: prefillData?.productCmiDetail?.carColorId ?? null,
@@ -46,10 +52,8 @@ const CarInformationForm = () => {
       dayCoverage: prefillData?.productCmiDetail?.dayCoverage ?? dayjs().date(),
       registrationYear: prefillData?.productCmiDetail?.registrationYear ?? null,
       registrationProvinceId: prefillData?.productCmiDetail?.registrationProvinceId ?? null,
-    },
-    carInformationSchema,
-    { openLoading, closeLoading },
-  )
+    })
+  }, [prefillData])
 
   useEffect(() => {
     const days = () => {
@@ -151,7 +155,7 @@ const CarInformationForm = () => {
         monthCoverage: values?.monthCoverage?.toString(),
         dayCoverage: values?.dayCoverage?.toString(),
       }
-      !values?.isRedLicense &&
+      if (!values?.isRedLicense) {
         Object.assign(data, {
           registrationYear: values?.registrationYear,
           registrationProvinceId: values?.registrationProvinceId,
@@ -159,6 +163,7 @@ const CarInformationForm = () => {
             carProvinceList.find((p) => p.provinceId.toString() === values?.registrationProvinceId?.toString())
               ?.provinceName || '',
         })
+      }
       dispatch(
         prefillDataSlice.actions.setPrefillData({
           ...prefillData,
@@ -304,7 +309,12 @@ const CarInformationForm = () => {
                     inputId="isRedLicense"
                     name="isRedLicense"
                     value={true}
-                    onChange={(e) => handleChange({ name: 'isRedLicense', value: e.value })}
+                    onChange={(e) => {
+                      handleChange({ name: 'isRedLicense', value: e.value })
+                      handleChange({ name: 'registrationYear', value: null })
+                      handleChange({ name: 'registrationProvinceId', value: null })
+                      handleChange({ name: 'registrationProvinceName', value: null })
+                    }}
                     checked={values?.isRedLicense}
                   />
                   <label htmlFor="isRedLicense" className="ml-2">

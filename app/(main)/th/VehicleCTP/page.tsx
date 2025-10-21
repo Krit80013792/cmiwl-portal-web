@@ -58,7 +58,7 @@ export default async function VehicleCTP() {
             </div>
           </div>
         )}
-        <VehicleType data={{ channelData }} />
+        <VehicleType prefill={prefill} />
       </div>
     </MainWithDynamicStyle>
   )

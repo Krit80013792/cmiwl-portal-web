@@ -8,7 +8,7 @@ import { getCompulsoryTypes } from '../../_actions'
 import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
 import useLoading from '@/helpers/hooks/useLoading'
 
-const VehicleCategory = ({ data }: { data: { channelData: any } }) => {
+const VehicleCategory = ({ prefill }: { prefill: any }) => {
   const router = useRouter()
   const { openLoading, closeLoading } = useLoading()
   const dispatch = useDispatch()
@@ -18,14 +18,14 @@ const VehicleCategory = ({ data }: { data: { channelData: any } }) => {
   const fetchData = useCallback(async () => {
     try {
       openLoading()
-      const res = await getCompulsoryTypes({ channelCode: data?.channelData?.channel?.channelCode })
+      const res = await getCompulsoryTypes({ channelCode: prefill?.channel?.channelCode })
       setTypeList((res?.data?.data?.compulsoryTypes ?? []).sort((a: any, b: any) => a.itemOrder - b.itemOrder))
     } catch (error) {
       console.error('Error fetching compulsory types:', error)
     } finally {
       closeLoading()
     }
-  }, [data.channelData?.channel?.channelCode, openLoading, closeLoading])
+  }, [prefill?.channel?.channelCode, openLoading, closeLoading])
 
   useEffect(() => {
     fetchData()
@@ -45,7 +45,11 @@ const VehicleCategory = ({ data }: { data: { channelData: any } }) => {
     }
     dispatch(
       prefillDataSlice.actions.setPrefillData({
-        channel: { channelOrderID: data?.channelData?.channel?.channelOrderID },
+        channel: {
+          channelOrderID: prefill?.channel?.channelOrderID,
+          isPolicyEmail: prefill?.channel?.isPolicyEmail,
+          isPolicySms: prefill?.channel?.isPolicySms,
+        },
         productCmiDetail: vehicleCategory,
       }),
     )

@@ -27,8 +27,14 @@ const CustomerInformationForm: React.FC = () => {
   const [subDistrictList, setSubDistrictList] = useState<any[]>([])
   const [addressData, setAddressData] = useState<any>(null)
   const [birthDayList, setBirthDayList] = useState<any[]>([])
-  const { handleChange, handleSubmit, errors, values, setValues } = useForm(
-    {
+  const { handleChange, handleSubmit, errors, values, setValues } = useForm({}, customerInformationSchema, {
+    openLoading,
+    closeLoading,
+  })
+  const zipCodeDebounced = useDebounce(values?.zipCode, 1000)
+
+  useEffect(() => {
+    setValues({
       title: prefillData?.customer?.title || '',
       firstName: prefillData?.customer?.firstName || '',
       lastName: prefillData?.customer?.lastName || '',
@@ -47,11 +53,12 @@ const CustomerInformationForm: React.FC = () => {
       provinceId: prefillData?.customerAddress?.provinceId || '',
       districtId: prefillData?.customerAddress?.districtId || '',
       subDistrictId: prefillData?.customerAddress?.subDistrictId || '',
-    } as any,
-    customerInformationSchema,
-    { openLoading, closeLoading },
-  )
-  const zipCodeDebounced = useDebounce(values?.zipCode, 1000)
+      isPolicyEmail: prefillData?.channel?.isPolicyEmail || false,
+      isPolicySms: prefillData?.channel?.isPolicySms || false,
+      policyEmail: prefillData?.personalInfo?.email || '',
+      policySms: prefillData?.personalInfo?.telephoneNo || '',
+    })
+  }, [prefillData, setValues])
 
   useEffect(() => {
     const birthDays = () => {
@@ -111,6 +118,13 @@ const CustomerInformationForm: React.FC = () => {
   const handleSubmitForm = async () => {
     const data = {
       ...prefill,
+      channel: {
+        ...prefill.channel,
+        isPolicyEmail: values.isPolicyEmail,
+        isPolicySms: values.isPolicySms,
+        policyEmail: values.policyEmail,
+        policySms: values.policySms,
+      },
       customer: {
         ...prefill.customer,
         taxId: values.taxId,
@@ -120,8 +134,13 @@ const CustomerInformationForm: React.FC = () => {
         birthDay: values.birthDay,
         birthMonth: values.birthMonth,
         birthYear: values.birthYear,
+        birthDate: dayjs(`${values.birthYear}-${values.birthMonth}-${values.birthDay}`).format('YYYY-MM-DD'),
       },
-      personalInfo: { ...prefill.personalInfo, telephoneNo: values.telephoneNo, email: values.email },
+      personalInfo: {
+        ...prefill.personalInfo,
+        telephoneNo: values.telephoneNo,
+        email: values.email,
+      },
       customerAddress: {
         ...prefill.customerAddress,
         houseNumber: values.houseNumber,
@@ -265,19 +284,19 @@ const CustomerInformationForm: React.FC = () => {
             </div>
             <div className="form-group mb-12">
               <Input
+                label={`เบอร์โทรศัพท์ ${!prefill?.isPolicyEmail && prefill?.isPolicySms ? '(ใช้สำหรับรับกรมธรรม์อิเล็กทรอนิกส์)' : ''}`}
                 name="telephoneNo"
                 type="text"
                 maxLength={12}
                 placeholder="กรอกเบอร์โทรศัพท์"
                 onChange={({ target: { name, value } }) => handleChange({ name, value: value?.replaceAll('-', '') })}
                 value={convertStrToFormat(values?.telephoneNo, 'phone_number') || ''}
-                label="เบอร์โทรศัพท์"
                 feedback={errors?.telephoneNo}
               />
             </div>
             <div className="form-group mb-12">
               <Input
-                label="อีเมล (ใช้สำหรับรับกรมธรรม์อิเล็กทรอนิกส์)"
+                label={`อีเมล ${prefill?.isPolicyEmail && !prefill?.isPolicySms ? '(ใช้สำหรับรับกรมธรรม์อิเล็กทรอนิกส์)' : ''}`}
                 name="email"
                 type="text"
                 maxLength={50}
@@ -431,6 +450,57 @@ const CustomerInformationForm: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {prefill?.channel?.isPolicyEmail && prefill?.channel?.isPolicySms && (
+              <>
+                <h2 className="mb-12 mt-4 text-black fs-18">
+                  <strong>ช่องทางการจัดส่งกรมธรรม์</strong>
+                </h2>
+                <p>กรมธรรม์อิเล็กทรอนิกส์จะถูกจัดส่งภายใน 15 นาที หลังจากชำระเงินสำเร็จ</p>
+                <div
+                  style={{ display: 'flex', width: '100%', alignItems: 'center', marginBottom: '12px', gap: '10px' }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={values?.isPolicyEmail}
+                    onChange={(e) => handleChange({ name: 'isPolicyEmail', value: e.target.checked })}
+                  />
+                  <Input
+                    label="อีเมล"
+                    name="policyEmail"
+                    type="text"
+                    maxLength={50}
+                    placeholder="กรอกอีเมล"
+                    onChange={({ target: { name, value } }) => handleChange({ name, value })}
+                    value={values?.policyEmail || ''}
+                    feedback={errors?.policyEmail}
+                    style={{ width: 'inherit' }}
+                  />
+                </div>
+                <div
+                  style={{ display: 'flex', width: '100%', alignItems: 'center', marginBottom: '12px', gap: '10px' }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={values?.isPolicySms}
+                    onChange={(e) => handleChange({ name: 'isPolicySms', value: e.target.checked })}
+                  />
+                  <Input
+                    name="policySms"
+                    type="text"
+                    maxLength={12}
+                    placeholder="กรอกเบอร์โทรศัพท์"
+                    onChange={({ target: { name, value } }) =>
+                      handleChange({ name, value: value?.replaceAll('-', '') })
+                    }
+                    value={convertStrToFormat(values?.policySms, 'phone_number') || ''}
+                    label="เบอร์โทรศัพท์"
+                    feedback={errors?.policySms}
+                    style={{ width: 'inherit' }}
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

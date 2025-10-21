@@ -10,6 +10,7 @@ export interface InputProps {
   label: string
   feedback?: string
   suffix?: React.ReactNode
+  style?: React.CSSProperties
 }
 
 const StyledInput = styled.input.withConfig({
@@ -33,10 +34,21 @@ const Feedback = styled.span`
   position: inherit;
 `
 
-export const Input = ({ name, type, maxLength, placeholder, onChange, value, label, feedback, suffix }: InputProps) => {
+export const Input = ({
+  name,
+  type,
+  maxLength,
+  placeholder,
+  onChange,
+  value,
+  label,
+  feedback,
+  suffix,
+  style,
+}: InputProps) => {
   return (
     <>
-      <div className="position-relative">
+      <div className="position-relative" style={style}>
         <StyledInput
           name={name}
           type={type}

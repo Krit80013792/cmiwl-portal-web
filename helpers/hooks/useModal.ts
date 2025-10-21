@@ -17,6 +17,7 @@ export interface ModalOptions {
   type?: ModalType
   confirmOptions?: ConfirmModalOptions
   hasImg?: boolean
+  renderActions?: () => React.ReactNode
 }
 
 export function useModal(initial?: Omit<ModalOptions, 'isOpen'>) {
@@ -59,6 +60,7 @@ export function useModal(initial?: Omit<ModalOptions, 'isOpen'>) {
           onCancel: options.onCancel,
         },
         hasImg: options.hasImg,
+        renderActions: undefined,
       })
     },
     [modal],
