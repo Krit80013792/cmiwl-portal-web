@@ -2,7 +2,7 @@
 
 import { useForm } from '@/helpers/hooks/useForm'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import creditCardSchema from '../_schemas'
 import { Input } from '@/cmi-layout/components/Input'
@@ -12,6 +12,7 @@ import { useModal } from '@/helpers/hooks/useModal'
 import useLoading from '@/helpers/hooks/useLoading'
 import { Button } from 'primereact/button'
 import { useRouter } from 'next/navigation'
+import { getPaymentCreditCard } from '../_actions'
 
 const PaymentCreditForm = () => {
   const route = useRouter()
@@ -35,29 +36,37 @@ const PaymentCreditForm = () => {
     setData(prefillData)
   }, [prefillData])
 
-  const handlePayment = () => {
+  const handlePayment = useCallback(async () => {
     try {
       openLoading()
-      openModal({
-        title: 'ชำระเงินไม่สำเร็จ',
-        content: <p>กรุณาตรวจสอบข้อมูลหรือพบปัญหาการชำระเงิน กรุณาติดต่อเจ้าหน้าที่</p>,
-        type: 'warning',
-        hasImg: true,
-        confirmOptions: {
-          confirmText: 'ติดต่อเจ้าหน้าที่',
-          onConfirm: () => {
-            window.location.href = 'tel:02-710-3100'
-          },
-          onCancel: () => {},
-          cancelText: 'ตรวจสอบข้อมูล',
-        },
+      const res = await getPaymentCreditCard({
+        channelOrderID: data.channel.channelOrderID,
+        cardNumber: values.creditCardNo,
+        cardName: values.creditName,
+        cardExpire: values.creditExpiry,
+        cvv: values.creditCVV,
       })
+      console.log(res)
+      // openModal({
+      //   title: 'ชำระเงินไม่สำเร็จ',
+      //   content: <p>กรุณาตรวจสอบข้อมูลหรือพบปัญหาการชำระเงิน กรุณาติดต่อเจ้าหน้าที่</p>,
+      //   type: 'warning',
+      //   hasImg: true,
+      //   confirmOptions: {
+      //     confirmText: 'ติดต่อเจ้าหน้าที่',
+      //     onConfirm: () => {
+      //       window.location.href = 'tel:02-710-3100'
+      //     },
+      //     onCancel: () => {},
+      //     cancelText: 'ตรวจสอบข้อมูล',
+      //   },
+      // })
     } catch (error) {
       console.log(error)
     } finally {
       closeLoading()
     }
-  }
+  }, [openLoading, closeLoading])
 
   return status === 'idle' ? (
     <div>

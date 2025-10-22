@@ -7,7 +7,7 @@ import { getCompulsoryRates } from '../../_actions'
 import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
 import useLoading from '@/helpers/hooks/useLoading'
 
-const VehicleCategoryComponent = ({ data }: { data: { channelCode: string } }) => {
+const VehicleCategoryComponent = () => {
   const { openLoading, closeLoading } = useLoading()
   const prefillData = useSelector((state: any) => state.prefillData)
   const dispatch = useDispatch()
@@ -24,7 +24,12 @@ const VehicleCategoryComponent = ({ data }: { data: { channelCode: string } }) =
     try {
       openLoading()
       const res = await getCompulsoryRates({ carTypeKey: prefill?.productCmiDetail?.carTypeKey })
-      setCompulsoryRateList(res?.data?.data?.compulsoryRates ?? [])
+      const compulsoryRates = res?.data?.data?.compulsoryRates || []
+      if (compulsoryRates.length === 1) {
+        await handleCarInformation(compulsoryRates[0], 0)
+        return
+      }
+      setCompulsoryRateList(compulsoryRates)
     } catch (error) {
       console.error('Error fetching compulsory rates:', error)
     } finally {

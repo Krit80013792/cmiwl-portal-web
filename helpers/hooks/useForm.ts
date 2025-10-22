@@ -80,7 +80,6 @@ export const useForm = <T>(
       return true
     } catch (error: any) {
       setErrors(extractErrors(error))
-      console.log(extractErrors(error))
       return false
     }
   }, [validateSchema, values])

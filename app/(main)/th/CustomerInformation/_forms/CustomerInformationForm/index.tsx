@@ -122,8 +122,6 @@ const CustomerInformationForm: React.FC = () => {
         ...prefill.channel,
         isPolicyEmail: values.isPolicyEmail,
         isPolicySms: values.isPolicySms,
-        policyEmail: values.policyEmail,
-        policySms: values.policySms,
       },
       customer: {
         ...prefill.customer,
@@ -140,6 +138,8 @@ const CustomerInformationForm: React.FC = () => {
         ...prefill.personalInfo,
         telephoneNo: values.telephoneNo,
         email: values.email,
+        policyEmail: values.policyEmail,
+        policySms: values.policySms,
       },
       customerAddress: {
         ...prefill.customerAddress,
