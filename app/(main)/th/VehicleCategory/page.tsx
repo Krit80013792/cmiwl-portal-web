@@ -39,7 +39,7 @@ const Page = async () => {
               เลือกประเภทการใช้งาน
             </strong>
           </h1>
-          <VehicleCategory data={{ channelCode: channelData?.channelCode as string }} />
+          <VehicleCategory />
           <div className="d-flex justify-content-center">
             <Image
               alt="เลือกประเภทการใช้งาน"
