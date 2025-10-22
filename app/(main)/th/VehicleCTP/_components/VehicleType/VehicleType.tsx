@@ -47,10 +47,16 @@ const VehicleCategory = ({ prefill }: { prefill: any }) => {
       prefillDataSlice.actions.setPrefillData({
         channel: {
           channelOrderID: prefill?.channel?.channelOrderID,
-          isPolicyEmail: prefill?.channel?.isPolicyEmail,
-          isPolicySms: prefill?.channel?.isPolicySms,
         },
         productCmiDetail: vehicleCategory,
+        deliveryType: {
+          isEmail: prefill?.deliveryType?.isEmail,
+          isSms: prefill?.deliveryType?.isSms,
+          isPolicyEmail: prefill?.deliveryType?.isEmail,
+          isPolicySms: prefill?.deliveryType?.isSms,
+          policyEmail: prefill?.deliveryType?.policyEmail,
+          policySms: prefill?.deliveryType?.policySms,
+        },
       }),
     )
 

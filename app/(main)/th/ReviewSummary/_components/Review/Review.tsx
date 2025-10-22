@@ -110,7 +110,7 @@ const Review = ({ reviewType }: { reviewType: string }) => {
           <div className="d-flex justify-content-between mb-0">
             <span className="f-md text-grey">ช่องทางการจัดส่งเอกสาร</span>
             <span className="f-bd text-grey">
-              {[prefill?.channel?.isPolicyEmail && 'อีเมล', prefill?.channel?.isPolicySms && 'SMS']
+              {[prefill?.deliveryType?.isEmail && 'อีเมล', prefill?.deliveryType?.isSms && 'SMS']
                 .filter(Boolean)
                 .join(', ') || '-'}
             </span>

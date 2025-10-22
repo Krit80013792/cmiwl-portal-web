@@ -53,10 +53,14 @@ const CustomerInformationForm: React.FC = () => {
       provinceId: prefillData?.customerAddress?.provinceId || '',
       districtId: prefillData?.customerAddress?.districtId || '',
       subDistrictId: prefillData?.customerAddress?.subDistrictId || '',
-      isPolicyEmail: prefillData?.channel?.isPolicyEmail || false,
-      isPolicySms: prefillData?.channel?.isPolicySms || false,
-      policyEmail: prefillData?.personalInfo?.email || '',
-      policySms: prefillData?.personalInfo?.telephoneNo || '',
+      isEmail: prefillData?.deliveryType?.isEmail || false,
+      isSms: prefillData?.deliveryType?.isSms || false,
+      policyEmail:
+        prefillData?.deliveryType?.policyEmail ||
+        (prefillData?.deliveryType?.isEmail ? prefillData?.personalInfo?.email : ''),
+      policySms:
+        prefillData?.deliveryType?.policySms ||
+        (prefillData?.deliveryType?.isSms ? prefillData?.personalInfo?.telephoneNo : ''),
     })
   }, [prefillData, setValues])
 
@@ -120,8 +124,6 @@ const CustomerInformationForm: React.FC = () => {
       ...prefill,
       channel: {
         ...prefill.channel,
-        isPolicyEmail: values.isPolicyEmail,
-        isPolicySms: values.isPolicySms,
       },
       customer: {
         ...prefill.customer,
@@ -156,6 +158,13 @@ const CustomerInformationForm: React.FC = () => {
           subDistrictList.find((sd) => sd.value?.toString() === values.subDistrictId?.toString())?.label || '',
         districtId: values.districtId,
         subDistrictId: values.subDistrictId,
+      },
+      deliveryType: {
+        ...prefill.deliveryType,
+        isEmail: values.isEmail,
+        isSms: values.isSms,
+        policyEmail: values.policyEmail,
+        policySms: values.policySms,
       },
     }
     dispatch(prefillDataSlice.actions.setPrefillData(data))
@@ -451,7 +460,7 @@ const CustomerInformationForm: React.FC = () => {
               </div>
             </div>
 
-            {prefill?.channel?.isPolicyEmail && prefill?.channel?.isPolicySms && (
+            {prefill?.deliveryType?.isPolicyEmail && prefill?.deliveryType?.isPolicySms && (
               <>
                 <h2 className="mb-12 mt-4 text-black fs-18">
                   <strong>ช่องทางการจัดส่งกรมธรรม์</strong>
@@ -462,8 +471,15 @@ const CustomerInformationForm: React.FC = () => {
                 >
                   <input
                     type="checkbox"
-                    checked={values?.isPolicyEmail}
-                    onChange={(e) => handleChange({ name: 'isPolicyEmail', value: e.target.checked })}
+                    checked={values?.isEmail}
+                    onChange={(e) => {
+                      handleChange({ name: 'isEmail', value: e.target.checked })
+                      if (!e.target.checked) {
+                        handleChange({ name: 'policyEmail', value: '' })
+                      } else {
+                        handleChange({ name: 'policyEmail', value: values?.email || '' })
+                      }
+                    }}
                   />
                   <Input
                     label="อีเมล"
@@ -473,8 +489,9 @@ const CustomerInformationForm: React.FC = () => {
                     placeholder="กรอกอีเมล"
                     onChange={({ target: { name, value } }) => handleChange({ name, value })}
                     value={values?.policyEmail || ''}
-                    feedback={errors?.policyEmail}
+                    feedback={values?.isEmail ? errors?.policyEmail : ''}
                     style={{ width: 'inherit' }}
+                    disabled={!values?.isEmail}
                   />
                 </div>
                 <div
@@ -482,8 +499,15 @@ const CustomerInformationForm: React.FC = () => {
                 >
                   <input
                     type="checkbox"
-                    checked={values?.isPolicySms}
-                    onChange={(e) => handleChange({ name: 'isPolicySms', value: e.target.checked })}
+                    checked={values?.isSms}
+                    onChange={(e) => {
+                      handleChange({ name: 'isSms', value: e.target.checked })
+                      if (!e.target.checked) {
+                        handleChange({ name: 'policySms', value: '' })
+                      } else {
+                        handleChange({ name: 'policySms', value: values?.telephoneNo || '' })
+                      }
+                    }}
                   />
                   <Input
                     name="policySms"
@@ -495,8 +519,9 @@ const CustomerInformationForm: React.FC = () => {
                     }
                     value={convertStrToFormat(values?.policySms, 'phone_number') || ''}
                     label="เบอร์โทรศัพท์"
-                    feedback={errors?.policySms}
+                    feedback={values?.isSms ? errors?.policySms : ''}
                     style={{ width: 'inherit' }}
+                    disabled={!values?.isSms}
                   />
                 </div>
               </>

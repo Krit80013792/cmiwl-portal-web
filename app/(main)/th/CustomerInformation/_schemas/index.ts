@@ -1,5 +1,5 @@
 import { isValidThaiID } from '@/helpers/functions/utils'
-import { object, string } from 'yup'
+import { boolean, object, string } from 'yup'
 
 const customerInformationSchema = object({
   title: string().required('กรุณาเลือกคำนำหน้า').notOneOf([null, '', 'NO_VALUE'], 'กรุณาเลือกคำนำหน้า'),
@@ -30,14 +30,24 @@ const customerInformationSchema = object({
   provinceId: string().required('กรุณาเลือกจังหวัด').notOneOf(['NO_VALUE'], 'กรุณาเลือกจังหวัด'),
   districtId: string().required('กรุณาเลือกอำเภอ').notOneOf(['NO_VALUE'], 'กรุณาเลือกอำเภอ'),
   subDistrictId: string().required('กรุณาเลือกตำบล').notOneOf(['NO_VALUE'], 'กรุณาเลือกตำบล'),
-  isPolicyEmail: string(),
-  policyEmail: string().when('isPolicyEmail', {
+  isEmail: boolean()
+    .required('กรุณาเลือกช่องทางการติดต่อ')
+    .test('at-least-one', 'กรุณาเลือกช่องทางการติดต่ออย่างน้อย 1 ช่องทาง', function (value) {
+      const { isSms } = this.parent
+      return value === true || isSms === true
+    }),
+  isSms: boolean()
+    .required('กรุณาเลือกช่องทางการติดต่อ')
+    .test('at-least-one', 'กรุณาเลือกช่องทางการติดต่ออย่างน้อย 1 ช่องทาง', function (value) {
+      const { isEmail } = this.parent
+      return value === true || isEmail === true
+    }),
+  policyEmail: string().when('isEmail', {
     is: true,
     then: (schema) => schema.required('กรุณากรอกอีเมล').email('กรุณากรอกอีเมลให้ถูกต้อง'),
     otherwise: (schema) => schema.notRequired(),
   }),
-  isPolicySms: string(),
-  policySms: string().when('isPolicySms', {
+  policySms: string().when('isSms', {
     is: true,
     then: (schema) => schema.required('กรุณากรอกเบอร์โทรศัพท์').matches(/^\d{10}$/, 'กรุณากรอกเบอร์โทรศัพท์ 10 หลัก'),
     otherwise: (schema) => schema.notRequired(),

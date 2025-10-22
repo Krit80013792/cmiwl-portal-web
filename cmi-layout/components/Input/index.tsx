@@ -11,6 +11,7 @@ export interface InputProps {
   feedback?: string
   suffix?: React.ReactNode
   style?: React.CSSProperties
+  disabled?: boolean
 }
 
 const StyledInput = styled.input.withConfig({
@@ -45,9 +46,10 @@ export const Input = ({
   feedback,
   suffix,
   style,
+  disabled,
 }: InputProps) => {
   return (
-    <>
+    <div className="w-100">
       <div className="position-relative" style={style}>
         <StyledInput
           name={name}
@@ -58,11 +60,12 @@ export const Input = ({
           onChange={onChange}
           value={value}
           error={!!feedback}
+          disabled={disabled}
         />
         {suffix && <div className="position-absolute top-50 end-0 translate-middle-y me-3">{suffix}</div>}
         <label className="form-label">{label}</label>
       </div>
       {feedback && <Feedback>{feedback}</Feedback>}
-    </>
+    </div>
   )
 }

@@ -12,7 +12,18 @@ const OldVehicle = ({ prefill }: { prefill: any }) => {
     dispatch(
       prefillDataSlice.actions.setPrefillData({
         ...prefill,
+        channel: {
+          ...prefill?.channel,
+        },
         productCmiDetail: { ...prefill?.productCmiDetail, carTypeName: prefill?.productCmiDetail?.displayName },
+        deliveryType: {
+          isEmail: prefill?.deliveryType?.isEmail,
+          isSms: prefill?.deliveryType?.isSms,
+          isPolicyEmail: prefill?.deliveryType?.isEmail,
+          isPolicySms: prefill?.deliveryType?.isSms,
+          policyEmail: prefill?.deliveryType?.policyEmail,
+          policySms: prefill?.deliveryType?.policySms,
+        },
       }),
     )
     route.push('/th/CarInformation')
