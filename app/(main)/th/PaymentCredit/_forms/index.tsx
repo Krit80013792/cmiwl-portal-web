@@ -254,15 +254,15 @@ const PaymentCreditForm = () => {
                 <div className="bg-lightgrey rounded-4 p-4 mb-3 mx-auto" style={{ maxWidth: '500px' }}>
                   <p className="text-grey mb-2 fs-14">
                     {`บริษัท วิริยะประกันภัย จำกัด (มหาชน) จะจัดส่งเอกสารกรมธรรม์ และรายละเอียดอื่นๆ ให้คุณทาง ${
-                      [data?.channel?.isPolicyEmail && 'อีเมล', data?.channel?.isPolicySms && 'SMS']
+                      [data?.deliveryType?.isEmail && 'อีเมล', data?.deliveryType?.isSms && 'SMS']
                         .filter(Boolean)
                         .join(', ') || '-'
                     }`}
                   </p>
                   <p className="f-bd mb-2" style={{ fontSize: '18px', color: '#333' }}>
                     {[
-                      data?.channel?.isPolicyEmail && `${data?.channel?.policyEmail}`,
-                      data?.channel?.isPolicySms && `${data?.channel?.policySms}`,
+                      data?.deliveryType?.isEmail && `${data?.deliveryType?.policyEmail}`,
+                      data?.deliveryType?.isSms && `${data?.deliveryType?.policySms}`,
                     ]
                       .filter(Boolean)
                       .join(', ') || '-'}
