@@ -21,3 +21,11 @@ export const getPaymentCreditCard = async (body: {
     },
   })
 }
+
+export const getPaymentStatus = async ({ paymentNo }: { paymentNo: string }) => {
+  const { token } = await getDataFromSession()
+  return await getDataFromServer(`/api/payment/v1/status/${paymentNo}`, {
+    method: 'GET',
+    token: token as string,
+  })
+}

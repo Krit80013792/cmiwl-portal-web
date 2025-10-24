@@ -12,7 +12,7 @@ import { useModal } from '@/helpers/hooks/useModal'
 import useLoading from '@/helpers/hooks/useLoading'
 import { Button } from 'primereact/button'
 import { useRouter } from 'next/navigation'
-import { getPaymentCreditCard } from '../_actions'
+import { getPaymentCreditCard, getPaymentStatus } from '../_actions'
 
 const PaymentCreditForm = () => {
   const route = useRouter()
@@ -21,8 +21,9 @@ const PaymentCreditForm = () => {
   const prefillData = useSelector((state: any) => state.prefillData)
   const [data, setData] = useState<any>({})
   const [cardType, setCardType] = useState<string>('unknown')
-  const [status, setStatus] = useState<string>('idle')
-  const { handleChange, values, errors } = useForm(
+  const [paymentStatus, setPaymentStatus] = useState<string>('idle')
+  const [paymentNo, setPaymentNo] = useState<string>('')
+  const { handleChange, values, errors, handleSubmit } = useForm(
     {
       creditCardNo: '',
       creditName: '',
@@ -40,13 +41,18 @@ const PaymentCreditForm = () => {
     try {
       openLoading()
       const res = await getPaymentCreditCard({
-        channelOrderID: data.channel.channelOrderID,
-        cardNumber: values.creditCardNo,
+        channelOrderID: prefillData?.channel?.channelOrderID,
+        cardNumber: values.creditCardNo.replaceAll(' ', ''),
         cardName: values.creditName,
         cardExpire: values.creditExpiry,
         cvv: values.creditCVV,
       })
-      console.log(res)
+      const payment = res.data.data
+      if (!payment.error) {
+        setPaymentNo(payment.paymentNo)
+        window.open(payment.authorizeUri, '_blank')
+        setPaymentStatus('processing')
+      }
       // openModal({
       //   title: 'ชำระเงินไม่สำเร็จ',
       //   content: <p>กรุณาตรวจสอบข้อมูลหรือพบปัญหาการชำระเงิน กรุณาติดต่อเจ้าหน้าที่</p>,
@@ -66,9 +72,41 @@ const PaymentCreditForm = () => {
     } finally {
       closeLoading()
     }
-  }, [openLoading, closeLoading])
+  }, [openLoading, closeLoading, data, values, prefillData])
 
-  return status === 'idle' ? (
+  const handleCheckPaymentStatus = useCallback(async () => {
+    try {
+      const res = await getPaymentStatus({ paymentNo })
+      const data = res?.data?.data
+      if (data?.isPaymentSuccess) {
+        setPaymentStatus('success')
+      }
+    } catch (error) {
+      console.error('Error checking payment status:', error)
+    }
+  }, [paymentNo])
+
+  useEffect(() => {
+    if (paymentStatus === 'processing') {
+      const interval = setInterval(() => {
+        handleCheckPaymentStatus()
+      }, 10000)
+
+      const timeout = setTimeout(
+        () => {
+          clearInterval(interval)
+        },
+        30 * 60 * 1000,
+      )
+
+      return () => {
+        clearInterval(interval)
+        clearTimeout(timeout)
+      }
+    }
+  }, [paymentStatus, handleCheckPaymentStatus])
+
+  return paymentStatus === 'idle' ? (
     <div>
       <div className="content-section fullPage-116 pt-48">
         <form className="container">
@@ -119,6 +157,7 @@ const PaymentCreditForm = () => {
                 placeholder="กรอกชื่อผู้ถือบัตร (ภาษาอังกฤษ)"
                 value={values.creditName}
                 onChange={({ target: { name, value } }) => handleChange({ name, value })}
+                feedback={errors?.creditName}
               />
             </div>
             <div className="d-flex">
@@ -131,6 +170,7 @@ const PaymentCreditForm = () => {
                   placeholder="MM/YY"
                   value={convertStrToFormat(values.creditExpiry, 'credit_expiry')}
                   onChange={({ target: { name, value } }) => handleChange({ name, value })}
+                  feedback={errors?.creditExpiry}
                 />
               </div>
               <div className="form-group form-cvv creditcvv mb-12">
@@ -142,6 +182,7 @@ const PaymentCreditForm = () => {
                   placeholder="000"
                   value={convertStrToFormat(values.creditCVV, 'number')}
                   onChange={({ target: { name, value } }) => handleChange({ name, value })}
+                  feedback={errors?.creditCVV}
                   suffix={
                     <Image
                       alt="ตัวช่วย"
@@ -186,7 +227,7 @@ const PaymentCreditForm = () => {
         <button
           type="button"
           className="btn btn-primary fs-6 mx-auto d-flex text-center align-items-center justify-content-center"
-          onClick={handlePayment}
+          onClick={() => handleSubmit(handlePayment)}
         >
           ชำระเงิน
         </button>
@@ -195,7 +236,7 @@ const PaymentCreditForm = () => {
   ) : (
     <div className="content-section fullPage-116 pt-48">
       <div className="container text-center py-48">
-        {status === 'success' && (
+        {paymentStatus === 'success' && (
           <div>
             <div className="content-section fullPage-92 pt-48">
               <div className="container text-center my-4">
@@ -263,7 +304,7 @@ const PaymentCreditForm = () => {
             </div>
           </div>
         )}
-        {status === 'error' && (
+        {paymentStatus === 'error' && (
           <div>
             <div className="content-section fullPage-92 pt-48">
               <div className="container text-center my-4">
@@ -302,10 +343,25 @@ const PaymentCreditForm = () => {
                   type="button"
                   className="btn btn-primary fs-6 w-100 d-flex text-center align-items-center justify-content-center"
                   style={{ padding: '12px' }}
-                  onClick={() => setStatus('idle')}
+                  onClick={() => setPaymentStatus('idle')}
                 >
                   ลองอีกครั้ง
                 </Button>
+              </div>
+            </div>
+          </div>
+        )}
+        {paymentStatus === 'processing' && (
+          <div>
+            <div className="content-section fullPage-92 pt-48">
+              <div className="container text-center my-4">
+                {/* Processing Message */}
+                <h1 className="f-bd mb-4" style={{ color: '#FF9800', fontSize: '24px' }}>
+                  กำลังดำเนินการชำระเงิน
+                </h1>
+                <div>
+                  <h5 className="f-md text-grey">กรุณารอสักครู่...</h5>
+                </div>
               </div>
             </div>
           </div>

@@ -58,7 +58,7 @@ const OldVehicle = ({ channel }: { channel: any }) => {
           <div className="pt-10 pb-2 px-12 rounded-4 choice-card text-center h-100 active">
             <button onClick={handleSubmit} type="button" className="w-100 border-0 bg-transparent">
               <p className="mb-0 text-grey fs-22">
-                <strong className="f-bd">{`${data?.productCmiDetail?.licensePrefix}-${data?.productCmiDetail?.licenseNo}`}</strong>
+                <strong className="f-bd">{`${data?.productCmiDetail?.licensePrefix ?? ''}-${data?.productCmiDetail?.licenseNo ?? ''}`}</strong>
               </p>
               <p className="mb-0 text-center text-grey">รถยนต์</p>
             </button>
