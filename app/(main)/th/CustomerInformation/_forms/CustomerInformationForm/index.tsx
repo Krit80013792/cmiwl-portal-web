@@ -290,7 +290,7 @@ const CustomerInformationForm: React.FC = () => {
             </div>
             <div className="form-group mb-12">
               <Input
-                label={`เบอร์โทรศัพท์ ${!prefill?.isPolicyEmail && prefill?.isPolicySms ? '(ใช้สำหรับรับกรมธรรม์อิเล็กทรอนิกส์)' : ''}`}
+                label={`เบอร์โทรศัพท์ ${!prefill?.deliveryType?.isEmail && prefill?.deliveryType?.isSms ? '(ใช้สำหรับรับกรมธรรม์อิเล็กทรอนิกส์)' : ''}`}
                 name="telephoneNo"
                 type="text"
                 maxLength={12}
@@ -302,7 +302,7 @@ const CustomerInformationForm: React.FC = () => {
             </div>
             <div className="form-group mb-12">
               <Input
-                label={`อีเมล ${prefill?.isPolicyEmail && !prefill?.isPolicySms ? '(ใช้สำหรับรับกรมธรรม์อิเล็กทรอนิกส์)' : ''}`}
+                label={`อีเมล ${prefill?.deliveryType?.isEmail && !prefill?.deliveryType?.isSms ? '(ใช้สำหรับรับกรมธรรม์อิเล็กทรอนิกส์)' : ''}`}
                 name="email"
                 type="text"
                 maxLength={50}
@@ -486,7 +486,7 @@ const CustomerInformationForm: React.FC = () => {
                     placeholder="กรอกอีเมล"
                     onChange={({ target: { name, value } }) => handleChange({ name, value })}
                     value={values?.policyEmail || ''}
-                    feedback={values?.isEmail ? errors?.policyEmail : ''}
+                    feedback={!values?.isEmail ? errors?.isEmail : ''}
                     style={{ width: 'inherit' }}
                     disabled={!values?.isEmail}
                   />
@@ -516,7 +516,7 @@ const CustomerInformationForm: React.FC = () => {
                     }
                     value={convertStrToFormat(values?.policySms, 'phone_number') || ''}
                     label="เบอร์โทรศัพท์"
-                    feedback={values?.isSms ? errors?.policySms : ''}
+                    feedback={!values?.isSms ? errors?.isSms : ''}
                     style={{ width: 'inherit' }}
                     disabled={!values?.isSms}
                   />

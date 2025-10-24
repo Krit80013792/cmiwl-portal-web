@@ -49,8 +49,6 @@ const VehicleCategory = ({ channel }: { channel: any }) => {
           deliveryType: {
             isEmail: prefill?.deliveryType?.isEmail,
             isSms: prefill?.deliveryType?.isSms,
-            isPolicyEmail: prefill?.deliveryType?.isEmail,
-            isPolicySms: prefill?.deliveryType?.isSms,
             policyEmail: prefill?.deliveryType?.policyEmail,
             policySms: prefill?.deliveryType?.policySms,
           },
