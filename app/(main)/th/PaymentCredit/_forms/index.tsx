@@ -52,23 +52,37 @@ const PaymentCreditForm = () => {
         setPaymentNo(payment.paymentNo)
         window.open(payment.authorizeUri, '_blank')
         setPaymentStatus('processing')
+      } else {
+        openModal({
+          title: 'ชำระเงินไม่สำเร็จ',
+          content: <p>กรุณาตรวจสอบข้อมูลหรือพบปัญหาการชำระเงิน กรุณาติดต่อเจ้าหน้าที่</p>,
+          type: 'warning',
+          hasImg: true,
+          confirmOptions: {
+            confirmText: 'ติดต่อเจ้าหน้าที่',
+            onConfirm: () => {
+              window.location.href = 'tel:02-710-3100'
+            },
+            onCancel: () => {},
+            cancelText: 'ตรวจสอบข้อมูล',
+          },
+        })
       }
-      // openModal({
-      //   title: 'ชำระเงินไม่สำเร็จ',
-      //   content: <p>กรุณาตรวจสอบข้อมูลหรือพบปัญหาการชำระเงิน กรุณาติดต่อเจ้าหน้าที่</p>,
-      //   type: 'warning',
-      //   hasImg: true,
-      //   confirmOptions: {
-      //     confirmText: 'ติดต่อเจ้าหน้าที่',
-      //     onConfirm: () => {
-      //       window.location.href = 'tel:02-710-3100'
-      //     },
-      //     onCancel: () => {},
-      //     cancelText: 'ตรวจสอบข้อมูล',
-      //   },
-      // })
     } catch (error) {
-      console.log(error)
+      openModal({
+        title: 'ชำระเงินไม่สำเร็จ',
+        content: <p>กรุณาตรวจสอบข้อมูลหรือพบปัญหาการชำระเงิน กรุณาติดต่อเจ้าหน้าที่</p>,
+        type: 'warning',
+        hasImg: true,
+        confirmOptions: {
+          confirmText: 'ติดต่อเจ้าหน้าที่',
+          onConfirm: () => {
+            window.location.href = 'tel:02-710-3100'
+          },
+          onCancel: () => {},
+          cancelText: 'ตรวจสอบข้อมูล',
+        },
+      })
     } finally {
       closeLoading()
     }

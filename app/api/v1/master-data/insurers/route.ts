@@ -103,7 +103,6 @@ export async function PATCH(poReq: NextRequest) {
       insurerImgPath: string
       active: boolean
     }
-    console.log(body)
     if (!id) {
       return new NextResponse(JSON.stringify({ message: `Bad Request: Missing id` }), { status: 400 })
     }
