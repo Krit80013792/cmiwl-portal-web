@@ -30,18 +30,14 @@ const customerInformationSchema = object({
   provinceId: string().required('กรุณาเลือกจังหวัด').notOneOf(['NO_VALUE'], 'กรุณาเลือกจังหวัด'),
   districtId: string().required('กรุณาเลือกอำเภอ').notOneOf(['NO_VALUE'], 'กรุณาเลือกอำเภอ'),
   subDistrictId: string().required('กรุณาเลือกตำบล').notOneOf(['NO_VALUE'], 'กรุณาเลือกตำบล'),
-  isEmail: boolean()
-    .required('กรุณาเลือกช่องทางการติดต่อ')
-    .test('at-least-one', 'กรุณาเลือกช่องทางการติดต่ออย่างน้อย 1 ช่องทาง', function (value) {
-      const { isSms } = this.parent
-      return value === true || isSms === true
-    }),
-  isSms: boolean()
-    .required('กรุณาเลือกช่องทางการติดต่อ')
-    .test('at-least-one', 'กรุณาเลือกช่องทางการติดต่ออย่างน้อย 1 ช่องทาง', function (value) {
-      const { isEmail } = this.parent
-      return value === true || isEmail === true
-    }),
+  isEmail: boolean().test('at-least-one', 'กรุณาเลือกช่องทางการติดต่ออย่างน้อย 1 ช่องทาง', function (value) {
+    const { isSms } = this.parent
+    return value === true || isSms === true
+  }),
+  isSms: boolean().test('at-least-one', 'กรุณาเลือกช่องทางการติดต่ออย่างน้อย 1 ช่องทาง', function (value) {
+    const { isEmail } = this.parent
+    return value === true || isEmail === true
+  }),
   policyEmail: string().when('isEmail', {
     is: true,
     then: (schema) => schema.required('กรุณากรอกอีเมล').email('กรุณากรอกอีเมลให้ถูกต้อง'),

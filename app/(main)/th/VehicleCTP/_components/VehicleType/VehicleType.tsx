@@ -4,11 +4,11 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDispatch } from 'react-redux'
 import Image from 'next/image'
-import { getCompulsoryTypes } from '../../_actions'
+import { getCompulsoryTypes, getPrefillData } from '../../_actions'
 import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
 import useLoading from '@/helpers/hooks/useLoading'
 
-const VehicleCategory = ({ prefill }: { prefill: any }) => {
+const VehicleCategory = ({ channel }: { channel: any }) => {
   const router = useRouter()
   const { openLoading, closeLoading } = useLoading()
   const dispatch = useDispatch()
@@ -18,49 +18,51 @@ const VehicleCategory = ({ prefill }: { prefill: any }) => {
   const fetchData = useCallback(async () => {
     try {
       openLoading()
-      const res = await getCompulsoryTypes({ channelCode: prefill?.channel?.channelCode })
+      const res = await getCompulsoryTypes({ channelCode: channel?.channelCode })
       setTypeList((res?.data?.data?.compulsoryTypes ?? []).sort((a: any, b: any) => a.itemOrder - b.itemOrder))
     } catch (error) {
       console.error('Error fetching compulsory types:', error)
     } finally {
       closeLoading()
     }
-  }, [prefill?.channel?.channelCode, openLoading, closeLoading])
+  }, [channel?.channelCode, openLoading, closeLoading])
 
   useEffect(() => {
     fetchData()
   }, [fetchData])
 
-  useEffect(() => {
-    dispatch(prefillDataSlice.actions.clearPrefillData())
-  }, [dispatch])
-
   const handleVehicleCategory = async (type: any, idx: number) => {
-    openLoading()
-    setActiveIndex(idx)
-    const vehicleCategory = {
-      carTypeName: type.displayName,
-      carTypeKey: type.carTypeKey,
-      isEvType: type.isEvType,
-    }
-    dispatch(
-      prefillDataSlice.actions.setPrefillData({
-        channel: {
-          channelOrderID: prefill?.channel?.channelOrderID,
-        },
-        productCmiDetail: vehicleCategory,
-        deliveryType: {
-          isEmail: prefill?.deliveryType?.isEmail,
-          isSms: prefill?.deliveryType?.isSms,
-          isPolicyEmail: prefill?.deliveryType?.isEmail,
-          isPolicySms: prefill?.deliveryType?.isSms,
-          policyEmail: prefill?.deliveryType?.policyEmail,
-          policySms: prefill?.deliveryType?.policySms,
-        },
-      }),
-    )
+    try {
+      openLoading()
+      const res = await getPrefillData()
+      const { prefill } = res.data.data
+      setActiveIndex(idx)
+      const vehicleCategory = {
+        carTypeName: type.displayName,
+        carTypeKey: type.carTypeKey,
+        isEvType: type.isEvType,
+      }
+      dispatch(
+        prefillDataSlice.actions.setPrefillData({
+          channel,
+          productCmiDetail: vehicleCategory,
+          deliveryType: {
+            isEmail: prefill?.deliveryType?.isEmail,
+            isSms: prefill?.deliveryType?.isSms,
+            isPolicyEmail: prefill?.deliveryType?.isEmail,
+            isPolicySms: prefill?.deliveryType?.isSms,
+            policyEmail: prefill?.deliveryType?.policyEmail,
+            policySms: prefill?.deliveryType?.policySms,
+          },
+        }),
+      )
 
-    router.push(`/th/VehicleCategory`)
+      router.push(`/th/VehicleCategory`)
+    } catch (error) {
+      console.error('Error handling vehicle category:', error)
+    } finally {
+      closeLoading()
+    }
   }
 
   return (

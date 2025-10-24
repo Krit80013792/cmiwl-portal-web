@@ -12,3 +12,12 @@ export const getCompulsoryTypes = async ({ channelCode }: { channelCode: string 
     cacheKey: `${channelCode}:CompulsoryTypes`,
   })
 }
+
+export const getPrefillData = async () => {
+  const { token, orderNo } = await getDataFromSession()
+  console.log(orderNo)
+  return await getDataFromServer(`/api/prefill/v1/get-data/${orderNo}`, {
+    method: 'GET',
+    token: token as string,
+  })
+}

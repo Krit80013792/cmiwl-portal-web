@@ -5,19 +5,23 @@ import { getConfigs } from '@/services/server/actions/configs.action'
 
 export type SessionData = {
   channelData: {
-    channel: string | null
+    channel: any
     channelConfig: any
     channelCode: string | null
   }
   token: string | null
   prefill: any
   insurers: any[]
+  productCmiDetail: any
+  orderNo: string | null
 }
 
 export const getDataFromSession: () => Promise<SessionData> = async () => {
   const session: any = await getIronSession(await cookies(), sessionOptions)
   const sessionData = session?.usrData?.data
   const prefill = sessionData?.prefill
+  const orderNo = sessionData?.orderNo
+  const productCmiDetail = prefill?.productCmiDetail
   const channel = prefill?.channel
   const token = sessionData?.jwt
   const insurers = session?.insurers || []
@@ -30,5 +34,5 @@ export const getDataFromSession: () => Promise<SessionData> = async () => {
     channelCode: channel?.channelCode,
   }
 
-  return { channelData, token, prefill, insurers }
+  return { channelData, token, prefill, insurers, productCmiDetail, orderNo }
 }

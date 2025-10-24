@@ -24,7 +24,6 @@ const CarInformationForm = () => {
   const route = useRouter()
   const prefillData = useSelector((state: any) => state.prefillData)
   const dispatch = useDispatch()
-  const [data, setData] = useState<any>({})
   const [open, setOpen] = useState<boolean>(false)
   const [carColorList, setCarColorList] = useState<any[]>([])
   const [carBrandList, setCarBrandList] = useState<any[]>([])

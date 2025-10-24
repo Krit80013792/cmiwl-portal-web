@@ -3,8 +3,11 @@
 import React, { useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import useLoading from '@/helpers/hooks/useLoading'
+import { useDispatch } from 'react-redux'
+import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
 
 const LaunchPage = () => {
+  const dispatch = useDispatch()
   const { openLoading, closeLoading } = useLoading()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -29,6 +32,8 @@ const LaunchPage = () => {
           body: JSON.stringify({ ck, token }),
         })
         if (res?.ok) {
+          const data = await res.json()
+          dispatch(prefillDataSlice.actions.setPrefillData(data?.data?.prefill))
           router.replace('/th/VehicleCTP')
         } else {
           console.error('Failed to fetch data.')

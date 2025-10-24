@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function VehicleCTP() {
-  const { channelData, prefill } = await getDataFromSession()
+  const { channelData, productCmiDetail } = await getDataFromSession()
 
   let configValue: any = {}
   try {
@@ -21,7 +21,7 @@ export default async function VehicleCTP() {
   } catch {
     configValue = {}
   }
-  const isProductCmiDetailValid = Object.values(prefill?.productCmiDetail || {}).every(
+  const isProductCmiDetailValid = Object.values(productCmiDetail || {}).every(
     (value) => value !== null && value !== undefined,
   )
   return (
@@ -40,7 +40,7 @@ export default async function VehicleCTP() {
                 <strong className="f-bd">เลือกรถของคุณที่ต้องการต่อ พ.ร.บ.</strong>
               </h1>
             </div>
-            <OldVehicle prefill={prefill} />
+            <OldVehicle channel={channelData.channel} />
             <div>
               <h2 className="mb-12 fs-18 text-black mb-0">
                 <strong className="f-bd">ซื้อ พ.ร.บ. ให้รถคันอื่น</strong>
@@ -58,7 +58,7 @@ export default async function VehicleCTP() {
             </div>
           </div>
         )}
-        <VehicleType prefill={prefill} />
+        <VehicleType channel={channelData.channel} />
       </div>
     </MainWithDynamicStyle>
   )

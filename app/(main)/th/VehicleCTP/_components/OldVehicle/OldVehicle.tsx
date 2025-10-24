@@ -2,27 +2,50 @@
 
 import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
 import { useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
+import { getPrefillData } from '../../_actions'
+import useLoading from '@/helpers/hooks/useLoading'
 
-const OldVehicle = ({ prefill }: { prefill: any }) => {
+const OldVehicle = ({ channel }: { channel: any }) => {
+  const { openLoading, closeLoading } = useLoading()
   const dispatch = useDispatch()
   const route = useRouter()
+  const [data, setData] = useState<any>({})
+
+  const fetchData = useCallback(async () => {
+    try {
+      openLoading()
+      const res = await getPrefillData()
+      const { data } = res.data
+      if (res) {
+        setData(data.prefill)
+      }
+    } catch (error) {
+      console.error('Error fetching prefill data:', error)
+    } finally {
+      closeLoading()
+    }
+  }, [openLoading, closeLoading])
+
+  useEffect(() => {
+    dispatch(prefillDataSlice.actions.clearPrefillData())
+    fetchData()
+  }, [fetchData, dispatch])
 
   const handleSubmit = async () => {
     dispatch(
       prefillDataSlice.actions.setPrefillData({
-        ...prefill,
-        channel: {
-          ...prefill?.channel,
-        },
-        productCmiDetail: { ...prefill?.productCmiDetail, carTypeName: prefill?.productCmiDetail?.displayName },
+        ...data,
+        channel,
+        productCmiDetail: { ...data?.productCmiDetail, carTypeName: data?.productCmiDetail?.displayName },
         deliveryType: {
-          isEmail: prefill?.deliveryType?.isEmail,
-          isSms: prefill?.deliveryType?.isSms,
-          isPolicyEmail: prefill?.deliveryType?.isEmail,
-          isPolicySms: prefill?.deliveryType?.isSms,
-          policyEmail: prefill?.deliveryType?.policyEmail,
-          policySms: prefill?.deliveryType?.policySms,
+          isEmail: data?.deliveryType?.isEmail,
+          isSms: data?.deliveryType?.isSms,
+          isPolicyEmail: data?.deliveryType?.isEmail,
+          isPolicySms: data?.deliveryType?.isSms,
+          policyEmail: data?.deliveryType?.policyEmail,
+          policySms: data?.deliveryType?.policySms,
         },
       }),
     )
@@ -35,7 +58,7 @@ const OldVehicle = ({ prefill }: { prefill: any }) => {
           <div className="pt-10 pb-2 px-12 rounded-4 choice-card text-center h-100 active">
             <button onClick={handleSubmit} type="button" className="w-100 border-0 bg-transparent">
               <p className="mb-0 text-grey fs-22">
-                <strong className="f-bd">{`${prefill?.productCmiDetail?.licensePrefix}-${prefill?.productCmiDetail?.licenseNo}`}</strong>
+                <strong className="f-bd">{`${data?.productCmiDetail?.licensePrefix}-${data?.productCmiDetail?.licenseNo}`}</strong>
               </p>
               <p className="mb-0 text-center text-grey">รถยนต์</p>
             </button>

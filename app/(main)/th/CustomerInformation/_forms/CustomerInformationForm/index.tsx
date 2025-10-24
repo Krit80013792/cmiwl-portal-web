@@ -86,10 +86,7 @@ const CustomerInformationForm: React.FC = () => {
         const data = res?.data?.data[0] || null
         setAddressData(data)
         if (data) {
-          setValues((prevValues: any) => ({
-            ...prevValues,
-            provinceId: data?.province?.provinceId || '',
-          }))
+          handleChange({ name: 'provinceId', value: data?.province?.provinceId || '' })
           setProvinceList(
             data?.province ? [{ label: data?.province?.provinceName, value: data?.province?.provinceId }] : [],
           )
@@ -460,7 +457,7 @@ const CustomerInformationForm: React.FC = () => {
               </div>
             </div>
 
-            {prefill?.deliveryType?.isPolicyEmail && prefill?.deliveryType?.isPolicySms && (
+            {prefill?.channel?.isPolicyEmail && prefill?.channel?.isPolicySms && (
               <>
                 <h2 className="mb-12 mt-4 text-black fs-18">
                   <strong>ช่องทางการจัดส่งกรมธรรม์</strong>
@@ -524,6 +521,11 @@ const CustomerInformationForm: React.FC = () => {
                     disabled={!values?.isSms}
                   />
                 </div>
+                {!values?.isEmail && !values?.isSms && (errors?.isEmail || errors?.isSms) && (
+                  <div className="feedback" style={{ color: 'red', marginTop: '-8px', marginBottom: '12px' }}>
+                    {errors?.isEmail || errors?.isSms}
+                  </div>
+                )}
               </>
             )}
           </div>

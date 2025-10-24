@@ -1,4 +1,3 @@
-//* app/api/v1/launch/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { getIronSession } from 'iron-session'
@@ -38,13 +37,20 @@ export async function POST(oReq: NextRequest) {
       },
     })
     const insurers = await insurersRes.json()
-
-    session.usrData = data
+    session.usrData = { data: { jwt: data?.data?.jwt, prefill: data?.data?.prefill, orderNo: data?.data?.orderNo } }
     session.insurers = insurers?.data
 
     await session.save()
 
-    return new NextResponse(JSON.stringify({ message: `Success`, data: { insurers } }), { status: 200 })
+    return new NextResponse(
+      JSON.stringify({
+        message: `Success`,
+        data: { insurers, prefill: data?.data?.prefill, orderNo: data?.data?.orderNo },
+      }),
+      {
+        status: 200,
+      },
+    )
   } catch (e) {
     console.error('Error in POST /api/v1/launch:', e)
     return new NextResponse(JSON.stringify({ message: `Internal Server Error` }), { status: 500 })
