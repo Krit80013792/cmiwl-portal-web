@@ -89,7 +89,7 @@ const OrderReportAdminPage = () => {
         .filter((channel: { active: boolean }) => channel.active)
         .map((channel: { displayName: string; keyCode: string }) => ({
           label: channel.displayName,
-          value: channel.displayName.toLocaleUpperCase(),
+          value: channel.keyCode.toLocaleUpperCase(),
         }))
       setChannelOptions(options)
     } catch (error) {
