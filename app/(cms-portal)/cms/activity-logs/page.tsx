@@ -24,8 +24,8 @@ const ActivityLogsPage = () => {
   const [clientPerms, setClientPerms] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [activityLogs, setActivityLogs] = useState<TxActivityLogDTO[]>([])
-  const [startDate, setStartDate] = useState<Date>(new Date())
-  const [endDate, setEndDate] = useState<Date>(new Date())
+  const [startDate, setStartDate] = useState<Date | null>(null)
+  const [endDate, setEndDate] = useState<Date | null>(null)
   const [action, setAction] = useState<string>('')
   const [actions, setActions] = useState<any[]>([])
   const [detailDialog, setDetailDialog] = useState(false)
@@ -34,6 +34,13 @@ const ActivityLogsPage = () => {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   })
   const [globalFilterValue, setGlobalFilterValue] = useState('')
+
+  // Set initial dates after component mounts to avoid hydration mismatch
+  useEffect(() => {
+    const today = new Date()
+    setStartDate(today)
+    setEndDate(today)
+  }, [])
 
   const setApiRoute = async (): Promise<any> => {
     const c = await ApiRoute()
@@ -52,6 +59,9 @@ const ActivityLogsPage = () => {
   useEffect(() => {
     const cc = clientCookie()
     setClientPerms(cc?.perms)
+
+    // Only fetch data if dates are set (after initial mount)
+    if (!startDate || !endDate) return
 
     setLoading(true)
     const getData = async () => {
@@ -150,6 +160,9 @@ const ActivityLogsPage = () => {
   }
 
   const onSearchClick = () => {
+    // Check if dates are set before searching
+    if (!startDate || !endDate) return
+
     setLoading(true)
     const getData = async () => {
       const route = await setApiRoute()

@@ -31,12 +31,21 @@ const CarInformationForm = () => {
   const [carProvinceList, setCarProvinceList] = useState<any[]>([])
   const [dayList, setDayList] = useState<any[]>([])
   const [coverageEndDateDisplay, setCoverageEndDateDisplay] = useState<string>('')
+  const [mounted, setMounted] = useState(false)
   const { values, handleChange, errors, handleSubmit, setValues } = useForm({}, carInformationSchema, {
     openLoading,
     closeLoading,
   })
 
+  // Set mounted state to prevent hydration mismatch
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    // Only set date values after component is mounted on client
+    if (!mounted) return
+
     setValues({
       carBrandId: prefillData?.productCmiDetail?.carBrandId ?? null,
       carModelName: prefillData?.productCmiDetail?.carModelName ?? null,
@@ -52,7 +61,7 @@ const CarInformationForm = () => {
       registrationYear: prefillData?.productCmiDetail?.registrationYear ?? null,
       registrationProvinceId: prefillData?.productCmiDetail?.registrationProvinceId ?? null,
     })
-  }, [prefillData])
+  }, [prefillData, mounted, setValues])
 
   useEffect(() => {
     const days = () => {
@@ -379,10 +388,14 @@ const CarInformationForm = () => {
                   name="yearCoverage"
                   value={values?.yearCoverage ? values?.yearCoverage.toString() : ''}
                   onChange={(value) => handleChange({ name: 'yearCoverage', value: Number(value) })}
-                  options={[dayjs().year()].map((year) => ({
-                    label: (year + 543).toString(),
-                    value: year.toString(),
-                  }))}
+                  options={
+                    mounted
+                      ? [dayjs().year()].map((year) => ({
+                          label: (year + 543).toString(),
+                          value: year.toString(),
+                        }))
+                      : []
+                  }
                   feedback={errors?.yearCoverage}
                 />
               </div>

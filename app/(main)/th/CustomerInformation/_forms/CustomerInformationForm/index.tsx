@@ -27,11 +27,17 @@ const CustomerInformationForm: React.FC = () => {
   const [subDistrictList, setSubDistrictList] = useState<any[]>([])
   const [addressData, setAddressData] = useState<any>(null)
   const [birthDayList, setBirthDayList] = useState<any[]>([])
+  const [mounted, setMounted] = useState(false)
   const { handleChange, handleSubmit, errors, values, setValues } = useForm({}, customerInformationSchema, {
     openLoading,
     closeLoading,
   })
   const zipCodeDebounced = useDebounce(values?.zipCode, 1000)
+
+  // Set mounted state to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     setValues({
@@ -247,13 +253,17 @@ const CustomerInformationForm: React.FC = () => {
                       label="ปี"
                       name="birthYear"
                       firstOptionLabel="เลือกปี"
-                      options={Array.from({ length: 80 }, (_, i) => {
-                        const year = dayjs().year() - 20 - i
-                        return {
-                          label: (year + 543).toString(),
-                          value: year.toString(),
-                        }
-                      })}
+                      options={
+                        mounted
+                          ? Array.from({ length: 80 }, (_, i) => {
+                              const year = dayjs().year() - 20 - i
+                              return {
+                                label: (year + 543).toString(),
+                                value: year.toString(),
+                              }
+                            })
+                          : []
+                      }
                       onChange={(value) => handleChange({ name: 'birthYear', value })}
                       value={values?.birthYear || ''}
                       feedback={errors?.birthYear}
