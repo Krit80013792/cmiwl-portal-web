@@ -55,14 +55,18 @@ const Review = ({ reviewType }: { reviewType: string }) => {
                 prefill?.productCmiDetail?.licenseNo}
             </span>
           </div>
-          <div className="d-flex justify-content-between mb-12">
-            <span className="f-md text-grey">ปีที่จดทะเบียน</span>
-            <span className="f-bd text-grey">{prefill?.productCmiDetail?.registrationYear}</span>
-          </div>
-          <div className="d-flex justify-content-between mb-0">
-            <span className="f-md text-grey">จังหวัดที่จดทะเบียน</span>
-            <span className="f-bd text-grey">{prefill?.productCmiDetail?.registrationProvinceName}</span>
-          </div>
+          {!prefill?.productCmiDetail?.isRedLicense && (
+            <>
+              <div className="d-flex justify-content-between mb-12">
+                <span className="f-md text-grey">ปีที่จดทะเบียน</span>
+                <span className="f-bd text-grey">{prefill?.productCmiDetail?.registrationYear}</span>
+              </div>
+              <div className="d-flex justify-content-between mb-0">
+                <span className="f-md text-grey">จังหวัดที่จดทะเบียน</span>
+                <span className="f-bd text-grey">{prefill?.productCmiDetail?.registrationProvinceName}</span>
+              </div>
+            </>
+          )}
         </div>
       )
     case 'coverage_date':
