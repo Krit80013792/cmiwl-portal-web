@@ -187,7 +187,7 @@ const Modal: React.FC<Props> = ({
             ) : (
               content
             )}
-            {renderButtons()}
+            <div className="mt-20">{renderButtons()}</div>
           </div>
         </div>
       </div>

@@ -8,9 +8,14 @@ import { useSelector } from 'react-redux'
 import { getPaymentQrCode, getPaymentQrStatus } from '../_actions'
 import dayjs from 'dayjs'
 import 'dayjs/locale/th'
+import Modal from '@/cmi-layout/components/Modal'
+import { useModal } from '@/helpers/hooks/useModal'
+import { useRouter } from 'next/navigation'
 dayjs.locale('th')
 
 const PaymentQRComponents = () => {
+  const route = useRouter()
+  const { modal, closeModal, openModal } = useModal()
   const { openLoading, closeLoading } = useLoading()
   const prefillData = useSelector((state: any) => state.prefillData)
   const [data, setData] = useState<any>({})
@@ -31,7 +36,40 @@ const PaymentQRComponents = () => {
         .add(543, 'year')
         .subtract(7, 'hour')
         .format('DD MMM YYYY - HH:mm น.')
-      setQrData({ ...qrData, qrExpiryDate })
+      if (res?.data) {
+        setQrData({ ...qrData, qrExpiryDate })
+      } else {
+        openModal({
+          title: 'ไม่สามารถดำเนินการต่อได้',
+          content: 'กรุณาทำรายการใหม่อีกครั้ง',
+          type: 'error',
+          renderActions: () => {
+            return (
+              <div className="d-flex">
+                <button
+                  className="btn btn-secondary w-100 fs-6 d-flex justify-content-center align-items-center me-2"
+                  onClick={() => {
+                    route.push('/th/PaymentChannel')
+                  }}
+                  type="button"
+                >
+                  <strong>{'เลือกช่องทางอื่น'}</strong>
+                </button>
+                <button
+                  className="btn btn-primary w-100 fs-6 d-flex justify-content-center align-items-center ms-2"
+                  onClick={async () => {
+                    closeModal()
+                    await fetchPayment()
+                  }}
+                  type="button"
+                >
+                  <strong>{'ตกลง'}</strong>
+                </button>
+              </div>
+            )
+          },
+        })
+      }
     } catch (error) {
       console.error('Error fetching payment types:', error)
     } finally {
@@ -56,7 +94,7 @@ const PaymentQRComponents = () => {
   }, [qrData?.paymentNo])
 
   useEffect(() => {
-    if (paymentStatus === 'idle') {
+    if (paymentStatus === 'idle' && qrData?.paymentNo) {
       const interval = setInterval(() => {
         handleCheckPaymentStatus()
       }, 10000)
@@ -138,6 +176,7 @@ const PaymentQRComponents = () => {
     </div>
   ) : paymentStatus === 'idle' ? (
     <div>
+      <Modal {...modal} onClose={closeModal} />
       <div className="content-section fullPage-92 pt-48">
         <div className="container">
           <h1 className="typ-of-vehicle fs-6 text-grey mb-0 mt-3 f-bd">
