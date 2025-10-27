@@ -37,7 +37,36 @@ export async function POST(oReq: NextRequest) {
       },
     })
     const insurers = await insurersRes.json()
-    session.usrData = { data: { jwt: data?.data?.jwt, prefill: data?.data?.prefill, orderNo: data?.data?.orderNo } }
+
+    const prefillRes = await fetch(`${process.env.TIDLOR_TECH_URI}/api/prefill/v1/get-data/${data?.data?.orderNo}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${data?.data?.jwt}`,
+      },
+    })
+    const prefillData = await prefillRes.json()
+    const prefill = prefillData?.data?.prefill
+    const productCmiDetail = {
+      carTypeKey: prefill?.productCmiDetail?.carTypeKey,
+      isEvType: prefill?.productCmiDetail?.carTypeKey,
+      subCarType: prefill?.productCmiDetail?.carTypeKey,
+      cmiCarTypeCode: prefill?.productCmiDetail?.carTypeKey,
+      licensePrefix: prefill?.productCmiDetail?.carTypeKey,
+      licenseNo: prefill?.productCmiDetail?.carTypeKey,
+      carBrand: prefill?.productCmiDetail?.carTypeKey,
+      carModelName: prefill?.productCmiDetail?.carTypeKey,
+      chassisNumber: prefill?.productCmiDetail?.carTypeKey,
+      carColorName: prefill?.productCmiDetail?.carTypeKey,
+      registrationProvince: prefill?.productCmiDetail?.carTypeKey,
+      registrationYear: prefill?.productCmiDetail?.carTypeKey,
+    }
+    session.usrData = {
+      data: {
+        jwt: data?.data?.jwt,
+        prefill: { ...data?.data?.prefill, productCmiDetail },
+        orderNo: data?.data?.orderNo,
+      },
+    }
     session.insurers = insurers?.data
 
     await session.save()

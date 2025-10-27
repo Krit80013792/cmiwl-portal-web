@@ -25,6 +25,7 @@ const VehicleCategoryComponent = () => {
       openLoading()
       const res = await getCompulsoryRates({ carTypeKey: prefill?.productCmiDetail?.carTypeKey })
       const compulsoryRates = res?.data?.data?.compulsoryRates || []
+      console.log(res)
       if (compulsoryRates.length === 1) {
         await handleCarInformation(compulsoryRates[0], 0)
         return
