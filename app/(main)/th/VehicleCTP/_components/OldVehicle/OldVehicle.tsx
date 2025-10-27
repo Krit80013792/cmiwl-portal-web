@@ -4,6 +4,7 @@ import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
+import { Skeleton } from 'primereact/skeleton'
 import { getPrefillData } from '../../_actions'
 import useLoading from '@/helpers/hooks/useLoading'
 
@@ -12,9 +13,11 @@ const OldVehicle = ({ channel }: { channel: any }) => {
   const dispatch = useDispatch()
   const route = useRouter()
   const [data, setData] = useState<any>({})
+  const [isLoadingData, setIsLoadingData] = useState<boolean>(true)
 
   const fetchData = useCallback(async () => {
     try {
+      setIsLoadingData(true)
       openLoading()
       const res = await getPrefillData()
       const { data } = res.data
@@ -24,6 +27,7 @@ const OldVehicle = ({ channel }: { channel: any }) => {
     } catch (error) {
       console.error('Error fetching prefill data:', error)
     } finally {
+      setIsLoadingData(false)
       closeLoading()
     }
   }, [openLoading, closeLoading])
@@ -55,14 +59,23 @@ const OldVehicle = ({ channel }: { channel: any }) => {
     <div className="row car-select mb-4">
       <div>
         <div className="col-6 pe-2">
-          <div className="pt-10 pb-2 px-12 rounded-4 choice-card text-center h-100 active">
-            <button onClick={handleSubmit} type="button" className="w-100 border-0 bg-transparent">
-              <p className="mb-0 text-grey fs-22">
-                <strong className="f-bd">{`${data?.productCmiDetail?.licensePrefix ?? ''}-${data?.productCmiDetail?.licenseNo ?? ''}`}</strong>
-              </p>
-              <p className="mb-0 text-center text-grey">รถยนต์</p>
-            </button>
-          </div>
+          {isLoadingData ? (
+            // Skeleton loading state
+            <div className="pt-10 pb-2 px-12 rounded-4 choice-card text-center h-100">
+              <Skeleton width="70%" height="1.5rem" className="mb-2 mx-auto" />
+              <Skeleton width="40%" height="1rem" className="mx-auto" />
+            </div>
+          ) : (
+            // Actual vehicle data
+            <div className="pt-10 pb-2 px-12 rounded-4 choice-card text-center h-100 active">
+              <button onClick={handleSubmit} type="button" className="w-100 border-0 bg-transparent">
+                <p className="mb-0 text-grey fs-22">
+                  <strong className="f-bd">{`${data?.productCmiDetail?.licensePrefix ?? ''}-${data?.productCmiDetail?.licenseNo ?? ''}`}</strong>
+                </p>
+                <p className="mb-0 text-center text-grey">รถยนต์</p>
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

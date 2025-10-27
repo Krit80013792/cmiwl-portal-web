@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useDispatch } from 'react-redux'
 import Image from 'next/image'
+import { Skeleton } from 'primereact/skeleton'
 import { getCompulsoryTypes, getPrefillData } from '../../_actions'
 import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
 import useLoading from '@/helpers/hooks/useLoading'
@@ -14,15 +15,18 @@ const VehicleCategory = ({ channel }: { channel: any }) => {
   const dispatch = useDispatch()
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [typeList, setTypeList] = useState<any[]>([])
+  const [isLoadingData, setIsLoadingData] = useState<boolean>(true)
 
   const fetchData = useCallback(async () => {
     try {
+      setIsLoadingData(true)
       openLoading()
       const res = await getCompulsoryTypes({ channelCode: channel?.channelCode })
       setTypeList((res?.data?.data?.compulsoryTypes ?? []).sort((a: any, b: any) => a.itemOrder - b.itemOrder))
     } catch (error) {
       console.error('Error fetching compulsory types:', error)
     } finally {
+      setIsLoadingData(false)
       closeLoading()
     }
   }, [channel?.channelCode, openLoading, closeLoading])
@@ -65,26 +69,42 @@ const VehicleCategory = ({ channel }: { channel: any }) => {
 
   return (
     <div className="row vehicle">
-      {typeList?.map((e: any, idx: number) => {
-        const isActive = activeIndex === idx
-        return (
-          <div className="col-6 pe-2 mb-3" key={e.itemOrder}>
-            <button onClick={() => handleVehicleCategory(e, idx)} type="button" className="w-100 h-100">
-              <div className={`py-12 px-3 rounded-4 choice-card text-center h-100${isActive ? ' active' : ''}`}>
-                <Image src={`data:image/png;base64,${e.imagePath}`} alt={e.displayName} width={80} height={42} />
-                <p className="mb-0 text-center text-grey">
-                  {e.displayName.split(':').map((line: string) => (
-                    <span key={line}>
-                      {line}
-                      <br />
-                    </span>
-                  ))}
-                </p>
+      {isLoadingData ? (
+        // Skeleton loading state
+        <>
+          {[1, 2, 3, 4].map((item) => (
+            <div className="col-6 pe-2 mb-3" key={item}>
+              <div className="py-12 px-3 rounded-4 choice-card text-center h-100">
+                <Skeleton width="80px" height="42px" className="mb-3 mx-auto" />
+                <Skeleton width="80%" height="1rem" className="mb-2 mx-auto" />
+                <Skeleton width="60%" height="1rem" className="mx-auto" />
               </div>
-            </button>
-          </div>
-        )
-      })}
+            </div>
+          ))}
+        </>
+      ) : (
+        // Actual vehicle type cards
+        typeList?.map((e: any, idx: number) => {
+          const isActive = activeIndex === idx
+          return (
+            <div className="col-6 pe-2 mb-3" key={e.itemOrder}>
+              <button onClick={() => handleVehicleCategory(e, idx)} type="button" className="w-100 h-100">
+                <div className={`py-12 px-3 rounded-4 choice-card text-center h-100${isActive ? ' active' : ''}`}>
+                  <Image src={`data:image/png;base64,${e.imagePath}`} alt={e.displayName} width={80} height={42} />
+                  <p className="mb-0 text-center text-grey">
+                    {e.displayName.split(':').map((line: string) => (
+                      <span key={line}>
+                        {line}
+                        <br />
+                      </span>
+                    ))}
+                  </p>
+                </div>
+              </button>
+            </div>
+          )
+        })
+      )}
     </div>
   )
 }
