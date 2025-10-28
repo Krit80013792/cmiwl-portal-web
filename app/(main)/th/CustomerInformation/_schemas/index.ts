@@ -25,7 +25,13 @@ const customerInformationSchema = object({
     .required('กรุณากรอกเบอร์โทรศัพท์')
     .matches(/^\d{10}$/, 'กรุณากรอกเบอร์โทรศัพท์ 10 หลัก'),
   email: string().required('กรุณากรอกอีเมล').email('กรุณากรอกอีเมลให้ถูกต้อง'),
-  houseNumber: string().required('กรุณากรอกที่อยู่'),
+  houseNumber: string()
+    .required('กรุณากรอกที่อยู่')
+    .matches(/^(?!\s).*/, 'ไม่สามารถขึ้นต้นด้วยช่องว่างได้'),
+  villageNo: string().matches(/^\d*$/, 'กรุณากรอกเฉพาะตัวเลข'),
+  buildingVillage: string().matches(/^(?!\s).*/, 'ไม่สามารถขึ้นต้นด้วยช่องว่างได้'),
+  alley: string().matches(/^(?!\s).*/, 'ไม่สามารถขึ้นต้นด้วยช่องว่างได้'),
+  street: string().matches(/^(?!\s).*/, 'ไม่สามารถขึ้นต้นด้วยช่องว่างได้'),
   zipCode: string().required('กรุณากรอกไปรษณีย์').length(5, 'กรุณากรอกไปรษณีย์ 5 หลัก'),
   provinceId: string().required('กรุณาเลือกจังหวัด').notOneOf(['NO_VALUE'], 'กรุณาเลือกจังหวัด'),
   districtId: string().required('กรุณาเลือกอำเภอ').notOneOf(['NO_VALUE'], 'กรุณาเลือกอำเภอ'),
