@@ -94,6 +94,8 @@ const PaymentCreditForm = () => {
       const data = res?.data?.data
       if (data?.isPaymentSuccess) {
         setPaymentStatus('success')
+      } else {
+        setPaymentStatus('error')
       }
     } catch (error) {
       console.error('Error checking payment status:', error)
