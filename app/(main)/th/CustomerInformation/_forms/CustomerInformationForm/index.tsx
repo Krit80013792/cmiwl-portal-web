@@ -347,6 +347,7 @@ const CustomerInformationForm: React.FC = () => {
                   placeholder="กรอกหมู่ที่"
                   onChange={({ target: { name, value } }) => handleChange({ name, value })}
                   value={values?.villageNo || ''}
+                  feedback={errors?.villageNo}
                 />
               </div>
             </div>
@@ -359,6 +360,7 @@ const CustomerInformationForm: React.FC = () => {
                 placeholder="กรอกหมู่บ้าน/อาคาร"
                 onChange={({ target: { name, value } }) => handleChange({ name, value })}
                 value={values?.buildingVillage || ''}
+                feedback={errors?.buildingVillage}
               />
             </div>
             <div className="d-flex">
@@ -371,6 +373,7 @@ const CustomerInformationForm: React.FC = () => {
                   placeholder="กรอกซอย/ตรอก"
                   onChange={({ target: { name, value } }) => handleChange({ name, value })}
                   value={values?.alley || ''}
+                  feedback={errors?.alley}
                 />
               </div>
               <div className="form-group mb-12 ms-2 w-100">
@@ -382,8 +385,8 @@ const CustomerInformationForm: React.FC = () => {
                   placeholder="กรอกถนน"
                   onChange={({ target: { name, value } }) => handleChange({ name, value })}
                   value={values?.street || ''}
+                  feedback={errors?.street}
                 />
-                <label className="form-label">{'ถนน'}</label>
               </div>
             </div>
             <div>
