@@ -214,7 +214,7 @@ const CustomerInformationForm: React.FC = () => {
                 type="text"
                 maxLength={50}
                 placeholder="กรอกชื่อตามบัตรประชาชน"
-                onChange={({ target: { name, value } }) => handleChange({ name, value })}
+                onChange={({ target: { name, value } }) => handleChange({ name, value: value?.replaceAll(' ', '') })}
                 value={values?.firstName || ''}
                 feedback={errors?.firstName}
               />
@@ -226,7 +226,7 @@ const CustomerInformationForm: React.FC = () => {
                 type="text"
                 maxLength={50}
                 placeholder="กรอกนามสกุลตามบัตรประชาชน"
-                onChange={({ target: { name, value } }) => handleChange({ name, value })}
+                onChange={({ target: { name, value } }) => handleChange({ name, value: value?.replaceAll(' ', '') })}
                 value={values?.lastName || ''}
                 feedback={errors?.lastName}
               />
