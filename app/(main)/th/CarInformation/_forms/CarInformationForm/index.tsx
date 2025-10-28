@@ -53,8 +53,8 @@ const CarInformationForm = () => {
       chassisNumber: prefillData?.productCmiDetail?.chassisNumber ?? null,
       isRedLicense: prefillData?.productCmiDetail?.isRedLicense ?? false,
       licenseNo: prefillData?.productCmiDetail?.licenseNo
-        ? `${prefillData?.productCmiDetail?.licensePrefix}-${prefillData?.productCmiDetail?.licenseNo}`
-        : null,
+        ? `${prefillData?.productCmiDetail?.licensePrefix ?? ''}-${prefillData?.productCmiDetail?.licenseNo}`
+        : '',
       yearCoverage: prefillData?.productCmiDetail?.yearCoverage ?? dayjs().year(),
       monthCoverage: prefillData?.productCmiDetail?.monthCoverage ?? dayjs().month() + 1,
       dayCoverage: prefillData?.productCmiDetail?.dayCoverage ?? dayjs().date(),
