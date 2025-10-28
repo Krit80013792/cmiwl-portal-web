@@ -281,7 +281,7 @@ const CarInformationForm = () => {
             maxLength={17}
             placeholder="ตัวอย่าง AAAAAA123AA123456"
             value={values?.chassisNumber || ''}
-            onChange={(e) => handleChange({ name: 'chassisNumber', value: e.target.value })}
+            onChange={(e) => handleChange({ name: 'chassisNumber', value: e.target.value.replaceAll(' ', '') })}
             suffix={
               <Image
                 alt="ตัวช่วย"
@@ -341,7 +341,12 @@ const CarInformationForm = () => {
             maxLength={13}
             placeholder="ตัวอย่าง 2ขข2222"
             value={values?.licenseNo?.replaceAll('-', '') || ''}
-            onChange={(e) => handleChange({ name: 'licenseNo', value: convertStrToFormat(e.target.value, 'idcar') })}
+            onChange={(e) =>
+              handleChange({
+                name: 'licenseNo',
+                value: convertStrToFormat(e.target.value.replaceAll(' ', ''), 'idcar'),
+              })
+            }
             feedback={errors?.licenseNo}
           />
         </div>
