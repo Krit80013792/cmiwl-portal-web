@@ -10,6 +10,7 @@ const customerInformationSchema = object({
   lastName: string()
     .required('กรุณากรอกนามสกุล')
     .matches(/^[ก-๏\s]+$/, 'กรุณากรอกนามสกุลเป็นภาษาไทยเท่านั้น')
+    .matches(/^(?!\s).*/, 'ไม่สามารถขึ้นต้นด้วยช่องว่างได้')
     .max(50, 'กรุณากรอกนามสกุลไม่เกิน 50 ตัวอักษร'),
   taxId: string()
     .required('กรุณากรอกเลขบัตรประชาชน')

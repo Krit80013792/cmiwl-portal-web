@@ -226,7 +226,7 @@ const CustomerInformationForm: React.FC = () => {
                 type="text"
                 maxLength={50}
                 placeholder="กรอกนามสกุลตามบัตรประชาชน"
-                onChange={({ target: { name, value } }) => handleChange({ name, value: value?.replaceAll(' ', '') })}
+                onChange={({ target: { name, value } }) => handleChange({ name, value })}
                 value={values?.lastName || ''}
                 feedback={errors?.lastName}
               />
