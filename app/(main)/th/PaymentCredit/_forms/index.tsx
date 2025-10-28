@@ -263,7 +263,7 @@ const PaymentCreditForm = () => {
 
                 {/* Success Message */}
                 <h1 className="f-bd mb-4" style={{ color: '#4CAF50', fontSize: '24px' }}>
-                  ขอบคุณที่ชื่อประกันกับเรา
+                  ขอบคุณที่ซื้อประกันกับเรา
                 </h1>
 
                 {/* Email Confirmation Box */}

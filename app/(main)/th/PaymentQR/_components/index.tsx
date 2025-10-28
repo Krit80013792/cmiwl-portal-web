@@ -20,7 +20,7 @@ const PaymentQRComponents = () => {
   const prefillData = useSelector((state: any) => state.prefillData)
   const [data, setData] = useState<any>({})
   const [qrData, setQrData] = useState<any>({})
-  const [paymentStatus, setPaymentStatus] = useState<string>('idle')
+  const [paymentStatus, setPaymentStatus] = useState<string>('success')
 
   useEffect(() => {
     setData(prefillData)
@@ -124,7 +124,7 @@ const PaymentQRComponents = () => {
 
           {/* Success Message */}
           <h1 className="f-bd mb-4" style={{ color: '#4CAF50', fontSize: '24px' }}>
-            ขอบคุณที่ชื่อประกันกับเรา
+            ขอบคุณที่ซื้อประกันกับเรา
           </h1>
 
           {/* Email Confirmation Box */}
