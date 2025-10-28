@@ -20,7 +20,7 @@ const PaymentQRComponents = () => {
   const prefillData = useSelector((state: any) => state.prefillData)
   const [data, setData] = useState<any>({})
   const [qrData, setQrData] = useState<any>({})
-  const [paymentStatus, setPaymentStatus] = useState<string>('success')
+  const [paymentStatus, setPaymentStatus] = useState<string>('idle')
 
   useEffect(() => {
     setData(prefillData)
