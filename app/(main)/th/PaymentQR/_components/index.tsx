@@ -138,8 +138,8 @@ const PaymentQRComponents = () => {
             </p>
             <p className="f-bd mb-2" style={{ fontSize: '18px', color: '#333' }}>
               {[
-                data?.channel?.isPolicyEmail && `${data?.channel?.policyEmail}`,
-                data?.channel?.isPolicySms && `${data?.channel?.policySms}`,
+                data?.deliveryType?.isEmail && `${data?.deliveryType?.policyEmail}`,
+                data?.deliveryType?.isSms && `${data?.deliveryType?.policySms}`,
               ]
                 .filter(Boolean)
                 .join(', ') || '-'}
@@ -161,6 +161,8 @@ const PaymentQRComponents = () => {
             outlined
             className="btn btn-outline-primary fs-6 w-100 mb-2 d-flex text-center align-items-center justify-content-center"
             style={{ padding: '12px' }}
+            // TODO: Update link to user's products page
+            onClick={() => route.replace('https://app.tidlor.com/main')}
           >
             ดูผลิตภัณฑ์ของฉัน
           </Button>
@@ -168,6 +170,7 @@ const PaymentQRComponents = () => {
             type="button"
             className="btn btn-primary fs-6 w-100 d-flex text-center align-items-center justify-content-center"
             style={{ padding: '12px' }}
+            onClick={() => route.replace('https://app.tidlor.com/main')}
           >
             กลับหน้าหลัก
           </Button>
@@ -224,6 +227,7 @@ const PaymentQRComponents = () => {
         <Button
           type="button"
           className="btn btn-primary fs-6 mx-auto d-flex text-center align-items-center justify-content-center"
+          onClick={() => route.replace('https://app.tidlor.com/main')}
         >
           กลับหน้าหลัก
         </Button>
