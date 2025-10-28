@@ -281,7 +281,12 @@ const CarInformationForm = () => {
             maxLength={17}
             placeholder="ตัวอย่าง AAAAAA123AA123456"
             value={values?.chassisNumber || ''}
-            onChange={(e) => handleChange({ name: 'chassisNumber', value: e.target.value.replaceAll(' ', '') })}
+            onChange={(e) =>
+              handleChange({
+                name: 'chassisNumber',
+                value: convertStrToFormat(e.target.value.replaceAll(' ', ''), 'eng_number'),
+              })
+            }
             suffix={
               <Image
                 alt="ตัวช่วย"

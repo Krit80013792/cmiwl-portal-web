@@ -12,7 +12,15 @@ export const isValidThaiID = (id: string) => {
 
 export const convertStrToFormat = (
   str: string | number | null,
-  format: 'number' | 'phone_number' | 'id_card' | 'idcar' | 'credit_card' | 'credit_expiry',
+  format:
+    | 'number'
+    | 'phone_number'
+    | 'id_card'
+    | 'idcar'
+    | 'credit_card'
+    | 'credit_expiry'
+    | 'eng_number'
+    | 'thai_number',
 ): string => {
   if (!str) {
     return ''
@@ -37,10 +45,13 @@ export const convertStrToFormat = (
         .replace(/^(\d)(\d{4})(\d{5})(\d{2})(\d)$/, '$1-$2-$3-$4-$5')
       break
     case 'idcar': {
-      str = str.toString().replace(/-/g, '')
+      str = str
+        .toString()
+        .replace(/-/g, '')
+        .replace(/[^ก-ฮ0-9]/g, '')
       let newString = str
       let index = 0
-      const regexp2 = /[A-zก-ฮ]/gi
+      const regexp2 = /[ก-ฮ]/gi
       const result2 = regexp2.exec(str)
       if (result2 !== null) {
         if (result2.index !== 0) {
@@ -69,6 +80,12 @@ export const convertStrToFormat = (
         .toString()
         .replace(/\D/g, '')
         .replace(/(\d{2})(\d{1,2})/, '$1/$2')
+      break
+    case 'eng_number':
+      str = str.toString().replace(/[^A-Za-z0-9]/g, '')
+      break
+    case 'thai_number':
+      str = str.toString().replace(/[^ก-ฮ0-9\s]/g, '')
       break
     default:
       str = str.toString()
