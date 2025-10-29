@@ -50,7 +50,7 @@ const PaymentCreditForm = () => {
       const payment = res.data.data
       if (!payment.error) {
         setPaymentNo(payment.paymentNo)
-        window.open(payment.authorizeUri, '_blank')
+        route.push(payment.authorizeUri)
         setPaymentStatus('processing')
       } else {
         openModal({
