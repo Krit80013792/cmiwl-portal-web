@@ -1,6 +1,6 @@
-import { UsersEntity } from '../../../../domain/entities/UsersEntity'
-import { IUser } from '../../../../domain/models/UserModel'
-import { IUserRepository } from '../../../../application/interfaces/IUserRepository'
+import { UsersEntity } from '@/src/domain/entities/UsersEntity'
+import { IUser } from '@/src/domain/models/UserModel'
+import { IUserRepository } from '@/src/application/interfaces/IUserRepository'
 import bcrypt from 'bcrypt'
 
 export class UserRepository implements IUserRepository {

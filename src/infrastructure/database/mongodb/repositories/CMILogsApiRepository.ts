@@ -1,6 +1,6 @@
-import { CMIApiLogsEntity } from '../../../../domain/entities/CMIApiLogsEntity'
-import { ICMIApiLogs } from '../../../../domain/models/CMIApiLogsModel'
-import { ICMIApiLogsRepository, IFindAllParams } from '../../../../application/interfaces/ICMIApiLogsRepository'
+import { ICMIApiLogsRepository, IFindAllParams } from '@/src/application/interfaces/ICMIApiLogsRepository'
+import { CMIApiLogsEntity } from '@/src/domain/entities/CMIApiLogsEntity'
+import { ICMIApiLogs } from '@/src/domain/models/CMIApiLogsModel'
 import { FilterQuery } from 'mongoose'
 
 export class CMIApiLogsRepository implements ICMIApiLogsRepository {

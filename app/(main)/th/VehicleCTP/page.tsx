@@ -1,9 +1,9 @@
 import React from 'react'
 import { Metadata } from 'next'
-import MainWithDynamicStyle from '../../../../cmi-layout/components/MainWithDynamicStyle'
 import { getDataFromSession } from '@/helpers/functions/getDataFromSession'
 import OldVehicle from './_components/OldVehicle'
 import VehicleType from './_components/VehicleType'
+import MainWithDynamicStyle from '@/cmi-layout/components/MainWithDynamicStyle'
 
 export async function generateMetadata(): Promise<Metadata> {
   return {

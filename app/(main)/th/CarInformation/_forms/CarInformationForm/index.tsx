@@ -19,15 +19,61 @@ import useLoading from '@/helpers/hooks/useLoading'
 import 'dayjs/locale/th'
 dayjs.locale('th')
 
+interface PrefillData {
+  productCmiDetail: {
+    carBrandId: string | null
+    carBrandName: string | null
+    carModelName: string | null
+    carColorId: string | null
+    carColorName: string | null
+    chassisNumber: string | null
+    isRedLicense: boolean
+    licensePrefix: string | null
+    licenseNo: string | null
+    yearCoverage: string | null
+    monthCoverage: string | null
+    dayCoverage: string | null
+    registrationYear: string | null
+    registrationProvinceId: string | null
+    registrationProvinceName: string | null
+    carTypeKey: string
+    isEvType: boolean
+  }
+  customer: {
+    coverageStartDate: string | null
+    coverageEndDate: string | null
+  }
+}
+
+interface RootState {
+  prefillData: PrefillData
+}
+
+interface CarColor {
+  carColorId: string
+  carColorNameTh: string
+}
+
+interface CarBrand {
+  carBrandId: string
+  carBrandName: string
+  carBrandImage: string
+  carBrandRanking: number
+}
+
+interface CarModel {
+  carModelName: string
+}
+
 const CarInformationForm = () => {
   const { openLoading, closeLoading } = useLoading()
   const route = useRouter()
-  const prefillData = useSelector((state: any) => state.prefillData)
+  const prefillData = useSelector((state: RootState) => state.prefillData)
   const dispatch = useDispatch()
   const [open, setOpen] = useState<boolean>(false)
-  const [carColorList, setCarColorList] = useState<any[]>([])
-  const [carBrandList, setCarBrandList] = useState<any[]>([])
-  const [carModelList, setCarModelList] = useState<any[]>([])
+  const [carColorList, setCarColorList] = useState<CarColor[]>([])
+  const [carBrandList, setCarBrandList] = useState<CarBrand[]>([])
+  const [carModelList, setCarModelList] = useState<CarModel[]>([])
   const [carProvinceList, setCarProvinceList] = useState<any[]>([])
   const [dayList, setDayList] = useState<any[]>([])
   const [coverageEndDateDisplay, setCoverageEndDateDisplay] = useState<string>('')

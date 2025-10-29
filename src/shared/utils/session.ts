@@ -1,5 +1,6 @@
 //* src/shared/utils/session.ts
 import { SessionOptions } from 'iron-session'
+import type { UserSessionData, Insurer } from '@/types/session'
 
 export const sessionOptions: SessionOptions = {
   password: process.env.PORTAL_API_KEY ?? 'complex_password_at_least_32_characters_long',
@@ -14,11 +15,13 @@ export const sessionOptions: SessionOptions = {
 
 declare module 'iron-session' {
   interface IronSessionData {
-    usrData?: any
-    vehicleCategory?: any
-    vehicleRates?: any
-    carInfo?: any
-    customerInfo?: any
-    insurers?: any
+    usrData?: {
+      data: UserSessionData
+    }
+    vehicleCategory?: string
+    vehicleRates?: Record<string, any> // TODO: Define rate structure
+    carInfo?: Record<string, any> // TODO: Define car info structure
+    customerInfo?: Record<string, any> // TODO: Define customer info structure
+    insurers?: Insurer[]
   }
 }
