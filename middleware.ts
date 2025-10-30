@@ -80,7 +80,7 @@ export default async function middleware(req: NextRequest) {
   const resNext = NextResponse.next()
   const path = req.nextUrl.pathname
 
-  if (path === '/th/PaymentCredit' || path === '/waiting') {
+  if (path === '/th/PaymentCC') {
     return resNext
   }
 

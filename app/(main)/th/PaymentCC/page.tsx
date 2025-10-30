@@ -134,7 +134,7 @@ const Page = () => {
             </div>
           </div>
         )}
-        {data.paymentStatus === 'error' && (
+        {data.paymentStatus === 'failed' && (
           <div>
             <div className="content-section fullPage-92 pt-48">
               <div className="container text-center my-4">
@@ -173,7 +173,10 @@ const Page = () => {
                   type="button"
                   className="btn btn-primary fs-6 w-100 d-flex text-center align-items-center justify-content-center"
                   style={{ padding: '12px' }}
-                  onClick={() => dispatch(paymentSlice.actions.setPayment({ paymentNo: null, paymentStatus: 'idle' }))}
+                  onClick={() => {
+                    dispatch(paymentSlice.actions.setPayment({ paymentNo: null, paymentStatus: 'idle' }))
+                    route.push('/th/PaymentCredit')
+                  }}
                 >
                   ลองอีกครั้ง
                 </Button>

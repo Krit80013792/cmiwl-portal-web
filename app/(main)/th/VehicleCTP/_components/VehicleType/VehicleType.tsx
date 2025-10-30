@@ -32,6 +32,7 @@ const VehicleCategory = ({ channel }: { channel: any }) => {
   }, [channel?.channelCode, openLoading, closeLoading])
 
   useEffect(() => {
+    dispatch(prefillDataSlice.actions.clearPrefillData())
     fetchData()
   }, [fetchData])
 
