@@ -4,27 +4,29 @@ import useLoading from '@/helpers/hooks/useLoading'
 import Image from 'next/image'
 import { Button } from 'primereact/button'
 import { useCallback, useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { getPaymentQrCode, getPaymentQrStatus } from '../_actions'
 import dayjs from 'dayjs'
 import 'dayjs/locale/th'
 import Modal from '@/cmi-layout/components/Modal'
 import { useModal } from '@/helpers/hooks/useModal'
 import { useRouter } from 'next/navigation'
+import { paymentSlice } from '@/stores/redux/slices/paymentSlice'
 dayjs.locale('th')
 
 const PaymentQRComponents = () => {
+  const dispatch = useDispatch()
   const route = useRouter()
   const { modal, closeModal, openModal } = useModal()
   const { openLoading, closeLoading } = useLoading()
   const prefillData = useSelector((state: any) => state.prefillData)
+  const paymentData = useSelector((state: any) => state.payment)
   const [data, setData] = useState<any>({})
   const [qrData, setQrData] = useState<any>({})
-  const [paymentStatus, setPaymentStatus] = useState<string>('idle')
 
   useEffect(() => {
-    setData(prefillData)
-  }, [prefillData])
+    setData({ ...prefillData, ...paymentData })
+  }, [prefillData, paymentData])
 
   const fetchPayment = useCallback(async () => {
     try {
@@ -37,6 +39,12 @@ const PaymentQRComponents = () => {
         .subtract(7, 'hour')
         .format('DD MMM YYYY - HH:mm น.')
       if (res?.data) {
+        dispatch(
+          paymentSlice.actions.setPayment({
+            paymentNo: qrData?.paymentNo,
+            paymentStatus: 'idle',
+          }),
+        )
         setQrData({ ...qrData, qrExpiryDate })
       } else {
         openModal({
@@ -85,16 +93,24 @@ const PaymentQRComponents = () => {
     try {
       const res = await getPaymentQrStatus({ paymentNo: qrData?.paymentNo })
       const data = res?.data?.data
+      dispatch(
+        paymentSlice.actions.setPayment({
+          paymentNo: qrData?.paymentNo,
+          paymentStatus: data?.isPaymentSuccess ? 'success' : 'idle',
+        }),
+      )
       if (data?.isPaymentSuccess) {
-        setPaymentStatus('success')
+        dispatch(paymentSlice.actions.setPayment({ paymentNo: qrData?.paymentNo, paymentStatus: 'success' }))
+      } else {
+        dispatch(paymentSlice.actions.setPayment({ paymentNo: qrData?.paymentNo, paymentStatus: 'idle' }))
       }
     } catch (error) {
       console.error('Error checking payment status:', error)
     }
-  }, [qrData?.paymentNo])
+  }, [qrData?.paymentNo, dispatch])
 
   useEffect(() => {
-    if (paymentStatus === 'idle' && qrData?.paymentNo) {
+    if (data.paymentStatus === 'idle' && qrData?.paymentNo) {
       const interval = setInterval(() => {
         handleCheckPaymentStatus()
       }, 10000)
@@ -111,9 +127,9 @@ const PaymentQRComponents = () => {
         clearTimeout(timeout)
       }
     }
-  }, [paymentStatus, handleCheckPaymentStatus])
+  }, [data.paymentStatus, handleCheckPaymentStatus, qrData?.paymentNo])
 
-  return paymentStatus === 'success' ? (
+  return data.paymentStatus === 'success' ? (
     <div>
       <div className="content-section fullPage-92 pt-48">
         <div className="container text-center my-4">
@@ -177,7 +193,7 @@ const PaymentQRComponents = () => {
         </div>
       </div>
     </div>
-  ) : paymentStatus === 'idle' ? (
+  ) : data.paymentStatus === 'idle' ? (
     <div>
       <Modal {...modal} onClose={closeModal} />
       <div className="content-section fullPage-92 pt-48">
@@ -233,15 +249,7 @@ const PaymentQRComponents = () => {
         </Button>
       </div>
     </div>
-  ) : (
-    <div className="content-section fullPage-116 pt-48">
-      <div className="container text-center py-48">
-        <div>
-          <Image alt="Pending" width="80" height="80" src="/assets/icon/icon-pending.png" className="mb-3" />
-        </div>
-      </div>
-    </div>
-  )
+  ) : null
 }
 
 export default PaymentQRComponents

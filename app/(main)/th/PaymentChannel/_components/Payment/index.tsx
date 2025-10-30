@@ -3,11 +3,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getPaymentType } from '../../_actions'
 import useLoading from '@/helpers/hooks/useLoading'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import { paymentSlice } from '@/stores/redux/slices/paymentSlice'
 
 const Payment = () => {
+  const dispatch = useDispatch()
   const route = useRouter()
   const { openLoading, closeLoading } = useLoading()
   const prefillData = useSelector((state: any) => state.prefillData)
@@ -29,6 +31,7 @@ const Payment = () => {
   }, [openLoading, closeLoading])
 
   useEffect(() => {
+    dispatch(paymentSlice.actions.clearPayment())
     setData(prefillData)
     fetchData()
   }, [fetchData, prefillData])

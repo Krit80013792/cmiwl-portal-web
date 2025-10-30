@@ -3,7 +3,7 @@
 import { useForm } from '@/helpers/hooks/useForm'
 import Image from 'next/image'
 import { useCallback, useEffect, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import creditCardSchema from '../_schemas'
 import { Input } from '@/cmi-layout/components/Input'
 import { convertStrToFormat, getCreditCardType } from '@/helpers/functions/utils'
@@ -13,15 +13,17 @@ import useLoading from '@/helpers/hooks/useLoading'
 import { Button } from 'primereact/button'
 import { useRouter } from 'next/navigation'
 import { getPaymentCreditCard, getPaymentStatus } from '../_actions'
+import { paymentSlice } from '@/stores/redux/slices/paymentSlice'
 
 const PaymentCreditForm = () => {
   const route = useRouter()
+  const dispatch = useDispatch()
   const { openLoading, closeLoading } = useLoading()
   const { modal, openModal, closeModal } = useModal()
   const prefillData = useSelector((state: any) => state.prefillData)
+  const paymentData = useSelector((state: any) => state.payment)
   const [data, setData] = useState<any>({})
   const [cardType, setCardType] = useState<string>('unknown')
-  const [paymentStatus, setPaymentStatus] = useState<string>('idle')
   const [paymentNo, setPaymentNo] = useState<string>('')
   const { handleChange, values, errors, handleSubmit } = useForm(
     {
@@ -34,8 +36,8 @@ const PaymentCreditForm = () => {
   )
 
   useEffect(() => {
-    setData(prefillData)
-  }, [prefillData])
+    setData({ ...prefillData, ...paymentData })
+  }, [prefillData, paymentData])
 
   const handlePayment = useCallback(async () => {
     try {
@@ -49,9 +51,14 @@ const PaymentCreditForm = () => {
       })
       const payment = res.data.data
       if (!payment.error) {
+        dispatch(
+          paymentSlice.actions.setPayment({
+            paymentNo: payment.paymentNo,
+            paymentStatus: 'processing',
+          }),
+        )
         setPaymentNo(payment.paymentNo)
         route.push(payment.authorizeUri)
-        setPaymentStatus('processing')
       } else {
         openModal({
           title: 'ชำระเงินไม่สำเร็จ',
@@ -86,24 +93,34 @@ const PaymentCreditForm = () => {
     } finally {
       closeLoading()
     }
-  }, [openLoading, closeLoading, data, values, prefillData])
+  }, [openLoading, closeLoading, data, values, prefillData, dispatch, openModal, route])
 
   const handleCheckPaymentStatus = useCallback(async () => {
     try {
-      const res = await getPaymentStatus({ paymentNo })
-      const data = res?.data?.data
-      if (data?.isPaymentSuccess) {
-        setPaymentStatus('success')
-      } else {
-        setPaymentStatus('error')
+      const res = await getPaymentStatus({ paymentNo: data.paymentNo })
+      const paymentData = res?.data?.data
+      if (paymentData?.paymentMessage === 'Paid') {
+        dispatch(
+          paymentSlice.actions.setPayment({
+            paymentNo: data.paymentNo,
+            paymentStatus: 'success',
+          }),
+        )
+      } else if (paymentData?.paymentMessage === 'Failed') {
+        dispatch(
+          paymentSlice.actions.setPayment({
+            paymentNo: data.paymentNo,
+            paymentStatus: 'failed',
+          }),
+        )
       }
     } catch (error) {
       console.error('Error checking payment status:', error)
     }
-  }, [paymentNo])
+  }, [paymentNo, data.paymentNo, dispatch])
 
   useEffect(() => {
-    if (paymentStatus === 'processing') {
+    if (data.paymentStatus === 'processing') {
       const interval = setInterval(() => {
         handleCheckPaymentStatus()
       }, 10000)
@@ -120,9 +137,9 @@ const PaymentCreditForm = () => {
         clearTimeout(timeout)
       }
     }
-  }, [paymentStatus, handleCheckPaymentStatus])
+  }, [data.paymentStatus, handleCheckPaymentStatus])
 
-  return paymentStatus === 'idle' ? (
+  return data.paymentStatus === 'idle' ? (
     <div>
       <div className="content-section fullPage-116 pt-48">
         <form className="container">
@@ -252,7 +269,7 @@ const PaymentCreditForm = () => {
   ) : (
     <div className="content-section fullPage-116 pt-48">
       <div className="container text-center py-48">
-        {paymentStatus === 'success' && (
+        {data.paymentStatus === 'success' && (
           <div>
             <div className="content-section fullPage-92 pt-48">
               <div className="container text-center my-4">
@@ -320,7 +337,7 @@ const PaymentCreditForm = () => {
             </div>
           </div>
         )}
-        {paymentStatus === 'error' && (
+        {data.paymentStatus === 'error' && (
           <div>
             <div className="content-section fullPage-92 pt-48">
               <div className="container text-center my-4">
@@ -359,7 +376,7 @@ const PaymentCreditForm = () => {
                   type="button"
                   className="btn btn-primary fs-6 w-100 d-flex text-center align-items-center justify-content-center"
                   style={{ padding: '12px' }}
-                  onClick={() => setPaymentStatus('idle')}
+                  onClick={() => dispatch(paymentSlice.actions.setPayment({ paymentNo: null, paymentStatus: 'idle' }))}
                 >
                   ลองอีกครั้ง
                 </Button>
@@ -367,7 +384,7 @@ const PaymentCreditForm = () => {
             </div>
           </div>
         )}
-        {paymentStatus === 'processing' && (
+        {data.paymentStatus === 'processing' && (
           <div>
             <div className="content-section fullPage-92 pt-48">
               <div className="container text-center my-4">
