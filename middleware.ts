@@ -80,6 +80,10 @@ export default async function middleware(req: NextRequest) {
   const resNext = NextResponse.next()
   const path = req.nextUrl.pathname
 
+  if (path === '/th/waiting') {
+    return resNext
+  }
+
   const isProtectedRoute = protectedRoutes.includes(path)
   const session = await getSessionFromCookie(resNext)
   const usrAgent = req.headers.get('user-agent')
@@ -119,5 +123,8 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|_next/data|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)'],
+  matcher: [
+    '/((?!api|_next/static|_next/image|_next/data|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)',
+    '/th/wainting',
+  ],
 }
