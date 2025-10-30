@@ -18,7 +18,7 @@ const validateLicenseNo = (value: string | undefined | null): boolean => {
   if (/^[ก-ฮ]+\d+$/.test(cleanValue)) {
     const letters = cleanValue.match(/^[ก-ฮ]+/)?.[0] || ''
     const numbers = cleanValue.match(/\d+$/)?.[0] || ''
-    return letters.length >= 2 && letters.length <= 3 && numbers.length >= 1 && numbers.length <= 4
+    return letters.length >= 1 && letters.length <= 3 && numbers.length >= 1 && numbers.length <= 4
   }
 
   if (/^\d+[ก-ฮ]+\d+$/.test(cleanValue)) {

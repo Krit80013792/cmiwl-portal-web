@@ -85,7 +85,7 @@ export class CMIApiLogsService {
         psOrderStatus,
       })
 
-      const plainCMILogs = oCMILogs.map((doc) => (doc.toObject ? doc.toObject() : doc))
+      const plainCMILogs: ICMIApiLogs[] = oCMILogs.map((doc) => (doc.toObject ? doc.toObject() : doc))
       return {
         statusCode: plainCMILogs ? 200 : 404,
         message: plainCMILogs ? 'CMILogs found' : 'CMILogs not found',
