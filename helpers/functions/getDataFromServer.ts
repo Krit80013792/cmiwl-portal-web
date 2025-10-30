@@ -38,9 +38,8 @@ export const getDataFromServer = async <T = any>(url: string, options: Options):
     if (method !== 'GET' && body !== undefined) {
       fetchOptions.body = JSON.stringify(body)
     }
-    const apiURI = process.env.APP_ENV === 'local' ? `${process.env.TIDLOR_TECH_URI}` : ''
 
-    const res = await fetch(`${apiURI}${url}`, fetchOptions)
+    const res = await fetch(`${process.env.TIDLOR_TECH_URI}${url}`, fetchOptions)
     if (!res.ok) {
       return {
         message: 'Failed to fetch data',

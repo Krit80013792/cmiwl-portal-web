@@ -5,12 +5,14 @@ import { getPaymentType } from '../../_actions'
 import useLoading from '@/helpers/hooks/useLoading'
 import { useSelector } from 'react-redux'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 const Payment = () => {
+  const route = useRouter()
   const { openLoading, closeLoading } = useLoading()
   const prefillData = useSelector((state: any) => state.prefillData)
   const [paymentMethodList, setPaymentMethodList] = useState<any[]>([])
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null)
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<number | null>(null)
   const [data, setData] = useState<any>({})
 
   const fetchData = useCallback(async () => {
@@ -24,12 +26,12 @@ const Payment = () => {
     } finally {
       closeLoading()
     }
-  }, [])
+  }, [openLoading, closeLoading])
 
   useEffect(() => {
     setData(prefillData)
     fetchData()
-  }, [fetchData])
+  }, [fetchData, prefillData])
 
   return (
     <>
@@ -52,6 +54,7 @@ const Payment = () => {
                     type="button"
                     onClick={() => setSelectedPaymentMethod(e.paymentMethodId)}
                     className={`w-100 p-3 border-grey d-flex justify-content-between align-items-center rounded-4 mb-3 ${isActive}`}
+                    style={{ border: `2px solid ${isActive ? '#045ffc' : '#c9c9c9'}` }}
                   >
                     <span className="f-bd">{e.paymentMethodTh}</span>
                     {e.payTypeCode === 'QRCS' ? (
@@ -86,6 +89,13 @@ const Payment = () => {
           type="button"
           className={`btn btn-primary fs-6 mx-auto d-flex text-center align-items-center justify-content-center ${!selectedPaymentMethod ? 'disabled' : ''}`}
           disabled={!selectedPaymentMethod}
+          onClick={() => {
+            if (selectedPaymentMethod === 1) {
+              route.push('/th/PaymentCredit')
+            } else if (selectedPaymentMethod === 2) {
+              route.push('/th/PaymentQR')
+            }
+          }}
         >
           ดำเนินการชำระเงิน
         </button>

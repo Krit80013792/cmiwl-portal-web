@@ -4,8 +4,8 @@ import { validateApiKey } from '@/src/shared/middleware/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { serializeRequest } from '@/src/shared/utils/serializeRequest'
 import { SafeUserDTO } from '@/src/application/dtos/UserDTO'
-import { UserService } from '../../../../../src/application/services/UserService'
-import { UserRepository } from '../../../../../src/infrastructure/database/mongodb/repositories/UserRepository'
+import { UserService } from '@/src/application/services/UserService'
+import { UserRepository } from '@/src/infrastructure/database/mongodb/repositories/UserRepository'
 import { UserRoleService } from '@/src/application/services/UserRoleService'
 import { UserRoleRepository } from '@/src/infrastructure/database/mongodb/repositories/UserRoleRepository'
 import { UserGroupRepository } from '@/src/infrastructure/database/mongodb/repositories/UserGroupRepository'
@@ -100,7 +100,8 @@ export async function POST(oReq: NextRequest) {
       userGroupName: user?.data?.userGroupName,
       perms: userRole?.data?.userRolePermissions,
     }
-    const base64PublicUserData = Buffer.from(JSON.stringify(publicUserData), 'binary').toString('base64')
+    const encryptedPublicData = await encrypt(JSON.stringify(publicUserData), process.env.PORTAL_API_KEY ?? '')
+    const base64PublicUserData = Buffer.from(encryptedPublicData, 'binary').toString('base64')
 
     const privateUserData = {
       token: '',

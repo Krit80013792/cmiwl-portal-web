@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { getIronSession } from 'iron-session'
+import { getIronSession, IronSession, IronSessionData } from 'iron-session'
 import { sessionOptions } from '@/src/shared/utils/session'
 import { decrypt } from './src/shared/utils/auth.crypto'
+import type { CmsSessionCookie, Insurer } from '@/types/session'
 
 const protectedRoutes = [
   '/cms/main',
@@ -23,8 +24,8 @@ function isClientRoute(path: string): boolean {
 }
 
 async function handleClientRoute(req: NextRequest) {
-  const session = await getIronSession(await cookies(), sessionOptions)
-  const sessionData = (session as any)?.usrData?.data
+  const session: IronSession<IronSessionData> = await getIronSession(await cookies(), sessionOptions)
+  const sessionData = session?.usrData?.data
   const token = sessionData?.jwt
   if (!token) {
     return NextResponse.redirect(new URL('https://app.tidlor.com/main', req.url))
@@ -32,10 +33,10 @@ async function handleClientRoute(req: NextRequest) {
   return null
 }
 
-async function getSessionFromCookie(resNext: NextResponse) {
+async function getSessionFromCookie(resNext: NextResponse): Promise<CmsSessionCookie> {
   const CMIWL_CMS_COOKIE_NAME = `${process.env.APP_ENV}_cmiwl_cms_token`
   const CMIWL_CMS_COOKIE = (await cookies()).get(CMIWL_CMS_COOKIE_NAME)
-  let session: any = {}
+  let session: CmsSessionCookie = {}
   try {
     if (CMIWL_CMS_COOKIE) {
       session = JSON.parse((await decrypt(CMIWL_CMS_COOKIE.value, process.env.PORTAL_API_KEY ?? '')) ?? '{}')
@@ -54,7 +55,7 @@ async function getSessionFromCookie(resNext: NextResponse) {
   return session
 }
 
-function handleRouteAuthorization(path: string, session: any, req: NextRequest) {
+function handleRouteAuthorization(path: string, session: CmsSessionCookie, req: NextRequest) {
   const allowedPaths = session?.routes || []
   if (allowedPaths.length > 0) {
     const isAuthorized = allowedPaths.some((route: string) => path.endsWith(route))
@@ -68,10 +69,10 @@ function handleRouteAuthorization(path: string, session: any, req: NextRequest) 
   return null
 }
 
-async function checkInsurer() {
-  const session = await getIronSession(await cookies(), sessionOptions)
-  const insurers = (session as any)?.insurers || []
-  const checkInsurer = insurers.every((insurer: any) => !insurer.active)
+async function checkInsurer(): Promise<boolean> {
+  const session: IronSession<IronSessionData> = await getIronSession(await cookies(), sessionOptions)
+  const insurers: Insurer[] = session?.insurers || []
+  const checkInsurer = insurers.every((insurer: Insurer) => !insurer.active)
   return checkInsurer
 }
 

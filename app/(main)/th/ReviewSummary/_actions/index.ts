@@ -5,7 +5,7 @@ import { getDataFromSession } from '@/helpers/functions/getDataFromSession'
 export const saveCustomerInformation = async ({ body }: { body: any }) => {
   try {
     const { token } = await getDataFromSession()
-    const res = await fetch(`/api/selling/v1/save`, {
+    const res = await fetch(`${process.env.TIDLOR_TECH_URI}/api/selling/v1/save`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,

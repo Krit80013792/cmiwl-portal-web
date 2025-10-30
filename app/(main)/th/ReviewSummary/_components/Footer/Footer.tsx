@@ -69,6 +69,12 @@ const Footer = () => {
             districtId: prefill?.customerAddress?.districtId,
             subDistrictId: prefill?.customerAddress?.subDistrictId,
           },
+          deliveryType: {
+            isEmail: prefill?.deliveryType?.isEmail,
+            isSms: prefill?.deliveryType?.isSms,
+            policyEmail: prefill?.deliveryType?.policyEmail,
+            policySms: prefill?.deliveryType?.policySms,
+          },
         },
       }
       const res = await saveCustomerInformation({ body: params })
