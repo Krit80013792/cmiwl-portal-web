@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import Image from 'next/image'
 import { Skeleton } from 'primereact/skeleton'
 import { getCompulsoryTypes, getPrefillData } from '../../_actions'
@@ -32,7 +32,6 @@ const VehicleCategory = ({ channel }: { channel: any }) => {
   }, [channel?.channelCode, openLoading, closeLoading])
 
   useEffect(() => {
-    dispatch(prefillDataSlice.actions.clearPrefillData())
     fetchData()
   }, [fetchData])
 
@@ -47,6 +46,7 @@ const VehicleCategory = ({ channel }: { channel: any }) => {
         carTypeKey: type.carTypeKey,
         isEvType: type.isEvType,
       }
+      dispatch(prefillDataSlice.actions.clearPrefillData())
       dispatch(
         prefillDataSlice.actions.setPrefillData({
           channel,
