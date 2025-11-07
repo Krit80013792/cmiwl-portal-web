@@ -96,7 +96,7 @@ const VehicleCategoryComponent = () => {
                 <div className={`px-12 py-2 rounded-4 choice-card h-100${isActive ? ' active' : ''}`}>
                   <p className="mb-0 text-grey">{e.rate.compulsoryText}</p>
                   <p className="mb-0 text-grey">
-                    <strong className="f-bd">{e.rate.total} บาท/ปี</strong>
+                    <strong className="f-bd">{e.rate.total.toLocaleString()} บาท/ปี</strong>
                   </p>
                 </div>
               </button>
