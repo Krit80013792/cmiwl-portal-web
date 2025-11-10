@@ -3,7 +3,7 @@
 import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { Skeleton } from 'primereact/skeleton'
 import { getPrefillData } from '../../_actions'
 import useLoading from '@/helpers/hooks/useLoading'
@@ -33,7 +33,6 @@ const OldVehicle = ({ channel }: { channel: any }) => {
   }, [openLoading, closeLoading])
 
   useEffect(() => {
-    dispatch(prefillDataSlice.actions.clearPrefillData())
     fetchData()
   }, [fetchData, dispatch])
 

@@ -112,22 +112,35 @@ const CarInformationForm = () => {
   useEffect(() => {
     const days = () => {
       const selectedMonth = values?.monthCoverage
-        ? dayjs(values?.yearCoverage).month(values?.monthCoverage - 1)
+        ? dayjs()
+            .year(values?.yearCoverage)
+            .month(values?.monthCoverage - 1)
         : dayjs()
       const daysInMonth = selectedMonth.daysInMonth()
+      const today = dayjs().startOf('day')
+      const maxDate = today.add(90, 'day')
+
       return Array.from({ length: daysInMonth }, (_, i) => {
         const day = i + 1
-        return {
-          value: day.toString(),
-          label: day.toString(),
+        const currentDate = selectedMonth.date(day).startOf('day')
+
+        // Only include days that are within 90 days from today
+        if (
+          (currentDate.isAfter(today) || currentDate.isSame(today)) &&
+          (currentDate.isBefore(maxDate) || currentDate.isSame(maxDate))
+        ) {
+          return {
+            value: day.toString(),
+            label: day.toString(),
+          }
         }
-      })
+        return null
+      }).filter(Boolean) as { value: string; label: string }[]
     }
     setDayList(days())
     setCoverageEndDateDisplay(
       dayjs(`${values?.yearCoverage}-${values?.monthCoverage}-${values?.dayCoverage}`)
         .add(1, 'year')
-        .subtract(1, 'day')
         .format('D MMMM YYYY')
         .replace(/\d{4}/, (year) => (parseInt(year) + 543).toString()),
     )
@@ -446,10 +459,21 @@ const CarInformationForm = () => {
                   onChange={(value) => handleChange({ name: 'yearCoverage', value: Number(value) })}
                   options={
                     mounted
-                      ? [dayjs().year()].map((year) => ({
-                          label: (year + 543).toString(),
-                          value: year.toString(),
-                        }))
+                      ? (() => {
+                          const years = []
+                          const currentYear = dayjs().year()
+                          const maxDate = dayjs().add(90, 'day')
+                          const maxYear = maxDate.year()
+
+                          // Add current year and next year if 90 days spans into it
+                          for (let year = currentYear; year <= maxYear; year++) {
+                            years.push({
+                              label: (year + 543).toString(),
+                              value: year.toString(),
+                            })
+                          }
+                          return years
+                        })()
                       : []
                   }
                   feedback={errors?.yearCoverage}
@@ -460,14 +484,39 @@ const CarInformationForm = () => {
                   label="เดือน"
                   name="monthCoverage"
                   value={values?.monthCoverage?.toString() || ''}
-                  onChange={(value) => handleChange({ name: 'monthCoverage', value: Number(value) })}
-                  options={Array.from({ length: 3 }, (_, i) => {
-                    const month = dayjs().add(i, 'month')
-                    return {
-                      label: month.format('MMMM'),
-                      value: (month.month() + 1).toString(),
+                  onChange={(value) => {
+                    handleChange({ name: 'monthCoverage', value: Number(value) })
+
+                    // Auto-update year if selected month is in next year
+                    const today = dayjs()
+                    const currentMonth = today.month() + 1
+                    const selectedMonthNum = Number(value)
+
+                    // If selected month is less than current month, it must be next year
+                    if (selectedMonthNum < currentMonth) {
+                      handleChange({ name: 'yearCoverage', value: today.year() + 1 })
+                    } else {
+                      handleChange({ name: 'yearCoverage', value: today.year() })
                     }
-                  })}
+                  }}
+                  options={
+                    mounted
+                      ? (() => {
+                          const months = []
+                          const maxDate = dayjs().add(90, 'day')
+                          for (let i = 0; i < 4; i++) {
+                            const month = dayjs().add(i, 'month')
+                            if (month.isBefore(maxDate) || month.isSame(maxDate, 'month')) {
+                              months.push({
+                                label: month.format('MMMM'),
+                                value: (month.month() + 1).toString(),
+                              })
+                            }
+                          }
+                          return months
+                        })()
+                      : []
+                  }
                   feedback={errors?.monthCoverage}
                 />
               </div>
@@ -476,7 +525,21 @@ const CarInformationForm = () => {
                   label="วัน"
                   name="dayCoverage"
                   value={values?.dayCoverage?.toString() || ''}
-                  onChange={(value) => handleChange({ name: 'dayCoverage', value: Number(value) })}
+                  onChange={(value) => {
+                    handleChange({ name: 'dayCoverage', value: Number(value) })
+
+                    // Auto-update year if selected date is in next year
+                    const today = dayjs()
+                    const currentMonth = today.month() + 1
+                    const selectedMonthNum = values?.monthCoverage || currentMonth
+
+                    // If selected month is less than current month, it must be next year
+                    if (selectedMonthNum < currentMonth) {
+                      handleChange({ name: 'yearCoverage', value: today.year() + 1 })
+                    } else {
+                      handleChange({ name: 'yearCoverage', value: today.year() })
+                    }
+                  }}
                   options={dayList}
                   feedback={errors?.dayCoverage}
                 />

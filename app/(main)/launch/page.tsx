@@ -33,6 +33,7 @@ const LaunchPage = () => {
         })
         if (res?.ok) {
           const data = await res.json()
+          dispatch(prefillDataSlice.actions.clearPrefillData())
           dispatch(prefillDataSlice.actions.setPrefillData(data?.data?.prefill))
           router.replace('/th/VehicleCTP')
         } else {

@@ -176,11 +176,10 @@ const OrderReportAdminPage = () => {
               <Section title="Business Validation" accent="#ef4444">
                 <div>
                   <InfoRow label="วันที่ทำรายการ:" value={datetimeFmt(item?.requestDate)} />
-                  <InfoRow label="Status:" value={fmt(item?.orderStatus)} valueColor={statusColor(item?.orderStatus)} />
+                  <InfoRow label="Response:" value={fmt(item?.response)} />
                 </div>
                 <div>
                   <InfoRow label="Message:" value={fmt(item?.message)} />
-                  <InfoRow label="Tech Message:" value={fmt(item?.detail?.techMessage)} />
                 </div>
               </Section>
 
