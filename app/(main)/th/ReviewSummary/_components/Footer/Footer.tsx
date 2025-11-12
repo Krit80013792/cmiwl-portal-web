@@ -69,6 +69,12 @@ const Footer = () => {
             districtId: prefill?.customerAddress?.districtId,
             subDistrictId: prefill?.customerAddress?.subDistrictId,
           },
+          deliveryType: {
+            isEmail: prefill?.deliveryType?.isEmail,
+            isSms: prefill?.deliveryType?.isSms,
+            policyEmail: prefill?.deliveryType?.policyEmail,
+            policySms: prefill?.deliveryType?.policySms,
+          },
         },
       }
       const res = await saveCustomerInformation({ body: params })
@@ -95,7 +101,9 @@ const Footer = () => {
         <div className="container d-flex justify-content-between">
           <div className="total-price text-grey">
             <p className="mb-0 text-start f-md">ยอดชำระ</p>
-            <span className="mb-0 text-start f-bd fs-26">{prefill?.productCmiDetail?.cmiCoverage?.total}</span>
+            <span className="mb-0 text-start f-bd fs-26">
+              {prefill?.productCmiDetail?.cmiCoverage?.total?.toLocaleString()}
+            </span>
             <span className="fs-6 f-bd"> บาท</span>
           </div>
           <button

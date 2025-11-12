@@ -1321,7 +1321,7 @@ input[type="radio"] {
 }
 
 .payment-options div {
-    cursor: pointer
+    cursor: pointer;
 }
 
 .hint-img-wrapper {

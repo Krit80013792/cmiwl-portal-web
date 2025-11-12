@@ -10,6 +10,8 @@ export interface InputProps {
   label: string
   feedback?: string
   suffix?: React.ReactNode
+  style?: React.CSSProperties
+  disabled?: boolean
 }
 
 const StyledInput = styled.input.withConfig({
@@ -33,21 +35,36 @@ const Feedback = styled.span`
   position: inherit;
 `
 
-export const Input = ({ name, type, maxLength, placeholder, onChange, value, label, feedback, suffix }: InputProps) => {
+export const Input = ({
+  name,
+  type,
+  maxLength,
+  placeholder,
+  onChange,
+  value,
+  label,
+  feedback,
+  suffix,
+  style,
+  disabled,
+}: InputProps) => {
   return (
-    <div>
-      <StyledInput
-        name={name}
-        type={type}
-        maxLength={maxLength}
-        className={`form-control`}
-        placeholder={placeholder}
-        onChange={onChange}
-        value={value}
-        error={!!feedback}
-      />
-      <label className="form-label">{label}</label>
-      {suffix}
+    <div className="w-100">
+      <div className="position-relative" style={style}>
+        <StyledInput
+          name={name}
+          type={type}
+          maxLength={maxLength}
+          className={`form-control`}
+          placeholder={placeholder}
+          onChange={onChange}
+          value={value}
+          error={!!feedback}
+          disabled={disabled}
+        />
+        {suffix && <div className="position-absolute top-50 end-0 translate-middle-y me-3">{suffix}</div>}
+        <label className="form-label">{label}</label>
+      </div>
       {feedback && <Feedback>{feedback}</Feedback>}
     </div>
   )

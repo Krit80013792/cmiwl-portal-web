@@ -55,14 +55,18 @@ const Review = ({ reviewType }: { reviewType: string }) => {
                 prefill?.productCmiDetail?.licenseNo}
             </span>
           </div>
-          <div className="d-flex justify-content-between mb-12">
-            <span className="f-md text-grey">ปีที่จดทะเบียน</span>
-            <span className="f-bd text-grey">{prefill?.productCmiDetail?.registrationYear}</span>
-          </div>
-          <div className="d-flex justify-content-between mb-0">
-            <span className="f-md text-grey">จังหวัดที่จดทะเบียน</span>
-            <span className="f-bd text-grey">{prefill?.productCmiDetail?.registrationProvinceName}</span>
-          </div>
+          {!prefill?.productCmiDetail?.isRedLicense && (
+            <>
+              <div className="d-flex justify-content-between mb-12">
+                <span className="f-md text-grey">ปีที่จดทะเบียน</span>
+                <span className="f-bd text-grey">{prefill?.productCmiDetail?.registrationYear}</span>
+              </div>
+              <div className="d-flex justify-content-between mb-0">
+                <span className="f-md text-grey">จังหวัดที่จดทะเบียน</span>
+                <span className="f-bd text-grey">{prefill?.productCmiDetail?.registrationProvinceName}</span>
+              </div>
+            </>
+          )}
         </div>
       )
     case 'coverage_date':
@@ -104,7 +108,7 @@ const Review = ({ reviewType }: { reviewType: string }) => {
           <div className="d-flex justify-content-between mb-12">
             <span className="f-md text-grey w-100">ที่อยู่ปัจจุบัน</span>
             <span className="f-bd text-grey text-end">
-              {`${prefill?.customerAddress?.houseNumber} ซ.${prefill?.customerAddress?.alley ? prefill?.customerAddress?.alley : ''} ถ.${prefill?.customerAddress?.street ? prefill?.customerAddress?.street : ''} ${prefill?.customerAddress?.subDistrictName} ${prefill?.customerAddress?.districtName} ${prefill?.customerAddress?.provinceName} ${prefill?.customerAddress?.zipCode}`}
+              {`${prefill?.customerAddress?.houseNumber} หมู่ที่ ${prefill?.customerAddress?.villageNo ? prefill?.customerAddress?.villageNo : '-'} หมู่บ้าน ${prefill?.customerAddress?.buildingVillage ? prefill?.customerAddress?.buildingVillage : '-'} ซ.${prefill?.customerAddress?.alley ? prefill?.customerAddress?.alley : '-'} ถ.${prefill?.customerAddress?.street ? prefill?.customerAddress?.street : '-'} ${prefill?.customerAddress?.subDistrictName} ${prefill?.customerAddress?.districtName} ${prefill?.customerAddress?.provinceName} ${prefill?.customerAddress?.zipCode}`}
             </span>
           </div>
           <div className="d-flex justify-content-between mb-0">

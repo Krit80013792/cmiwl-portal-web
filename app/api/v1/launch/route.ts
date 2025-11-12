@@ -1,4 +1,3 @@
-//* app/api/v1/launch/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { getIronSession } from 'iron-session'
@@ -14,8 +13,8 @@ export async function POST(oReq: NextRequest) {
     if (!ck || !token) {
       return new NextResponse(JSON.stringify({ message: `Unauthorized` }), { status: 401 })
     }
-    const apiURI = process.env.APP_ENV === 'local' ? `${process.env.TIDLOR_TECH_URI}` : ''
-    const res = await fetch(`${apiURI}/api/auth/v1/authorize`, {
+
+    const res = await fetch(`${process.env.TIDLOR_TECH_URI}/api/auth/v1/authorize`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -31,22 +30,56 @@ export async function POST(oReq: NextRequest) {
     }
 
     const data = await res.json()
-
-    const insurersRes = await fetch(`${apiURI}/api/master-data/v1/insurer`, {
+    const insurersRes = await fetch(`${process.env.TIDLOR_TECH_URI}/api/master-data/v1/insurer`, {
       method: 'GET',
       headers: {
         Authorization: `Bearer ${data?.data?.jwt}`,
       },
     })
-
     const insurers = await insurersRes.json()
 
-    session.usrData = data
+    const prefillRes = await fetch(`${process.env.TIDLOR_TECH_URI}/api/prefill/v1/get-data/${data?.data?.orderNo}`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${data?.data?.jwt}`,
+      },
+    })
+    const prefillData = await prefillRes.json()
+    const prefill = prefillData?.data?.prefill
+    const productCmiDetail = {
+      carTypeKey: prefill?.productCmiDetail?.carTypeKey,
+      isEvType: prefill?.productCmiDetail?.carTypeKey,
+      subCarType: prefill?.productCmiDetail?.carTypeKey,
+      cmiCarTypeCode: prefill?.productCmiDetail?.carTypeKey,
+      licensePrefix: prefill?.productCmiDetail?.carTypeKey,
+      licenseNo: prefill?.productCmiDetail?.carTypeKey,
+      carBrand: prefill?.productCmiDetail?.carTypeKey,
+      carModelName: prefill?.productCmiDetail?.carTypeKey,
+      chassisNumber: prefill?.productCmiDetail?.carTypeKey,
+      carColorName: prefill?.productCmiDetail?.carTypeKey,
+      registrationProvince: prefill?.productCmiDetail?.carTypeKey,
+      registrationYear: prefill?.productCmiDetail?.carTypeKey,
+    }
+    session.usrData = {
+      data: {
+        jwt: data?.data?.jwt,
+        prefill: { ...data?.data?.prefill, productCmiDetail },
+        orderNo: data?.data?.orderNo,
+      },
+    }
     session.insurers = insurers?.data
 
     await session.save()
 
-    return new NextResponse(JSON.stringify({ message: `Success`, data: { insurers } }), { status: 200 })
+    return new NextResponse(
+      JSON.stringify({
+        message: `Success`,
+        data: { insurers, prefill: data?.data?.prefill, orderNo: data?.data?.orderNo },
+      }),
+      {
+        status: 200,
+      },
+    )
   } catch (e) {
     console.error('Error in POST /api/v1/launch:', e)
     return new NextResponse(JSON.stringify({ message: `Internal Server Error` }), { status: 500 })

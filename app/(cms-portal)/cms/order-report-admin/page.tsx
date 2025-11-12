@@ -89,7 +89,7 @@ const OrderReportAdminPage = () => {
         .filter((channel: { active: boolean }) => channel.active)
         .map((channel: { displayName: string; keyCode: string }) => ({
           label: channel.displayName,
-          value: channel.displayName.toLocaleUpperCase(),
+          value: channel.keyCode.toLocaleUpperCase(),
         }))
       setChannelOptions(options)
     } catch (error) {
@@ -127,7 +127,9 @@ const OrderReportAdminPage = () => {
   }
 
   const logsData = useMemo(() => {
-    const fmt = (v?: string | number | null) => ((v ?? !v) ? String(v) : '-')
+    const fmt = (v?: string | number | null) => (v ? String(v) : '-')
+    const datetimeFmt = (v?: Date | null) => (v ? dayjs(v).format('DD/MM/YYYY HH:mm:ss') : '-')
+    const dateFmt = (v?: Date | null) => (v ? dayjs(v).format('DD/MM/YYYY') : '-')
     const statusColor = (v?: string) => {
       const s = (v || '').toLowerCase()
       if (['success', 'paid', 'completed', 'ok'].includes(s)) return '#2e7d32'
@@ -165,27 +167,26 @@ const OrderReportAdminPage = () => {
                 <div>
                   <InfoRow label="รุ่นรถ:" value={fmt(item?.detail?.carModelName)} />
                   <InfoRow label="จังหวัดที่จดทะเบียนรถ:" value={fmt(item?.detail?.provinceName)} />
-                  <InfoRow label="วันที่เริ่มคุ้มครอง:" value={fmt(item?.detail?.effectiveDate)} />
-                  <InfoRow label="วันที่สิ้นสุดวันคุ้มครอง:" value={fmt(item?.detail?.expiredDate)} />
+                  <InfoRow label="วันที่เริ่มคุ้มครอง:" value={dateFmt(item?.detail?.effectiveDate)} />
+                  <InfoRow label="วันที่สิ้นสุดวันคุ้มครอง:" value={dateFmt(item?.detail?.expiredDate)} />
                 </div>
               </Section>
 
               {/* Business Validation */}
               <Section title="Business Validation" accent="#ef4444">
                 <div>
-                  <InfoRow label="วันที่ทำรายการ:" value={fmt(item?.requestDate)} />
-                  <InfoRow label="Status:" value={fmt(item?.orderStatus)} valueColor={statusColor(item?.orderStatus)} />
+                  <InfoRow label="วันที่ทำรายการ:" value={datetimeFmt(item?.requestDate)} />
+                  <InfoRow label="Response:" value={fmt(item?.response)} />
                 </div>
                 <div>
                   <InfoRow label="Message:" value={fmt(item?.message)} />
-                  <InfoRow label="Tech Message:" value={fmt(item?.detail?.techMessage)} />
                 </div>
               </Section>
 
               {/* การส่งข้อมูลการชำระเงิน */}
               <Section title="การส่งข้อมูลการชำระเงิน" accent="#f59e0b">
                 <div>
-                  <InfoRow label="วันที่ทำรายการ:" value={fmt(item?.detail?.paymentDate)} />
+                  <InfoRow label="วันที่ทำรายการ:" value={datetimeFmt(item?.detail?.paymentDate)} />
                   <InfoRow label="ช่องทางการชำระเงิน:" value={fmt(item?.detail?.paymentChannel)} />
                   <InfoRow
                     label="Status:"
@@ -201,7 +202,7 @@ const OrderReportAdminPage = () => {
               {/* ผลการชำระเงิน (hook payment) */}
               <Section title="ผลการชำระเงิน (hook payment)" accent="#0baff5ff">
                 <div>
-                  <InfoRow label="วันที่ทำรายการ:" value={fmt(item?.detail?.paymentResultDate)} />
+                  <InfoRow label="วันที่ทำรายการ:" value={datetimeFmt(item?.detail?.paymentResultDate)} />
                   <InfoRow
                     label="สถานะการชำระเงิน:"
                     value={fmt(item?.detail?.paymentResultStatus)}
@@ -217,7 +218,7 @@ const OrderReportAdminPage = () => {
               {/* ผลการออก e-policy */}
               <Section title="ผลการออก e-policy (hook policy)" accent="#a855f7">
                 <div>
-                  <InfoRow label="วันที่ทำรายการ:" value={fmt(item?.detail?.policyResultDate)} />
+                  <InfoRow label="วันที่ทำรายการ:" value={datetimeFmt(item?.detail?.policyResultDate)} />
                   <InfoRow label="Policy No:" value={fmt(item?.detail?.policyNo)} />
                   <InfoRow label="Cover Note:" value={fmt(item?.detail?.covernote)} />
                   <InfoRow label="Partner Code:" value={fmt(item?.detail?.partnerCode)} />
@@ -233,7 +234,7 @@ const OrderReportAdminPage = () => {
               {/* ผลการออกเอกสาร */}
               <Section title="ผลการออกเอกสาร (hook document)" accent="#10b981">
                 <div>
-                  <InfoRow label="วันที่ทำรายการ:" value={fmt(item?.detail?.documentResultDate)} />
+                  <InfoRow label="วันที่ทำรายการ:" value={datetimeFmt(item?.detail?.documentResultDate)} />
                   <InfoRow label="Document No:" value={fmt(item?.detail?.documentNo)} />
                   <InfoRow label="Transaction No:" value={fmt(item?.detail?.transactionNo)} />
                   <InfoRow label="Partner Code:" value={fmt(item?.detail?.partnerCode)} />
@@ -253,7 +254,8 @@ const OrderReportAdminPage = () => {
 
       return {
         ...item,
-        requestDate: item?.requestDate ? dayjs(item?.requestDate).format('YYYY-MM-DD HH:mm:ss') : '-',
+        paymentNo: item?.detail?.paymentNo ? fmt(item?.detail?.paymentNo) : '-',
+        requestDate: datetimeFmt(item?.requestDate),
         tel: item?.tel?.replace('+66', '0') || '-',
         actions: <Button label="View" icon="pi pi-eye" onClick={handleView} className="p-button-text" />,
       }

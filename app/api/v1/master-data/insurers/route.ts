@@ -2,8 +2,8 @@
 import { validateApiKey } from '@/src/shared/middleware/auth'
 import { NextRequest, NextResponse } from 'next/server'
 import { serializeRequest } from '@/src/shared/utils/serializeRequest'
-import { MasterInsurerService } from '../../../../../src/application/services/MasterInsurerService'
-import { MasterInsurerRepository } from '../../../../../src/infrastructure/database/mongodb/repositories/MasterInsurerRepository'
+import { MasterInsurerService } from '@/src/application/services/MasterInsurerService'
+import { MasterInsurerRepository } from '@/src/infrastructure/database/mongodb/repositories/MasterInsurerRepository'
 import { permissionGuard } from '@/src/shared/middleware/permission.guard'
 import { authGuard } from '@/src/shared/middleware/auth.guard'
 import { TxActivityLogger } from '@/src/shared/middleware/logging/TxActivityLogger'
@@ -103,7 +103,6 @@ export async function PATCH(poReq: NextRequest) {
       insurerImgPath: string
       active: boolean
     }
-    console.log(body)
     if (!id) {
       return new NextResponse(JSON.stringify({ message: `Bad Request: Missing id` }), { status: 400 })
     }
