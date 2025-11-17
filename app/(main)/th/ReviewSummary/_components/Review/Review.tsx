@@ -107,7 +107,7 @@ const Review = ({ reviewType }: { reviewType: string }) => {
           </div>
           <div className="d-flex justify-content-between mb-12">
             <span className="f-md text-grey w-100">ที่อยู่ปัจจุบัน</span>
-            <span className="f-bd text-grey text-end">
+            <span className="f-bd text-grey text-end" style={{ wordBreak: 'break-all' }}>
               {`${prefill?.customerAddress?.houseNumber} หมู่ที่ ${prefill?.customerAddress?.villageNo ? prefill?.customerAddress?.villageNo : '-'} หมู่บ้าน ${prefill?.customerAddress?.buildingVillage ? prefill?.customerAddress?.buildingVillage : '-'} ซ.${prefill?.customerAddress?.alley ? prefill?.customerAddress?.alley : '-'} ถ.${prefill?.customerAddress?.street ? prefill?.customerAddress?.street : '-'} ${prefill?.customerAddress?.subDistrictName} ${prefill?.customerAddress?.districtName} ${prefill?.customerAddress?.provinceName} ${prefill?.customerAddress?.zipCode}`}
             </span>
           </div>
