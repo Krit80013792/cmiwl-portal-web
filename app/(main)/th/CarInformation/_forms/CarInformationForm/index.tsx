@@ -245,7 +245,6 @@ const CarInformationForm = () => {
             ),
             coverageEndDate: dayjs(`${values?.yearCoverage}-${values?.monthCoverage}-${values?.dayCoverage}`)
               .add(1, 'year')
-              .subtract(1, 'day')
               .format('YYYY-MM-DD'),
           },
         }),
