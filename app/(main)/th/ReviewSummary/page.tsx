@@ -27,12 +27,7 @@ export default async function ReviewSummary() {
           <a href="/th/CustomerInformation" className="back-btn">
             <img alt="กลับ" width="36" height="36" src="/assets/icon/back.png" />
           </a>
-          <p
-            id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_CustomerInformation_lbHeaderBar"
-            className="text-center mb-0 w-100 fs-18 f-bd"
-          >
-            พ.ร.บ.
-          </p>
+          <p className="text-center mb-0 w-100 fs-18 f-bd">พ.ร.บ.</p>
         </div>
       </div>
 

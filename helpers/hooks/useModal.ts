@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 
-export type ModalType = 'error' | 'success' | 'warning' | 'confirm'
+export type ModalType = 'error' | 'success' | 'warning' | 'confirm' | 'info'
 
 export interface ConfirmModalOptions {
   confirmText?: string
@@ -13,9 +13,11 @@ export interface ModalOptions {
   isOpen: boolean
   title?: string
   message?: string
+  content?: React.ReactNode
   type?: ModalType
   confirmOptions?: ConfirmModalOptions
   hasImg?: boolean
+  renderActions?: () => React.ReactNode
 }
 
 export function useModal(initial?: Omit<ModalOptions, 'isOpen'>) {
@@ -58,6 +60,7 @@ export function useModal(initial?: Omit<ModalOptions, 'isOpen'>) {
           onCancel: options.onCancel,
         },
         hasImg: options.hasImg,
+        renderActions: undefined,
       })
     },
     [modal],

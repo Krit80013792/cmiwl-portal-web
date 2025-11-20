@@ -26,8 +26,21 @@ const CustomerInformationForm: React.FC = () => {
   const [districtList, setDistrictList] = useState<any[]>([])
   const [subDistrictList, setSubDistrictList] = useState<any[]>([])
   const [addressData, setAddressData] = useState<any>(null)
-  const { handleChange, handleSubmit, errors, values, setValues } = useForm(
-    {
+  const [birthDayList, setBirthDayList] = useState<any[]>([])
+  const [mounted, setMounted] = useState(false)
+  const { handleChange, handleSubmit, errors, values, setValues } = useForm({}, customerInformationSchema, {
+    openLoading,
+    closeLoading,
+  })
+  const zipCodeDebounced = useDebounce(values?.zipCode, 1000)
+
+  // Set mounted state to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    setValues({
       title: prefillData?.customer?.title || '',
       firstName: prefillData?.customer?.firstName || '',
       lastName: prefillData?.customer?.lastName || '',
@@ -46,11 +59,31 @@ const CustomerInformationForm: React.FC = () => {
       provinceId: prefillData?.customerAddress?.provinceId || '',
       districtId: prefillData?.customerAddress?.districtId || '',
       subDistrictId: prefillData?.customerAddress?.subDistrictId || '',
-    } as any,
-    customerInformationSchema,
-    { openLoading, closeLoading },
-  )
-  const zipCodeDebounced = useDebounce(values?.zipCode, 1000)
+      isEmail: prefillData?.deliveryType?.isEmail || false,
+      isSms: prefillData?.deliveryType?.isSms || false,
+      policyEmail:
+        prefillData?.deliveryType?.policyEmail ||
+        (prefillData?.deliveryType?.isEmail ? prefillData?.personalInfo?.email : ''),
+      policySms:
+        prefillData?.deliveryType?.policySms ||
+        (prefillData?.deliveryType?.isSms ? prefillData?.personalInfo?.telephoneNo : ''),
+    })
+  }, [prefillData, setValues])
+
+  useEffect(() => {
+    const birthDays = () => {
+      const selectedMonth = values?.birthMonth ? dayjs(values?.birthYear).month(values?.birthMonth - 1) : dayjs()
+      const daysInMonth = selectedMonth.daysInMonth()
+      return Array.from({ length: daysInMonth }, (_, i) => {
+        const day = i + 1
+        return {
+          value: day.toString(),
+          label: day.toString(),
+        }
+      })
+    }
+    setBirthDayList(birthDays())
+  }, [values?.birthMonth, values?.birthYear])
 
   const fetchAddressByZipCode = useCallback(
     async (zipCode: string) => {
@@ -59,10 +92,7 @@ const CustomerInformationForm: React.FC = () => {
         const data = res?.data?.data[0] || null
         setAddressData(data)
         if (data) {
-          setValues((prevValues: any) => ({
-            ...prevValues,
-            provinceId: data?.province?.provinceId || '',
-          }))
+          handleChange({ name: 'provinceId', value: data?.province?.provinceId || '' })
           setProvinceList(
             data?.province ? [{ label: data?.province?.provinceName, value: data?.province?.provinceId }] : [],
           )
@@ -95,6 +125,9 @@ const CustomerInformationForm: React.FC = () => {
   const handleSubmitForm = async () => {
     const data = {
       ...prefill,
+      channel: {
+        ...prefill.channel,
+      },
       customer: {
         ...prefill.customer,
         taxId: values.taxId,
@@ -104,8 +137,15 @@ const CustomerInformationForm: React.FC = () => {
         birthDay: values.birthDay,
         birthMonth: values.birthMonth,
         birthYear: values.birthYear,
+        birthDate: dayjs(`${values.birthYear}-${values.birthMonth}-${values.birthDay}`).format('YYYY-MM-DD'),
       },
-      personalInfo: { ...prefill.personalInfo, telephoneNo: values.telephoneNo, email: values.email },
+      personalInfo: {
+        ...prefill.personalInfo,
+        telephoneNo: values.telephoneNo,
+        email: values.email,
+        policyEmail: values.policyEmail,
+        policySms: values.policySms,
+      },
       customerAddress: {
         ...prefill.customerAddress,
         houseNumber: values.houseNumber,
@@ -122,6 +162,13 @@ const CustomerInformationForm: React.FC = () => {
         districtId: values.districtId,
         subDistrictId: values.subDistrictId,
       },
+      deliveryType: {
+        ...prefill.deliveryType,
+        isEmail: values.isEmail,
+        isSms: values.isSms,
+        policyEmail: values.policyEmail,
+        policySms: values.policySms,
+      },
     }
     dispatch(prefillDataSlice.actions.setPrefillData(data))
     route.push('/th/ReviewSummary')
@@ -132,7 +179,7 @@ const CustomerInformationForm: React.FC = () => {
   }, [prefillData])
 
   return (
-    <form>
+    <div>
       <div className="content-section fullPage-150">
         <div className="container">
           <div className="d-flex justify-content-between pt-3 pb-12">
@@ -167,7 +214,7 @@ const CustomerInformationForm: React.FC = () => {
                 type="text"
                 maxLength={50}
                 placeholder="กรอกชื่อตามบัตรประชาชน"
-                onChange={({ target: { name, value } }) => handleChange({ name, value })}
+                onChange={({ target: { name, value } }) => handleChange({ name, value: value?.replaceAll(' ', '') })}
                 value={values?.firstName || ''}
                 feedback={errors?.firstName}
               />
@@ -206,13 +253,17 @@ const CustomerInformationForm: React.FC = () => {
                       label="ปี"
                       name="birthYear"
                       firstOptionLabel="เลือกปี"
-                      options={Array.from({ length: 80 }, (_, i) => {
-                        const year = dayjs().year() - 20 - i
-                        return {
-                          label: (year + 543).toString(),
-                          value: year.toString(),
-                        }
-                      })}
+                      options={
+                        mounted
+                          ? Array.from({ length: 80 }, (_, i) => {
+                              const year = dayjs().year() - 20 - i
+                              return {
+                                label: (year + 543).toString(),
+                                value: year.toString(),
+                              }
+                            })
+                          : []
+                      }
                       onChange={(value) => handleChange({ name: 'birthYear', value })}
                       value={values?.birthYear || ''}
                       feedback={errors?.birthYear}
@@ -237,19 +288,7 @@ const CustomerInformationForm: React.FC = () => {
                       label="วัน"
                       name="birthDay"
                       firstOptionLabel="เลือกวัน"
-                      options={(() => {
-                        const selectedMonth = values?.birthMonth
-                          ? dayjs(values?.birthYear).month(values?.birthMonth - 1)
-                          : dayjs()
-                        const daysInMonth = selectedMonth.daysInMonth()
-                        return Array.from({ length: daysInMonth }, (_, i) => {
-                          const day = i + 1
-                          return {
-                            value: day.toString(),
-                            label: day.toString(),
-                          }
-                        })
-                      })()}
+                      options={birthDayList}
                       onChange={(value) => handleChange({ name: 'birthDay', value })}
                       value={values?.birthDay || ''}
                       feedback={errors?.birthDay}
@@ -261,19 +300,19 @@ const CustomerInformationForm: React.FC = () => {
             </div>
             <div className="form-group mb-12">
               <Input
+                label={`เบอร์โทรศัพท์ ${!prefill?.deliveryType?.isEmail && prefill?.deliveryType?.isSms ? '(ใช้สำหรับรับกรมธรรม์อิเล็กทรอนิกส์)' : ''}`}
                 name="telephoneNo"
                 type="text"
                 maxLength={12}
                 placeholder="กรอกเบอร์โทรศัพท์"
                 onChange={({ target: { name, value } }) => handleChange({ name, value: value?.replaceAll('-', '') })}
                 value={convertStrToFormat(values?.telephoneNo, 'phone_number') || ''}
-                label="เบอร์โทรศัพท์"
                 feedback={errors?.telephoneNo}
               />
             </div>
             <div className="form-group mb-12">
               <Input
-                label="อีเมล (ใช้สำหรับรับกรมธรรม์อิเล็กทรอนิกส์)"
+                label={`อีเมล ${prefill?.deliveryType?.isEmail && !prefill?.deliveryType?.isSms ? '(ใช้สำหรับรับกรมธรรม์อิเล็กทรอนิกส์)' : ''}`}
                 name="email"
                 type="text"
                 maxLength={50}
@@ -308,6 +347,7 @@ const CustomerInformationForm: React.FC = () => {
                   placeholder="กรอกหมู่ที่"
                   onChange={({ target: { name, value } }) => handleChange({ name, value })}
                   value={values?.villageNo || ''}
+                  feedback={errors?.villageNo}
                 />
               </div>
             </div>
@@ -320,6 +360,7 @@ const CustomerInformationForm: React.FC = () => {
                 placeholder="กรอกหมู่บ้าน/อาคาร"
                 onChange={({ target: { name, value } }) => handleChange({ name, value })}
                 value={values?.buildingVillage || ''}
+                feedback={errors?.buildingVillage}
               />
             </div>
             <div className="d-flex">
@@ -332,6 +373,7 @@ const CustomerInformationForm: React.FC = () => {
                   placeholder="กรอกซอย/ตรอก"
                   onChange={({ target: { name, value } }) => handleChange({ name, value })}
                   value={values?.alley || ''}
+                  feedback={errors?.alley}
                 />
               </div>
               <div className="form-group mb-12 ms-2 w-100">
@@ -343,8 +385,8 @@ const CustomerInformationForm: React.FC = () => {
                   placeholder="กรอกถนน"
                   onChange={({ target: { name, value } }) => handleChange({ name, value })}
                   value={values?.street || ''}
+                  feedback={errors?.street}
                 />
-                <label className="form-label">{'ถนน'}</label>
               </div>
             </div>
             <div>
@@ -427,6 +469,78 @@ const CustomerInformationForm: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            {prefill?.channel?.isPolicyEmail && prefill?.channel?.isPolicySms && (
+              <>
+                <h2 className="mb-12 mt-4 text-black fs-18">
+                  <strong>ช่องทางการจัดส่งกรมธรรม์</strong>
+                </h2>
+                <p>กรมธรรม์อิเล็กทรอนิกส์จะถูกจัดส่งภายใน 15 นาที หลังจากชำระเงินสำเร็จ</p>
+                <div
+                  style={{ display: 'flex', width: '100%', alignItems: 'center', marginBottom: '12px', gap: '10px' }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={values?.isEmail}
+                    onChange={(e) => {
+                      handleChange({ name: 'isEmail', value: e.target.checked })
+                      if (!e.target.checked) {
+                        handleChange({ name: 'policyEmail', value: '' })
+                      } else {
+                        handleChange({ name: 'policyEmail', value: values?.email || '' })
+                      }
+                    }}
+                  />
+                  <Input
+                    label="อีเมล"
+                    name="policyEmail"
+                    type="text"
+                    maxLength={50}
+                    placeholder="กรอกอีเมล"
+                    onChange={({ target: { name, value } }) => handleChange({ name, value })}
+                    value={values?.policyEmail || ''}
+                    feedback={!values?.isEmail ? errors?.isEmail : ''}
+                    style={{ width: 'inherit' }}
+                    disabled={!values?.isEmail}
+                  />
+                </div>
+                <div
+                  style={{ display: 'flex', width: '100%', alignItems: 'center', marginBottom: '12px', gap: '10px' }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={values?.isSms}
+                    onChange={(e) => {
+                      handleChange({ name: 'isSms', value: e.target.checked })
+                      if (!e.target.checked) {
+                        handleChange({ name: 'policySms', value: '' })
+                      } else {
+                        handleChange({ name: 'policySms', value: values?.telephoneNo || '' })
+                      }
+                    }}
+                  />
+                  <Input
+                    name="policySms"
+                    type="text"
+                    maxLength={12}
+                    placeholder="กรอกเบอร์โทรศัพท์"
+                    onChange={({ target: { name, value } }) =>
+                      handleChange({ name, value: value?.replaceAll('-', '') })
+                    }
+                    value={convertStrToFormat(values?.policySms, 'phone_number') || ''}
+                    label="เบอร์โทรศัพท์"
+                    feedback={!values?.isSms ? errors?.isSms : ''}
+                    style={{ width: 'inherit' }}
+                    disabled={!values?.isSms}
+                  />
+                </div>
+                {!values?.isEmail && !values?.isSms && (errors?.isEmail || errors?.isSms) && (
+                  <div className="feedback" style={{ color: 'red', marginTop: '-8px', marginBottom: '12px' }}>
+                    {errors?.isEmail || errors?.isSms}
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -439,7 +553,7 @@ const CustomerInformationForm: React.FC = () => {
           ดำเนินการต่อ
         </button>
       </div>
-    </form>
+    </div>
   )
 }
 

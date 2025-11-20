@@ -2,7 +2,7 @@ import React from 'react'
 import Link from 'next/link'
 import { ModalOptions, ModalType } from '@/helpers/hooks/useModal'
 
-const typeConfig: Record<ModalType, { imageSrc: string; imageAlt: string; colorClass: string }> = {
+const typeConfig: Record<ModalType, { imageSrc?: string; imageAlt: string; colorClass: string }> = {
   error: {
     imageSrc: '/assets/icon/icon-error.png',
     imageAlt: 'เกิดข้อผิดพลาด',
@@ -23,6 +23,10 @@ const typeConfig: Record<ModalType, { imageSrc: string; imageAlt: string; colorC
     imageAlt: 'ยืนยัน',
     colorClass: 'text-primary',
   },
+  info: {
+    imageAlt: 'ข้อมูล',
+    colorClass: 'text-info',
+  },
 }
 
 interface Props extends ModalOptions {
@@ -34,11 +38,13 @@ const Modal: React.FC<Props> = ({
   isOpen,
   title = '',
   message = '',
+  content = null,
   type = 'error',
   confirmOptions,
   onClose,
   callNumber,
   hasImg = true,
+  renderActions,
 }) => {
   if (!isOpen) return null
 
@@ -78,6 +84,42 @@ const Modal: React.FC<Props> = ({
           </button>
         </div>
       )
+    } else if (type === 'info') {
+      return (
+        <div className="d-flex">
+          <button
+            className="btn btn-primary w-100 fs-6 d-flex justify-content-center align-items-center"
+            onClick={onClose}
+            type="button"
+          >
+            <strong>ตกลง</strong>
+          </button>
+        </div>
+      )
+    } else if (type === 'warning') {
+      return (
+        <div className="d-flex">
+          <button
+            className="btn btn-secondary w-100 fs-6 d-flex justify-content-center align-items-center me-2"
+            onClick={handleCancel}
+            type="button"
+          >
+            <strong>{confirmOptions?.cancelText || 'ยกเลิก'}</strong>
+          </button>
+          <button
+            className="btn btn-primary w-100 fs-6 d-flex justify-content-center align-items-center ms-2 call-btn"
+            onClick={() => {
+              window.location.href = ''
+              onClose()
+            }}
+            type="button"
+          >
+            <strong className="f-bd text-payment-3Terror-call">โทร</strong>
+          </button>
+        </div>
+      )
+    } else if (renderActions) {
+      return renderActions()
     }
 
     // Original button logic for other modal types
@@ -130,18 +172,22 @@ const Modal: React.FC<Props> = ({
                 )
               })}
             </h5>
-            <p className="text-black mb-20">
-              {message.split(':').map((line, i) => {
-                const key = `${line} + ${i}`
-                return (
-                  <React.Fragment key={key}>
-                    {line}
-                    <br />
-                  </React.Fragment>
-                )
-              })}
-            </p>
-            {renderButtons()}
+            {message ? (
+              <p className="text-black mb-20">
+                {message.split(':').map((line, i) => {
+                  const key = `${line} + ${i}`
+                  return (
+                    <React.Fragment key={key}>
+                      {line}
+                      <br />
+                    </React.Fragment>
+                  )
+                })}
+              </p>
+            ) : (
+              content
+            )}
+            <div className="mt-20">{renderButtons()}</div>
           </div>
         </div>
       </div>
