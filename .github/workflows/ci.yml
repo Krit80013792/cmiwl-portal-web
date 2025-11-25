@@ -6,7 +6,7 @@ on:
       - dev
       - sit
       - uat
-      - preprod
+      - pre
       - main
 
 jobs:
