@@ -213,7 +213,9 @@ const PaymentQRComponents = () => {
           </div>
           <div className="bg-lightgrey rounded-4 py-3 mb-12">
             <div className="text-center mb-2">
-              {qrData?.fileImage && <Image src={qrData?.fileImage} priority alt="QR Code" width={152} height={213} />}
+              {qrData?.fileImage && (
+                <Image src={qrData?.fileImage} unoptimized priority alt="QR Code" width={152} height={213} />
+              )}
             </div>
             <div className="text-center mb-2">
               <Image className="d-inline me-1" alt="Clock" width="16" height="17" src="/assets/icon/clock.png" />
