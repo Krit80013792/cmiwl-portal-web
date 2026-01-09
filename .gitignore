@@ -460,6 +460,5 @@ MigrationBackup/
 FodyWeavers.xsd
 
 bun.lock
-package-lock.json
 .scannerwork
 .sonarlint
