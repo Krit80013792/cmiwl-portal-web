@@ -3,7 +3,7 @@ FROM base AS deps
 # RUN apk add --no-cache --update libc6-compat python3 py3-pip build-base g++ cairo-dev jpeg-dev pango-dev giflib-dev
 WORKDIR /app
 
-COPY package.json ./
+COPY package.json package-lock.json ./
 RUN yarn install --ignore-scripts && yarn cache clean
 
 FROM base AS builder
