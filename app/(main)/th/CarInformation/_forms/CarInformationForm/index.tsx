@@ -365,7 +365,11 @@ const CarInformationForm = () => {
           <div className="mt-2">
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <div className="gap-3" style={{ display: 'flex', width: '100%' }}>
-                <div style={{ display: 'flex', width: '100%' }}>
+                <label
+                  htmlFor="isNotRed"
+                  className={`red-license-option ${!values?.isRedLicense ? 'red-license-option--selected' : ''}`}
+                  style={{ display: 'flex', width: '100%', cursor: 'pointer' }}
+                >
                   <RadioButton
                     inputId="isNotRed"
                     name="isRedLicense"
@@ -373,11 +377,15 @@ const CarInformationForm = () => {
                     onChange={(e) => handleChange({ name: 'isRedLicense', value: e.value })}
                     checked={!values?.isRedLicense}
                   />
-                  <label htmlFor="isNotRed" className="ml-2">
+                  <span className="ml-2">
                     ไม่ใช่
-                  </label>
-                </div>
-                <div style={{ display: 'flex', width: '100%' }}>
+                  </span>
+                </label>
+                <label
+                  htmlFor="isRedLicense"
+                  className={`red-license-option ${values?.isRedLicense ? 'red-license-option--selected' : ''}`}
+                  style={{ display: 'flex', width: '100%', cursor: 'pointer' }}
+                >
                   <RadioButton
                     inputId="isRedLicense"
                     name="isRedLicense"
@@ -390,10 +398,10 @@ const CarInformationForm = () => {
                     }}
                     checked={values?.isRedLicense}
                   />
-                  <label htmlFor="isRedLicense" className="ml-2">
+                  <span className="ml-2">
                     ใช่ ป้ายแดง
-                  </label>
-                </div>
+                  </span>
+                </label>
               </div>
             </div>
           </div>
