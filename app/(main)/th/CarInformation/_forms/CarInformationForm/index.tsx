@@ -362,10 +362,21 @@ const CarInformationForm = () => {
         <ChassisDialog open={open} onClose={() => setOpen(false)} />
         <div style={{ marginTop: '24px' }} className="form-group mb-12 radio-list-horizontal">
           <h2 className="text-black" style={{ fontSize: '16px', fontWeight: '700' }}>รถของคุณป้ายแดงหรือไม่ ?</h2>
-          <div className="mt-2">
+            <div className="mt-2">
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <div className="gap-3" style={{ display: 'flex', width: '100%' }}>
-                <div style={{ display: 'flex', width: '100%' }}>
+            <div className="gap-3" style={{ display: 'flex', width: '100%' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    width: '100%',
+                    padding: '12px 16px',
+                    borderRadius: '8px',
+                    border: `1px solid ${values?.isRedLicense === false ? '#2563eb' : '#d1d5db'}`,
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => handleChange({ name: 'isRedLicense', value: false })}
+                >
                   <RadioButton
                     inputId="isNotRed"
                     name="isRedLicense"
@@ -377,7 +388,23 @@ const CarInformationForm = () => {
                     ไม่ใช่
                   </label>
                 </div>
-                <div style={{ display: 'flex', width: '100%' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    width: '100%',
+                    padding: '12px 16px',
+                    borderRadius: '8px',
+                    border: `1px solid ${values?.isRedLicense ? '#2563eb' : '#d1d5db'}`,
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => {
+                    handleChange({ name: 'isRedLicense', value: true })
+                    handleChange({ name: 'registrationYear', value: null })
+                    handleChange({ name: 'registrationProvinceId', value: null })
+                    handleChange({ name: 'registrationProvinceName', value: null })
+                  }}
+                >
                   <RadioButton
                     inputId="isRedLicense"
                     name="isRedLicense"
