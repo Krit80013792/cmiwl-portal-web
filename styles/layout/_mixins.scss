@@ -1,3 +1,16 @@
+@mixin respond($breakpoint) {
+    @if $breakpoint == 'tl' {
+        @media (min-width: 810px) {
+            @content;
+        }
+    }
+    @if $breakpoint == 'dt' {
+        @media (min-width: 1440px) {
+            @content;
+        }
+    }
+}
+
 @mixin focused() {
     outline: 0 none;
     outline-offset: 0;

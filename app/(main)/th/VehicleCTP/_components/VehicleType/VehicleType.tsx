@@ -69,12 +69,12 @@ const VehicleCategory = ({ channel }: { channel: any }) => {
   }
 
   return (
-    <div className="row vehicle">
+    <section id="vehicle-type" className="row vehicle">
       {isLoadingData ? (
         // Skeleton loading state
         <>
           {[1, 2, 3, 4].map((item) => (
-            <div className="col-6 pe-2 mb-3" key={item}>
+            <div className="col-6 pe-2" key={item}>
               <div className="py-12 px-3 rounded-4 choice-card text-center h-100">
                 <Skeleton width="80px" height="42px" className="mb-3 mx-auto" />
                 <Skeleton width="80%" height="1rem" className="mb-2 mx-auto" />
@@ -88,7 +88,7 @@ const VehicleCategory = ({ channel }: { channel: any }) => {
         typeList?.map((e: any, idx: number) => {
           const isActive = activeIndex === idx
           return (
-            <div className="col-6 pe-2 mb-3" key={e.itemOrder}>
+            <div className="col-6 pe-2" key={e.itemOrder}>
               <button onClick={() => handleVehicleCategory(e, idx)} type="button" className="w-100 h-100">
                 <div className={`py-12 px-3 rounded-4 choice-card text-center h-100${isActive ? ' active' : ''}`}>
                   <Image src={`data:image/png;base64,${e.imagePath}`} alt={e.displayName} width={80} height={42} />
@@ -106,7 +106,7 @@ const VehicleCategory = ({ channel }: { channel: any }) => {
           )
         })
       )}
-    </div>
+    </section>
   )
 }
 

@@ -1,5 +1,6 @@
 import React from 'react'
 import { Metadata } from 'next'
+import './page.scss'
 import { getDataFromSession } from '@/helpers/functions/getDataFromSession'
 import OldVehicle from './_components/OldVehicle'
 import VehicleType from './_components/VehicleType'
@@ -25,41 +26,44 @@ export default async function VehicleCTP() {
     (value) => value !== null && value !== undefined,
   )
   return (
-    <MainWithDynamicStyle primaryColor={configValue?.primaryColor} secondaryColor={configValue?.secondaryColor}>
-      <div className="head-bar">
-        <div className="container d-flex align-items-center">
-          <p className="text-center mb-0 w-100 fs-18 f-bd">พ.ร.บ.</p>
+    <section id='vehicle-ctp'>
+      <MainWithDynamicStyle primaryColor={configValue?.primaryColor} secondaryColor={configValue?.secondaryColor}>
+        <div className="head-bar">
+          <div className="container d-flex align-items-center">
+            <p className="text-center mb-0 w-100 fs-18 f-bd">พ.ร.บ.</p>
+          </div>
         </div>
-      </div>
 
-      <div className="container pt-48">
-        {isProductCmiDetailValid && (
-          <div>
-            <div className="pt-4">
-              <h1 className="mb-12 fs-18 text-black">
-                <strong className="f-bd">เลือกรถของคุณที่ต้องการต่อ พ.ร.บ.</strong>
-              </h1>
-            </div>
-            <OldVehicle channel={channelData.channel} />
+        <div className="vehicle-ctp-content pt-48">
+          {isProductCmiDetailValid && (
             <div>
-              <h2 className="mb-12 fs-18 text-black mb-0">
-                <strong className="f-bd">ซื้อ พ.ร.บ. ให้รถคันอื่น</strong>
-              </h2>
-              <p className="mb-12 text-grey">เลือกประเภทรถที่ต้องการซื้อ พ.ร.บ.</p>
+              <div className="pt-4">
+                <h1 className="mb-12 fs-18 text-black">
+                  <strong className="f-bd">เลือกรถของคุณที่ต้องการต่อ พ.ร.บ.</strong>
+                </h1>
+              </div>
+              <OldVehicle channel={channelData.channel} />
+              <div>
+                <h2 className="mb-12 fs-18 text-black mb-0">
+                  <strong className="f-bd">ซื้อ พ.ร.บ. ให้รถคันอื่น</strong>
+                </h2>
+                <p className="mb-12 text-grey">เลือกประเภทรถที่ต้องการซื้อ พ.ร.บ.</p>
+              </div>
             </div>
-          </div>
-        )}
-        {!isProductCmiDetailValid && (
-          <div>
-            <div className="pt-4">
-              <h1 className="mb-12 fs-18 text-black">
-                <strong className="f-bd">เลือกประเภทรถ</strong>
-              </h1>
+          )}
+          {!isProductCmiDetailValid && (
+            <div>
+              <div className="pt-4">
+                <h1 className="mb-12 fs-18 text-black" style={{ margin: 0 }}>
+                  <strong className="f-bd">ซื้อ พ.ร.บ. ให้รถคันอื่น</strong>
+                </h1>
+                <p className="mb-12 text-grey">เลือกประเภทรถที่ต้องการซื้อ พ.ร.บ.</p>
+              </div>
             </div>
-          </div>
-        )}
-        <VehicleType channel={channelData.channel} />
-      </div>
-    </MainWithDynamicStyle>
+          )}
+          <VehicleType channel={channelData.channel} />
+        </div>
+      </MainWithDynamicStyle>
+    </section>
   )
 }

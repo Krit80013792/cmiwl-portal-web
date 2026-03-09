@@ -1,0 +1,43 @@
+@use '@/styles/layout/mixins' as *;
+
+#vehicle-ctp {
+
+    padding-left: 16px;
+    padding-right: 16px;
+
+    .vehicle-ctp-content {
+        display: flex;
+        flex-direction: column;
+        margin-left: auto;
+        margin-right: auto;
+        max-width: 328px;
+
+        @include respond(tl) {
+            max-width: 556px;
+        }
+
+        @include respond(dt) {
+            max-width: 592px;
+        }
+    }
+
+    #vehicle-type {
+        row-gap: 10px;
+        column-gap: 8px;
+
+        div {
+
+            width: 159px;
+            height: 100px;
+
+            @include respond(tl) {
+                width: 179px;
+            }
+
+            @include respond(dt) {
+                width: 191px;
+            }
+        }
+    }
+
+}
