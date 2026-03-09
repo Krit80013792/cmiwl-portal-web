@@ -72,7 +72,7 @@ const VehicleCategoryComponent = () => {
     router.push(`/th/CarInformation`)
   }
   return (
-    <div className="row seatamount-select mb-4">
+    <div className="vehicle-category-list row seatamount-select mb-4">
       {isLoadingData ? (
         // Skeleton loading state
         <>
@@ -91,9 +91,9 @@ const VehicleCategoryComponent = () => {
           const isActive = activeIndex === i
           const key = i
           return (
-            <div className="col-6 pe-2 mb-3" key={key}>
+            <div className='vehicle-category-item' key={key}>
               <button onClick={() => handleCarInformation(e, i)} type="button" className="w-100 h-100 text-start">
-                <div className={`px-12 py-2 rounded-4 choice-card h-100${isActive ? ' active' : ''}`}>
+                <div style={{ alignItems: 'center' }} className={`px-12 py-2 rounded-4 choice-card h-100${isActive ? ' active' : ''}`}>
                   <p className="mb-0 text-grey">{e.rate.compulsoryText}</p>
                   <p className="mb-0 text-grey">
                     <strong className="f-bd">{e.rate.total.toLocaleString()} บาท/ปี</strong>

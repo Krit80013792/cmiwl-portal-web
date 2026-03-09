@@ -26,7 +26,7 @@ export default async function VehicleCTP() {
     (value) => value !== null && value !== undefined,
   )
   return (
-    <section id='vehicle-ctp'>
+    <section id='vehicle-ctp-page'>
       <MainWithDynamicStyle primaryColor={configValue?.primaryColor} secondaryColor={configValue?.secondaryColor}>
         <div className="head-bar">
           <div className="container d-flex align-items-center">
