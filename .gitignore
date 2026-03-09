@@ -462,3 +462,4 @@ FodyWeavers.xsd
 bun.lock
 .scannerwork
 .sonarlint
+.cursor/
