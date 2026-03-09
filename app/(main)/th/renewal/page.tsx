@@ -16,7 +16,7 @@ export default async function RenewalErrorPage() {
 
     return (
         <MainWithDynamicStyle primaryColor={configValue?.primaryColor} secondaryColor={configValue?.secondaryColor}>
-            <div className="container fullPage-72 pt-48 text-center position-relative d-flex justify-content-center flex-column">
+            <div style={{ height: '100vh' }} className="container fullPage-72 pt-48 text-center position-relative d-flex justify-content-center flex-column">
                 <div>
                     <Image
                         className="img-fluid mb-12"
