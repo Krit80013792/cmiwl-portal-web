@@ -26,9 +26,7 @@
         column-gap: 8px;
 
         div {
-
             width: 159px;
-            height: 100px;
 
             @include respond(tl) {
                 width: 179px;
@@ -37,6 +35,14 @@
             @include respond(dt) {
                 width: 191px;
             }
+        }
+
+        .vehicle-category-image {
+            transform: translateY(-50%);
+        }
+
+        .vehicle-category-text {
+            transform: translateY(-50%);
         }
     }
 
