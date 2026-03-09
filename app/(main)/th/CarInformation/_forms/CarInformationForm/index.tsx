@@ -362,21 +362,10 @@ const CarInformationForm = () => {
         <ChassisDialog open={open} onClose={() => setOpen(false)} />
         <div style={{ marginTop: '24px' }} className="form-group mb-12 radio-list-horizontal">
           <h2 className="text-black" style={{ fontSize: '16px', fontWeight: '700' }}>รถของคุณป้ายแดงหรือไม่ ?</h2>
-            <div className="mt-2">
+          <div className="mt-2">
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <div className="gap-3" style={{ display: 'flex', width: '100%' }}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    width: '100%',
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                    border: `1px solid ${values?.isRedLicense === false ? '#2563eb' : '#d1d5db'}`,
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => handleChange({ name: 'isRedLicense', value: false })}
-                >
+              <div className="gap-3" style={{ display: 'flex', width: '100%' }}>
+                <div style={{ display: 'flex', width: '100%' }}>
                   <RadioButton
                     inputId="isNotRed"
                     name="isRedLicense"
@@ -388,23 +377,7 @@ const CarInformationForm = () => {
                     ไม่ใช่
                   </label>
                 </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    width: '100%',
-                    padding: '12px 16px',
-                    borderRadius: '8px',
-                    border: `1px solid ${values?.isRedLicense ? '#2563eb' : '#d1d5db'}`,
-                    cursor: 'pointer',
-                  }}
-                  onClick={() => {
-                    handleChange({ name: 'isRedLicense', value: true })
-                    handleChange({ name: 'registrationYear', value: null })
-                    handleChange({ name: 'registrationProvinceId', value: null })
-                    handleChange({ name: 'registrationProvinceName', value: null })
-                  }}
-                >
+                <div style={{ display: 'flex', width: '100%' }}>
                   <RadioButton
                     inputId="isRedLicense"
                     name="isRedLicense"
@@ -425,52 +398,54 @@ const CarInformationForm = () => {
             </div>
           </div>
         </div>
-        <div className="form-group mb-12 licenseregis">
-          <Input
-            label="ทะเบียนรถ"
-            name="licenseNo"
-            type="text"
-            maxLength={13}
-            placeholder="ตัวอย่าง 2ขข2222"
-            value={values?.licenseNo?.replaceAll('-', '') || ''}
-            onChange={(e) =>
-              handleChange({
-                name: 'licenseNo',
-                value: convertStrToFormat(e.target.value.replaceAll(' ', ''), 'idcar'),
-              })
-            }
-            feedback={errors?.licenseNo}
-          />
-        </div>
-        {!values?.isRedLicense && (
-          <div>
-            <div className="form-group mb-12 yearregis">
-              <Select
-                label="ปีที่จดทะเบียน"
-                name="registrationYear"
-                value={values?.registrationYear}
-                onChange={(value) => handleChange({ name: 'registrationYear', value })}
-                options={YEAR_REGISTER}
-                firstOptionLabel="เลือกปีที่จดทะเบียน"
-                feedback={errors?.registrationYear}
-              />
-            </div>
-            <div className="form-group mb-12 province">
-              <Select
-                label="จังหวัดที่จดทะเบียน"
-                name="registrationProvinceId"
-                value={values?.registrationProvinceId}
-                onChange={(value) => handleChange({ name: 'registrationProvinceId', value })}
-                options={carProvinceList?.map((e) => ({
-                  label: e.provinceName,
-                  value: e.provinceId,
-                }))}
-                firstOptionLabel="เลือกจังหวัดที่จดทะเบียน"
-                feedback={errors?.registrationProvinceId}
-              />
-            </div>
+        <div className="license-registration-container">
+          <div className="form-group licenseregis">
+            <Input
+              label="ทะเบียนรถ"
+              name="licenseNo"
+              type="text"
+              maxLength={13}
+              placeholder="ตัวอย่าง 2ขข2222"
+              value={values?.licenseNo?.replaceAll('-', '') || ''}
+              onChange={(e) =>
+                handleChange({
+                  name: 'licenseNo',
+                  value: convertStrToFormat(e.target.value.replaceAll(' ', ''), 'idcar'),
+                })
+              }
+              feedback={errors?.licenseNo}
+            />
           </div>
-        )}
+          {!values?.isRedLicense && (
+            <>
+              <div className="form-group yearregis">
+                <Select
+                  label="ปีที่จดทะเบียน"
+                  name="registrationYear"
+                  value={values?.registrationYear}
+                  onChange={(value) => handleChange({ name: 'registrationYear', value })}
+                  options={YEAR_REGISTER}
+                  firstOptionLabel="เลือกปีที่จดทะเบียน"
+                  feedback={errors?.registrationYear}
+                />
+              </div>
+              <div className="form-group province span-2">
+                <Select
+                  label="จังหวัดที่จดทะเบียน"
+                  name="registrationProvinceId"
+                  value={values?.registrationProvinceId}
+                  onChange={(value) => handleChange({ name: 'registrationProvinceId', value })}
+                  options={carProvinceList?.map((e) => ({
+                    label: e.provinceName,
+                    value: e.provinceId,
+                  }))}
+                  firstOptionLabel="เลือกจังหวัดที่จดทะเบียน"
+                  feedback={errors?.registrationProvinceId}
+                />
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       <div className="formMain">

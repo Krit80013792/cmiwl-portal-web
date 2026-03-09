@@ -5,4 +5,14 @@
         display: flex;
         gap: 10px;
     }
+
+    .license-registration-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+
+        .span-2 {
+            grid-column: span 2;
+        }
+    }
 }
