@@ -1,0 +1,8 @@
+@use '@/styles/layout/mixins' as *;
+
+#car-information {
+    .car-model-color-container {
+        display: flex;
+        gap: 10px;
+    }
+}

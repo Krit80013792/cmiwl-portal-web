@@ -113,8 +113,8 @@ const CarInformationForm = () => {
     const days = () => {
       const selectedMonth = values?.monthCoverage
         ? dayjs()
-            .year(values?.yearCoverage)
-            .month(values?.monthCoverage - 1)
+          .year(values?.yearCoverage)
+          .month(values?.monthCoverage - 1)
         : dayjs()
       const daysInMonth = selectedMonth.daysInMonth()
       const today = dayjs().startOf('day')
@@ -302,34 +302,36 @@ const CarInformationForm = () => {
             feedback={errors?.carBrandId}
           />
         </div>
-        <div className="form-group mb-12 carmodel">
-          <Select
-            label="รุ่นรถ"
-            name="carModelName"
-            firstOptionLabel="เลือกรุ่นรถ"
-            disabled={values?.carBrandId === 'NO_VALUE'}
-            options={carModelList?.slice()?.map((model: any) => ({
-              label: model,
-              value: model,
-            }))}
-            onChange={(value) => handleChange({ name: 'carModelName', value })}
-            value={values?.carModelName || ''}
-            feedback={errors?.carModelName}
-          />
-        </div>
-        <div className="form-group mb-12 carcolor">
-          <Select
-            label="สีรถ"
-            name="carColorId"
-            firstOptionLabel="เลือกสีรถ"
-            value={values?.carColorId || ''}
-            onChange={(value) => handleChange({ name: 'carColorId', value })}
-            options={carColorList?.slice()?.map((color: any) => ({
-              label: color?.carColorNameTh,
-              value: color?.carColorId,
-            }))}
-            feedback={errors?.carColorId}
-          />
+        <div className='car-model-color-container'>
+          <div style={{ width: '100%' }} className="form-group mb-12 carmodel">
+            <Select
+              label="รุ่นรถ"
+              name="carModelName"
+              firstOptionLabel="เลือกรุ่นรถ"
+              disabled={values?.carBrandId === 'NO_VALUE'}
+              options={carModelList?.slice()?.map((model: any) => ({
+                label: model,
+                value: model,
+              }))}
+              onChange={(value) => handleChange({ name: 'carModelName', value })}
+              value={values?.carModelName || ''}
+              feedback={errors?.carModelName}
+            />
+          </div>
+          <div style={{ width: '100%' }} className="form-group mb-12 carcolor">
+            <Select
+              label="สีรถ"
+              name="carColorId"
+              firstOptionLabel="เลือกสีรถ"
+              value={values?.carColorId || ''}
+              onChange={(value) => handleChange({ name: 'carColorId', value })}
+              options={carColorList?.slice()?.map((color: any) => ({
+                label: color?.carColorNameTh,
+                value: color?.carColorId,
+              }))}
+              feedback={errors?.carColorId}
+            />
+          </div>
         </div>
         <div className="form-group form-vehicle-id mb-12 chassisnumber">
           <Input
@@ -350,7 +352,7 @@ const CarInformationForm = () => {
                 alt="ตัวช่วย"
                 width="24"
                 height="24"
-                src="/assets/icon/icon-question.png"
+                src="/assets/icon/question-circle.svg"
                 onClick={() => setOpen(true)}
               />
             }
@@ -358,12 +360,12 @@ const CarInformationForm = () => {
           />
         </div>
         <ChassisDialog open={open} onClose={() => setOpen(false)} />
-        <div className="form-group mb-12 radio-list-horizontal">
-          <span className="EditingFormLabel fs-14 ">รถของคุณป้ายแดงหรือไม่ ?</span>
+        <div style={{ marginTop: '24px' }} className="form-group mb-12 radio-list-horizontal">
+          <h2 className="text-black" style={{ fontSize: '16px', fontWeight: '700' }}>รถของคุณป้ายแดงหรือไม่ ?</h2>
           <div className="mt-2">
-            <div style={{ display: 'flex' }}>
-              <div className="flex-wrap gap-3" style={{ display: 'flex' }}>
-                <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <div className="gap-3" style={{ display: 'flex', width: '100%' }}>
+                <div style={{ display: 'flex', width: '100%' }}>
                   <RadioButton
                     inputId="isNotRed"
                     name="isRedLicense"
@@ -375,7 +377,7 @@ const CarInformationForm = () => {
                     ไม่ใช่
                   </label>
                 </div>
-                <div style={{ display: 'flex' }}>
+                <div style={{ display: 'flex', width: '100%' }}>
                   <RadioButton
                     inputId="isRedLicense"
                     name="isRedLicense"
@@ -459,20 +461,20 @@ const CarInformationForm = () => {
                   options={
                     mounted
                       ? (() => {
-                          const years = []
-                          const currentYear = dayjs().year()
-                          const maxDate = dayjs().add(90, 'day')
-                          const maxYear = maxDate.year()
+                        const years = []
+                        const currentYear = dayjs().year()
+                        const maxDate = dayjs().add(90, 'day')
+                        const maxYear = maxDate.year()
 
-                          // Add current year and next year if 90 days spans into it
-                          for (let year = currentYear; year <= maxYear; year++) {
-                            years.push({
-                              label: (year + 543).toString(),
-                              value: year.toString(),
-                            })
-                          }
-                          return years
-                        })()
+                        // Add current year and next year if 90 days spans into it
+                        for (let year = currentYear; year <= maxYear; year++) {
+                          years.push({
+                            label: (year + 543).toString(),
+                            value: year.toString(),
+                          })
+                        }
+                        return years
+                      })()
                       : []
                   }
                   feedback={errors?.yearCoverage}
@@ -501,19 +503,19 @@ const CarInformationForm = () => {
                   options={
                     mounted
                       ? (() => {
-                          const months = []
-                          const maxDate = dayjs().add(90, 'day')
-                          for (let i = 0; i < 4; i++) {
-                            const month = dayjs().add(i, 'month')
-                            if (month.isBefore(maxDate) || month.isSame(maxDate, 'month')) {
-                              months.push({
-                                label: month.format('MMMM'),
-                                value: (month.month() + 1).toString(),
-                              })
-                            }
+                        const months = []
+                        const maxDate = dayjs().add(90, 'day')
+                        for (let i = 0; i < 4; i++) {
+                          const month = dayjs().add(i, 'month')
+                          if (month.isBefore(maxDate) || month.isSame(maxDate, 'month')) {
+                            months.push({
+                              label: month.format('MMMM'),
+                              value: (month.month() + 1).toString(),
+                            })
                           }
-                          return months
-                        })()
+                        }
+                        return months
+                      })()
                       : []
                   }
                   feedback={errors?.monthCoverage}
