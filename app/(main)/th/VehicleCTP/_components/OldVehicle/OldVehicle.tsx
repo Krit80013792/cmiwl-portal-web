@@ -39,12 +39,15 @@ const OldVehicle = ({ channel }: { channel: any }) => {
     fetchData()
   }, [fetchData, dispatch])
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (selected: any) => {
     dispatch(
       prefillDataSlice.actions.setPrefillData({
         ...data,
         channel,
-        productCmiDetail: { ...data?.productCmiDetail, carTypeName: data?.productCmiDetail?.displayName },
+        productCmiDetail: {
+          ...(selected?.productCmiDetail ?? data?.productCmiDetail),
+          carTypeName: selected?.productCmiDetail?.displayName ?? data?.productCmiDetail?.displayName,
+        },
         deliveryType: {
           isEmail: data?.deliveryType?.isEmail,
           isSms: data?.deliveryType?.isSms,
@@ -61,6 +64,7 @@ const OldVehicle = ({ channel }: { channel: any }) => {
 
   //todo: need to change productCmiDetail model as a list instead of object
   const [mockProductCmiDetail, setMockProductCmiDetail] = useState<any>([])
+  const [selectedProduct, setSelectedProduct] = useState<any | null>(null)
   const [isLastItem, setIsLastItem] = useState<boolean>(false)
 
   const createMockProductCmiList = (baseDetail: any, count: number) => {
@@ -112,8 +116,18 @@ const OldVehicle = ({ channel }: { channel: any }) => {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '17px' }}>
                 {
                   mockProductCmiDetail.map((item: any) => (
-                    <div key={item?.id} className="pt-10 pb-2 px-12 rounded-4 choice-card text-center h-100">
-                      <button onClick={handleSubmit} type="button" className="w-100 border-0 bg-transparent">
+                    <div
+                      key={item?.id}
+                      className={`pt-10 pb-2 px-12 rounded-4 choice-card text-center h-100${selectedProduct?.id === item?.id ? ' active' : ''}`}
+                    >
+                      <button
+                        onClick={() => {
+                          setSelectedProduct(item)
+                          handleSubmit(item)
+                        }}
+                        type="button"
+                        className="w-100 border-0 bg-transparent"
+                      >
                         <p className="mb-0 text-grey fs-22">
                           <strong className="f-bd">{`${item?.licensePrefix ?? ''}-${item?.productCmiDetail?.licenseNo ?? ''}`}</strong>
                         </p>
