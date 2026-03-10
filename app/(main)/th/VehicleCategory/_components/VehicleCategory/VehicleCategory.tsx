@@ -95,9 +95,9 @@ const VehicleCategoryComponent = () => {
               <button onClick={() => handleCarInformation(e, i)} type="button" className="w-100 h-100 text-start">
                 <div style={{ alignItems: 'center' }} className={`px-12 py-2 rounded-4 choice-card h-100${isActive ? ' active' : ''}`}>
                   <p className="mb-0 text-grey">{e.rate.compulsoryText}</p>
-                  <p className="mb-0 text-grey">
-                    <strong className="f-bd">{e.rate.total.toLocaleString()} บาท/ปี</strong>
-                  </p>
+                  {/* <p className="mb-0 text-grey"> */}
+                  {/* <strong className="f-bd">{e.rate.total.toLocaleString()} บาท/ปี</strong> */}
+                  {/* </p> */}
                 </div>
               </button>
             </div>
