@@ -39,6 +39,7 @@ export default async function Custom404() {
             ลองตรวจสอบลิงก์ของคุณอีกครั้ง
           </p>
 
+          {/* //todo: recheck redirect href path */}
           <Link
             href="/"
             style={{ fontSize: '18px', borderRadius: '12px', height: '48px' }}
