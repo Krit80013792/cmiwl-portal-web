@@ -31,6 +31,8 @@ export default async function Custom404() {
               alt="404"
               width={360}
               height={171}
+              style={{ width: '100%', height: 'auto' }}
+              priority
               className="img-fluid mb-3"
             />
           </div>
