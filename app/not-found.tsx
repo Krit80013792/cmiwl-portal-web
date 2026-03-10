@@ -1,48 +1,53 @@
 import React from 'react'
-import { Metadata } from 'next'
-import styles from './not-found.module.css'
-import { Button } from 'primereact/button'
+import Image from 'next/image'
+import Link from 'next/link'
+import { getDataFromSession } from '@/helpers/functions/getDataFromSession'
+import MainWithDynamicStyle from '@/cmi-layout/components/MainWithDynamicStyle'
+import '@/public/themes/cmi/css/global.css'
+import '@/public/themes/cmi/css/fontface.css'
+import '@/public/themes/cmi/css/style-default.css'
+import '@/public/custom/plugin/bootstrap/bootstrap.min.css'
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: 'ต่อ พ.ร.บ. รถยนต์ออนไลน์ (ประกันภาคบังคับ) กับติดล้อ',
-    description:
-      'พ.ร.บ. รถยนต์ ต่อง่าย สะดวก รวดเร็วกับเว็บติดล้อ ประกันภัยภาคบังคับคุ้มครองทั้งคุณและบุคคลภายนอก ต่อพ.ร.บ. ออนไลน์รับกรมธรรม์อิเล็กทรอนิกส์ทันทีที่นี่',
+
+
+
+export default async function Custom404() {
+  const { channelData } = await getDataFromSession()
+
+  let configValue: Record<string, unknown> = {}
+  try {
+    configValue = JSON.parse(channelData?.channelConfig?.configValue ?? '{}') as Record<string, unknown>
+  } catch {
+    configValue = {}
   }
-}
 
-export default function Custom404() {
   return (
-    <main>
-      <div className={`${styles.fullPage}`}>
-        <div className={styles['content-block-404']}>
-          <div className={styles['text-center']}>
-            <img
-              src="/cmisite/media/assets/component-illustrate-error-404.webp"
+    <MainWithDynamicStyle primaryColor={configValue?.primaryColor as string} secondaryColor={configValue?.secondaryColor as string}>
+      <main>
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', height: '100vh' }} className="page-404">
+          <div style={{ marginBottom: '8px' }} className="text-center">
+            <Image
+              src="/assets/not-found/404.svg"
               alt="404"
-              width="360"
-              height="171"
-              className={`${styles['img-fluid']} mb-3`}
+              width={360}
+              height={171}
+              className="img-fluid mb-3"
             />
           </div>
-          <div className={`container ${styles['text-center']}`}>
-            <h1 className={`${styles['fs-18']} ${styles['f-bd']} mb-12`}>ขออภัย ไม่พบหน้าที่คุณต้องการ</h1>
-            <p className={`${styles['fs-16']} ${styles['f-bd']} ${styles['text-caption']} mb-0`}>
-              ลองตรวจสอบลิงก์ของคุณอีกครั้ง <span className="d-inline-block">หรือกลับหน้าหลัก</span>
-            </p>
-          </div>
+          <h1 className="f-bd mb-12" style={{ color: '#3F74F5', fontSize: '20px' }}>ขออภัย ไม่พบหน้าที่คุณต้องการ</h1>
+          <p className="fs-16 text-caption mb-24" style={{ color: '#414243' }}>
+            ลองตรวจสอบลิงก์ของคุณอีกครั้ง
+          </p>
+
+          <Link
+            href="/"
+            style={{ fontSize: '18px', borderRadius: '12px', height: '48px' }}
+            className="btn btn-primary  d-flex justify-content-center align-items-center mx-auto mb-4"
+          >
+            กลับหน้าหลัก
+          </Link>
         </div>
-        <div className={styles['btn-wrapper-404']}>
-          <div className={`container ${styles['text-center']}`}>
-            <a href="/" className="text-decoration-none">
-              <Button
-                label="กลับหน้าหลัก"
-                className={`${styles['btn-primary']} fs-6 d-flex justify-content-center align-items-center mb-4`}
-              />
-            </a>
-          </div>
-        </div>
-      </div>
-    </main>
+      </main>
+    </MainWithDynamicStyle>
   )
 }
