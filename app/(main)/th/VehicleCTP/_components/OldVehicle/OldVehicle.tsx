@@ -63,12 +63,28 @@ const OldVehicle = ({ channel }: { channel: any }) => {
   const [mockProductCmiDetail, setMockProductCmiDetail] = useState<any>([])
   const [isLastItem, setIsLastItem] = useState<boolean>(false)
 
+  const createMockProductCmiList = (baseDetail: any, count: number) => {
+    return Array.from({ length: count }, (_, index) => {
+      const suffix = index + 1
+      const baseLicenseNo = baseDetail?.productCmiDetail?.licenseNo ?? baseDetail?.licenseNo ?? ''
+      const baseLicensePrefix = baseDetail?.licensePrefix ?? ''
+
+      return {
+        ...baseDetail,
+        id: `${baseDetail?.id ?? 'mock'}-${suffix}`,
+        licensePrefix: `${baseLicensePrefix}${suffix}`,
+        productCmiDetail: {
+          ...(baseDetail?.productCmiDetail ?? {}),
+          licenseNo: `${baseLicenseNo}${suffix}`,
+        },
+      }
+    })
+  }
+
   const handleFetchMore = () => {
     const productCmiDetail = data?.productCmiDetail
     if (productCmiDetail) {
-      setMockProductCmiDetail(
-        Array.from({ length: 4 }, () => ({ ...productCmiDetail }))
-      )
+      setMockProductCmiDetail(createMockProductCmiList(productCmiDetail, 4))
     }
     setIsLastItem(true)
   }
@@ -76,9 +92,7 @@ const OldVehicle = ({ channel }: { channel: any }) => {
   useEffect(() => {
     const productCmiDetail = data?.productCmiDetail
     if (productCmiDetail) {
-      setMockProductCmiDetail(
-        Array.from({ length: 3 }, () => ({ ...productCmiDetail }))
-      )
+      setMockProductCmiDetail(createMockProductCmiList(productCmiDetail, 3))
     }
   }, [data?.productCmiDetail])
 
@@ -98,7 +112,7 @@ const OldVehicle = ({ channel }: { channel: any }) => {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '17px' }}>
                 {
                   mockProductCmiDetail.map((item: any) => (
-                    <div key={item?.id} className="pt-10 pb-2 px-12 rounded-4 choice-card text-center h-100 active">
+                    <div key={item?.id} className="pt-10 pb-2 px-12 rounded-4 choice-card text-center h-100">
                       <button onClick={handleSubmit} type="button" className="w-100 border-0 bg-transparent">
                         <p className="mb-0 text-grey fs-22">
                           <strong className="f-bd">{`${item?.licensePrefix ?? ''}-${item?.productCmiDetail?.licenseNo ?? ''}`}</strong>
