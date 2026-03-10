@@ -15,6 +15,9 @@ const OldVehicle = ({ channel }: { channel: any }) => {
   const [data, setData] = useState<any>({})
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true)
 
+  //todo: need to change productCmiDetail model as a list instead of object
+  const [mockProductCmiDetail, setMockProductCmiDetail] = useState<any>([])
+
   const fetchData = useCallback(async () => {
     try {
       setIsLoadingData(true)
@@ -35,6 +38,15 @@ const OldVehicle = ({ channel }: { channel: any }) => {
   useEffect(() => {
     fetchData()
   }, [fetchData, dispatch])
+
+  useEffect(() => {
+    const productCmiDetail = data?.productCmiDetail
+    if (productCmiDetail) {
+      setMockProductCmiDetail(
+        Array.from({ length: 4 }, () => ({ ...productCmiDetail }))
+      )
+    }
+  }, [data?.productCmiDetail])
 
   const handleSubmit = async () => {
     dispatch(
@@ -57,7 +69,7 @@ const OldVehicle = ({ channel }: { channel: any }) => {
   return (
     <div className="row car-select mb-4">
       <div>
-        <div className="col-6 pe-2">
+        <div className="col-6 pe-2" style={{ width: '100%' }}>
           {isLoadingData ? (
             // Skeleton loading state
             <div className="pt-10 pb-2 px-12 rounded-4 choice-card text-center h-100">
@@ -66,13 +78,19 @@ const OldVehicle = ({ channel }: { channel: any }) => {
             </div>
           ) : (
             // Actual vehicle data
-            <div className="pt-10 pb-2 px-12 rounded-4 choice-card text-center h-100 active">
-              <button onClick={handleSubmit} type="button" className="w-100 border-0 bg-transparent">
-                <p className="mb-0 text-grey fs-22">
-                  <strong className="f-bd">{`${data?.productCmiDetail?.licensePrefix ?? ''}-${data?.productCmiDetail?.licenseNo ?? ''}`}</strong>
-                </p>
-                <p className="mb-0 text-center text-grey">รถยนต์</p>
-              </button>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+              {
+                mockProductCmiDetail.map((item: any) => (
+                  <div key={item?.id} className="pt-10 pb-2 px-12 rounded-4 choice-card text-center h-100 active">
+                    <button onClick={handleSubmit} type="button" className="w-100 border-0 bg-transparent">
+                      <p className="mb-0 text-grey fs-22">
+                        <strong className="f-bd">{`${item?.licensePrefix ?? ''}-${item?.productCmiDetail?.licenseNo ?? ''}`}</strong>
+                      </p>
+                      <p className="mb-0 text-center text-grey">รถยนต์</p>
+                    </button>
+                  </div>
+                ))
+              }
             </div>
           )}
         </div>
@@ -82,3 +100,4 @@ const OldVehicle = ({ channel }: { channel: any }) => {
 }
 
 export default OldVehicle
+
