@@ -91,6 +91,7 @@ const VehicleCategory = ({ channel }: { channel: any }) => {
             <div className="col-6 pe-2" key={e.itemOrder}>
               <button onClick={() => handleVehicleCategory(e, idx)} type="button" className="w-100 h-100">
                 <div className={`py-12 px-3 rounded-4 choice-card text-center h-100${isActive ? ' active' : ''}`}>
+                  {/* // todo: hard code file name follow index of list -> need to chanage */}
                   <img className='vehicle-type-image' src={`/assets/vehicle-type/${idx}.svg`} alt={e.displayName} width={123} height={56} />
                   <p className="vehicle-type-image mb-0 text-center text-grey">
                     {e.displayName.split(':').map((line: string) => (
