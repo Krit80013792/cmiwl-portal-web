@@ -1,18 +1,11 @@
 
 import { getDataFromSession } from '@/helpers/functions/getDataFromSession'
 import MainWithDynamicStyle from '@/cmi-layout/components/MainWithDynamicStyle'
-import SelectInsurer from './SelectInsurer'
-import { Metadata } from 'next'
+import CoverageCondition from './CoverageCondition'
 import Link from 'next/link'
+import Image from 'next/image'
 
-export async function generateMetadata(): Promise<Metadata> {
-    return {
-        title: 'title',
-        description: 'description',
-    }
-}
-
-export default async function SelectInsurerPage() {
+export default async function ConverageConditionPage() {
     const { channelData } = await getDataFromSession()
     let configValue: any = {}
     try {
@@ -21,14 +14,14 @@ export default async function SelectInsurerPage() {
         configValue = {}
     }
     return (
-        <section id="select-insurer-page">
+        <section id="coverage-condition-page">
             <MainWithDynamicStyle
                 primaryColor={configValue?.primaryColor}
                 secondaryColor={configValue?.secondaryColor}
             >
                 <div className="head-bar">
                     <div className="container d-flex align-items-center">
-                        <Link href="/th/VehicleCategory" className="back-btn">
+                        <Link href="/th/select-insurer" className="back-btn">
                             <img alt="กลับ" width="36" height="36" src="/assets/icon/back.png" />
                         </Link>
                         <p
@@ -41,13 +34,23 @@ export default async function SelectInsurerPage() {
                 </div>
 
                 <div className="container pt-48">
-                    <div className="pt-4">
+                    <Image
+                        src="/assets/coverage-condition/coverage-condition.svg"
+                        alt="เงื่อนไขการรับประกันแต่ละบริษัท"
+                        width={556}
+                        height={584}
+                    />
+                </div>
+
+
+                <div className="container">
+                    <div style={{ marginTop: '16px' }}>
                         <h1 className="mb-12 fs-18 text-black">
-                            <strong className="f-bd">เลือกบริษัทประกันภัย</strong>
+                            <strong className="f-bd">เงื่อนไขการรับประกันแต่ละบริษัท</strong>
                         </h1>
                     </div>
 
-                    <SelectInsurer />
+                    <CoverageCondition />
                 </div>
             </MainWithDynamicStyle>
         </section>

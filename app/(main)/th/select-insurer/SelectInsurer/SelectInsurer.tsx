@@ -1,4 +1,5 @@
 'use client'
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react"
 
@@ -95,6 +96,9 @@ const SelectInsurer = () => {
                         </div>
                     </button>
                 ))}
+                <Link href="/th/coverage-condition" style={{ marginTop: '18px', textAlign: 'center', color: '#1E1E1F' }}>
+                    เงื่อนไขและรายละเอียดความคุ้มครอง
+                </Link>
             </div>
         </section>
     )
