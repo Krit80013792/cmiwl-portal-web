@@ -7,6 +7,8 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Skeleton } from 'primereact/skeleton'
 import { getPrefillData } from '../../_actions'
 import useLoading from '@/helpers/hooks/useLoading'
+import SeeMoreButton from '../SeeMoreButton'
+
 
 const OldVehicle = ({ channel }: { channel: any }) => {
   const { openLoading, closeLoading } = useLoading()
@@ -15,8 +17,6 @@ const OldVehicle = ({ channel }: { channel: any }) => {
   const [data, setData] = useState<any>({})
   const [isLoadingData, setIsLoadingData] = useState<boolean>(true)
 
-  //todo: need to change productCmiDetail model as a list instead of object
-  const [mockProductCmiDetail, setMockProductCmiDetail] = useState<any>([])
 
   const fetchData = useCallback(async () => {
     try {
@@ -39,15 +39,6 @@ const OldVehicle = ({ channel }: { channel: any }) => {
     fetchData()
   }, [fetchData, dispatch])
 
-  useEffect(() => {
-    const productCmiDetail = data?.productCmiDetail
-    if (productCmiDetail) {
-      setMockProductCmiDetail(
-        Array.from({ length: 4 }, () => ({ ...productCmiDetail }))
-      )
-    }
-  }, [data?.productCmiDetail])
-
   const handleSubmit = async () => {
     dispatch(
       prefillDataSlice.actions.setPrefillData({
@@ -66,6 +57,31 @@ const OldVehicle = ({ channel }: { channel: any }) => {
     )
     route.push('/th/CarInformation')
   }
+
+
+  //todo: need to change productCmiDetail model as a list instead of object
+  const [mockProductCmiDetail, setMockProductCmiDetail] = useState<any>([])
+  const [isLastItem, setIsLastItem] = useState<boolean>(false)
+
+  const handleFetchMore = () => {
+    const productCmiDetail = data?.productCmiDetail
+    if (productCmiDetail) {
+      setMockProductCmiDetail(
+        Array.from({ length: 4 }, () => ({ ...productCmiDetail }))
+      )
+    }
+    setIsLastItem(true)
+  }
+
+  useEffect(() => {
+    const productCmiDetail = data?.productCmiDetail
+    if (productCmiDetail) {
+      setMockProductCmiDetail(
+        Array.from({ length: 3 }, () => ({ ...productCmiDetail }))
+      )
+    }
+  }, [data?.productCmiDetail])
+
   return (
     <div className="row car-select mb-4">
       <div>
@@ -78,20 +94,25 @@ const OldVehicle = ({ channel }: { channel: any }) => {
             </div>
           ) : (
             // Actual vehicle data
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-              {
-                mockProductCmiDetail.map((item: any) => (
-                  <div key={item?.id} className="pt-10 pb-2 px-12 rounded-4 choice-card text-center h-100 active">
-                    <button onClick={handleSubmit} type="button" className="w-100 border-0 bg-transparent">
-                      <p className="mb-0 text-grey fs-22">
-                        <strong className="f-bd">{`${item?.licensePrefix ?? ''}-${item?.productCmiDetail?.licenseNo ?? ''}`}</strong>
-                      </p>
-                      <p className="mb-0 text-center text-grey">รถยนต์</p>
-                    </button>
-                  </div>
-                ))
-              }
-            </div>
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginBottom: '17px' }}>
+                {
+                  mockProductCmiDetail.map((item: any) => (
+                    <div key={item?.id} className="pt-10 pb-2 px-12 rounded-4 choice-card text-center h-100 active">
+                      <button onClick={handleSubmit} type="button" className="w-100 border-0 bg-transparent">
+                        <p className="mb-0 text-grey fs-22">
+                          <strong className="f-bd">{`${item?.licensePrefix ?? ''}-${item?.productCmiDetail?.licenseNo ?? ''}`}</strong>
+                        </p>
+                        <p className="mb-0 text-center text-grey">รถยนต์</p>
+                      </button>
+                    </div>
+                  ))
+                }
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center' }} >
+                <SeeMoreButton hidden={isLastItem} onFetchMore={() => handleFetchMore()} />
+              </div>
+            </>
           )}
         </div>
       </div>

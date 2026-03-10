@@ -6,37 +6,28 @@ export interface SeeMoreButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   /** Async callback from parent to fetch more items. */
   onFetchMore?: () => Promise<void> | void
+  label?: string
+  hidden?: boolean
 }
 
 const SeeMoreButton: React.FC<SeeMoreButtonProps> = ({
   onFetchMore,
-  children,
-  type = 'button',
   className = '',
-  ...buttonProps
+  label = 'ดูเพิ่มเติม',
+  hidden = false
 }) => {
-  const handleClick: React.MouseEventHandler<HTMLButtonElement> = async (e) => {
-    // Preserve any external onClick
-    if (buttonProps.onClick) {
-      buttonProps.onClick(e)
-    }
-    if (e.defaultPrevented) return
-
-    if (onFetchMore) {
-      await onFetchMore()
-    }
+  if (hidden) {
+    return null
   }
-
   return (
     <button
-      type={type}
-      // className={`${styles.root} ${className}`.trim()}
+      type='button'
       className={`${className}`.trim()}
-      onClick={handleClick}
-      {...buttonProps}
+      style={{ backgroundColor: '#DBE7FE', borderRadius: '6px', padding: '2px 12px 1px' }}
+      onClick={onFetchMore}
     >
-      {children ?? 'ดูเพิ่มเติม'}
-      <img src="/assets/icon/arrow-down.svg" alt="" />
+      {label ?? 'ดูเพิ่มเติม'}
+      <img style={{ marginLeft: '4px' }} src="/assets/icon/arrow-down.svg" alt="" />
     </button>
   )
 }
