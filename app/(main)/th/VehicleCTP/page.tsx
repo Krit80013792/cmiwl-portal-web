@@ -15,7 +15,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function VehicleCTP() {
   const { channelData, productCmiDetail } = await getDataFromSession()
-  console.log("🚀 ~ VehicleCTP ~ channelData:", channelData)
 
   let configValue: any = {}
   try {
