@@ -49,11 +49,7 @@ const Page = async () => {
                 width={320}
                 height={235}
                 priority
-                fetchPriority="high"
-                loading="eager"
-                decoding="async"
-                sizes="(max-width: 768px) 90vw, 320px"
-                style={{ width: '320px', height: 'auto', maxWidth: '100%' }}
+                style={{ width: '100%', height: 'auto', maxWidth: '320px' }}
               />
             </div>
           </div>
