@@ -29,9 +29,8 @@ export default async function Custom404() {
             <Image
               src="/assets/not-found/404.svg"
               alt="404"
-              width={360}
-              height={171}
-              style={{ width: '100%', height: 'auto' }}
+              width={328}
+              height={116}
               priority
               className="img-fluid mb-3"
             />
