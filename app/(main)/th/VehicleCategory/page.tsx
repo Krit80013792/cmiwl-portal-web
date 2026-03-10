@@ -49,7 +49,6 @@ const Page = async () => {
                 width={320}
                 height={235}
                 priority
-                style={{ width: '100%', height: 'auto', maxWidth: '320px' }}
               />
             </div>
           </div>
