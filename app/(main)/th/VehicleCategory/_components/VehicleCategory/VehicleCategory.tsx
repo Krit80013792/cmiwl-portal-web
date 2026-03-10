@@ -69,7 +69,7 @@ const VehicleCategoryComponent = () => {
         productCmiDetail,
       }),
     )
-    router.push(`/th/CarInformation`)
+    router.push(`/th/select-insurer`)
   }
   return (
     <div className="vehicle-category-list row seatamount-select mb-4">
