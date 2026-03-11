@@ -54,7 +54,7 @@ const SelectInsurer = () => {
         setSelectedInsurerId(insurer.id)
         //todo: displach state to redux to use in another page 
 
-        router.push('/th/car-information')
+        router.push('/th/CarInformation')
     }
 
     return (
