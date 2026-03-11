@@ -9,14 +9,13 @@ interface ChassisDialogProps {
 
 const TabButton = styled.button.withConfig({
   shouldForwardProp: (prop) => prop !== 'active',
-})<{ active?: boolean }>`
+}) <{ active?: boolean }>`
   color: #3e3e3e;
   padding: 8px 16px;
   border-radius: 50px;
-  border: solid ${({ active }) => (active ? '2px var(--primary)' : '1px #c9c9c9')} !important;
-  background-color: ${({ active }) => (active ? 'var(--bg-active)' : '#fff')} !important;
-  margin-right: 16px;
-  font-weight: ${({ active }) => (active ? 'bold' : 'normal')};
+  // border: solid ${({ active }) => (active ? '2px var(--primary)' : '1px #c9c9c9')} !important;
+  // background-color: ${({ active }) => (active ? 'var(--bg-active)' : '#fff')} !important;
+  // font-weight: ${({ active }) => (active ? 'bold' : 'normal')};
 `
 
 const TABS = [
@@ -62,21 +61,21 @@ export const ChassisDialog: React.FC<ChassisDialogProps> = ({ open, onClose }) =
   return (
     <div
       className="modal fade show"
-      style={{ display: 'block', background: 'rgba(0,0,0,0.5)' }}
+      style={{ display: 'block', background: 'rgba(30, 30, 31, 0.80)' }}
       tabIndex={-1}
       aria-modal="true"
     >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content" style={{ borderRadius: '16px', border: 'none' }}>
           <div className="modal-header">
-            <h5 className="modal-title f-bd fs-18" id="exampleModalLongTitle">
+            <h5 className="modal-title f-bd fs-18" id="exampleModalLongTitle" style={{ flex: '1', textAlign: 'center' }}>
               หมายเลขตัวถังดูได้จากที่ไหนบ้าง
             </h5>
             <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
           </div>
           <div className="modal-body" style={{ maxHeight: '314px' }}>
             <nav>
-              <div className="nav nav-tabs border-0" id="nav-tab" role="tablist">
+              <div className="nav nav-tabs border-0" id="nav-tab" role="tablist" style={{ display: 'grid', gap: '8px', gridTemplateColumns: 'repeat(3, 1fr)', backgroundColor: '#F2F2F2', padding: '6px', borderRadius: '32px', boxShadow: '2px 3px 8px 0 rgba(0, 0, 0, 0.10) inset' }}>
                 {TABS.map((tab) => (
                   <TabButton
                     key={tab.key}
