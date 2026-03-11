@@ -3,7 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react"
 
-export function formatPriceTHB(value: number): string {
+export function formatPrice(value: number): string {
     return value.toLocaleString('th-TH', {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
@@ -31,6 +31,7 @@ const SelectInsurer = () => {
                     value: 12000,
                     unit: 'บาท/ปี',
                 },
+                isRecommended: true,
             }, {
                 id: 'viriya',
                 name: 'วิริยะ',
@@ -39,6 +40,7 @@ const SelectInsurer = () => {
                     value: 11500,
                     unit: 'บาท/ปี',
                 },
+                isRecommended: false,
             }])
         }
         fetchInsurers()
@@ -46,7 +48,7 @@ const SelectInsurer = () => {
 
     const handleSelectInsurer = (insurer: any) => {
         setSelectedInsurerId(insurer.id)
-        //todo: displach state here
+        //todo: displach state to redux to use in another page 
 
         router.push('/th/car-information')
     }
@@ -62,14 +64,19 @@ const SelectInsurer = () => {
                             display: 'flex', gap: '8px', alignItems: 'center', borderRadius: '12px', padding: '8px', height: '56px', border: selectedInsurerId === insurer.id ? '2px solid #2563EB' : '1px solid #DDDDDF',
                         }}
                     >
-                        <img src={insurer.image} alt={insurer.name} />
+                        <div style={{ position: 'relative', padding: '4px', borderRadius: '8px', border: '1px solid #F2F2F2' }}>
+                            {insurer.isRecommended && (
+                                <img style={{ position: 'absolute', top: '0', right: '0', transform: 'translate(15px, -15px)' }} src="/assets/icon/recommend.svg" alt="recommended" />
+                            )}
+                            <img src={insurer.image} alt={insurer.name} />
+                        </div>
                         <span style={{ flex: '1', textAlign: 'start' }}>{insurer.name}</span>
                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
                             {insurer.discountPrice ? (
                                 <>
                                     <div style={{ display: 'flex', gap: '4px', alignItems: 'end' }}>
                                         <span style={{ lineHeight: '20px', fontWeight: '700', fontSize: '20px', background: 'linear-gradient(90deg, #FF4696 0%, #F50 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                                            {formatPriceTHB(insurer.discountPrice.value)}
+                                            {formatPrice(insurer.discountPrice.value)}
                                         </span>
                                         <span style={{ fontSize: '12px' }}>
                                             {insurer.discountPrice.unit}
@@ -77,7 +84,7 @@ const SelectInsurer = () => {
                                     </div>
                                     {insurer.originalPrice && (
                                         <span style={{ textDecoration: 'line-through', color: '#999999', fontSize: '12px' }}>
-                                            {insurer.originalPrice.value} {insurer.originalPrice.unit}
+                                            {formatPrice(insurer.originalPrice.value)} {insurer.originalPrice.unit}
                                         </span>
                                     )}
                                 </>
@@ -85,7 +92,7 @@ const SelectInsurer = () => {
                                 insurer.originalPrice && (
                                     <div style={{ display: 'flex', gap: '4px', alignItems: 'end' }}>
                                         <span style={{ lineHeight: '20px', fontWeight: '700', fontSize: '20px', background: 'linear-gradient(90deg, #000000 0%, #000000 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                                            {formatPriceTHB(insurer.originalPrice.value)}
+                                            {formatPrice(insurer.originalPrice.value)}
                                         </span>
                                         <span style={{ fontSize: '12px' }}>
                                             {insurer.originalPrice.unit}
