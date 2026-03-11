@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react"
+import useLoading from '@/helpers/hooks/useLoading'
 
 export function formatPrice(value: number): string {
     return value.toLocaleString('th-TH', {
@@ -15,6 +16,8 @@ const SelectInsurer = () => {
     const [insurer, setInsurer] = useState<any>([])
     const [selectedInsurerId, setSelectedInsurerId] = useState<string>('')
     const router = useRouter()
+
+    const { closeLoading } = useLoading()
 
     useEffect(() => {
         const fetchInsurers = async () => {
@@ -48,6 +51,9 @@ const SelectInsurer = () => {
             setInsurer(insurers)
         }
         fetchInsurers()
+
+        closeLoading()
+
     }, [])
 
     const handleSelectInsurer = (insurer: any) => {
