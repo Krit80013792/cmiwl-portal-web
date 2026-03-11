@@ -42,15 +42,6 @@ const Page = async () => {
               </strong>
             </h1>
             <VehicleCategory />
-            <div className="d-flex justify-content-center">
-              <Image
-                alt="เลือกประเภทการใช้งาน"
-                src="/assets/vehicle-category/card.svg"
-                width={320}
-                height={235}
-                priority
-              />
-            </div>
           </div>
         </div>
       </MainWithDynamicStyle>

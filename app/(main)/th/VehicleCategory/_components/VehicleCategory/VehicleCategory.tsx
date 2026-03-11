@@ -7,6 +7,7 @@ import { Skeleton } from 'primereact/skeleton'
 import { getCompulsoryRates } from '../../_actions'
 import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
 import useLoading from '@/helpers/hooks/useLoading'
+import Image from 'next/image'
 
 const VehicleCategoryComponent = () => {
   const { openLoading, closeLoading } = useLoading()
@@ -71,6 +72,7 @@ const VehicleCategoryComponent = () => {
     )
     router.push(`/th/select-insurer`)
   }
+
   return (
     <div className="vehicle-category-list row seatamount-select mb-4">
       {isLoadingData ? (
@@ -104,6 +106,41 @@ const VehicleCategoryComponent = () => {
           )
         })
       )}
+
+
+      <div className="d-flex justify-content-center">
+        {/* //todo: car type key for "เลือกรถ เก๋ง, กระบะ 4 ประตู, รถไฟฟ้า หรือไม่?" */}
+        {prefillData?.productCmiDetail?.carTypeKey == '1' && (
+          <Image
+            alt="เลือกประเภทการใช้งาน"
+            src="/assets/vehicle-category/1.svg"
+            width={320}
+            height={235}
+            priority
+          />
+        )}
+        {/* //todo: car type key for "รถกระบะ 2 ประตู, รถบรรทุกหรือไม่?" */}
+        {prefillData?.productCmiDetail?.carTypeKey == '2' && (
+          <Image
+            alt="เลือกประเภทการใช้งาน"
+            src="/assets/vehicle-category/2.svg"
+            width={320}
+            height={235}
+            priority
+          />
+        )}
+
+        {/* //todo: car type key for "รถโดยสารมากกว่า 7 ที่นั่ง หรือไม่?" */}
+        {prefillData?.productCmiDetail?.carTypeKey == '5' && (
+          <Image
+            alt="เลือกประเภทการใช้งาน"
+            src="/assets/vehicle-category/3.svg"
+            width={320}
+            height={235}
+            priority
+          />
+        )}
+      </div>
     </div>
   )
 }

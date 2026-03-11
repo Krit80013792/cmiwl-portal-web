@@ -20,24 +20,14 @@ const CoverageCondition = () => {
             //todo: fetch insurer here
             setCoverage([{
                 id: 'ergo',
-                name: 'เออร์โก',
+                name: 'เออร์โกประกันภัย',
                 image: '/assets/insurer/ergo.svg',
-                discountPrice: {
-                    value: 10000,
-                    unit: 'บาท/ปี',
-                },
-                originalPrice: {
-                    value: 12000,
-                    unit: 'บาท/ปี',
-                },
+                link: 'https://www.google.com',
             }, {
                 id: 'viriya',
-                name: 'วิริยะ',
+                name: 'วิริยะประกันภัย',
                 image: '/assets/insurer/viriya.svg',
-                originalPrice: {
-                    value: 11500,
-                    unit: 'บาท/ปี',
-                },
+                link: 'https://www.google.com',
             }])
         }
         fetchCoverage()
@@ -53,7 +43,9 @@ const CoverageCondition = () => {
                             display: 'flex', gap: '8px', alignItems: 'center', borderRadius: '12px', padding: '8px', height: '56px', border: '1px solid #DDDDDF',
                         }}
                     >
-                        <img src={insurer.image} alt={insurer.name} />
+                        <div style={{ padding: '4px', borderRadius: '8px', borderColor: '#F2F2F2' }}>
+                            <img src={insurer.image} alt={insurer.name} />
+                        </div>
                         <span style={{ flex: '1', textAlign: 'start' }}>{insurer.name}</span>
                         <a href={insurer.link} >
                             <img src="/assets/icon/download.svg" alt="download" width={20} height={20} />
