@@ -13,11 +13,11 @@ interface SelectProps {
 
 const StyledSelect = styled.select.withConfig({
   shouldForwardProp: (prop) => prop !== 'error',
-})<{ error: boolean }>`
+}) <{ error: boolean }>`
   &.form-control {
     ${({ error }) =>
-      error &&
-      css`
+    error &&
+    css`
         box-shadow: 0 0 0 1px rgba(235, 88, 72, 1) !important;
       `}
   }
@@ -60,7 +60,11 @@ export const Select: React.FC<SelectProps> = ({
         ))}
       </StyledSelect>
       <label className="form-label">{label}</label>
-      {feedback && <Feedback>{feedback}</Feedback>}
+      {feedback &&
+        <Feedback>
+          <span style={{ marginRight: '2px' }}><img src="/assets/icon/alert-circle.svg" alt="alert-circle" /></span>
+          {feedback}
+        </Feedback>}
     </>
   )
 }

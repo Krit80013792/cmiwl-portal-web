@@ -16,11 +16,11 @@ export interface InputProps {
 
 const StyledInput = styled.input.withConfig({
   shouldForwardProp: (prop) => prop !== 'error',
-})<{ error: boolean }>`
+}) <{ error: boolean }>`
   &.form-control {
     ${({ error }) =>
-      error &&
-      css`
+    error &&
+    css`
         box-shadow: 0 0 0 1px rgba(235, 88, 72, 1) !important;
       `}
   }
@@ -65,7 +65,10 @@ export const Input = ({
         {suffix && <div className="position-absolute top-50 end-0 translate-middle-y me-3">{suffix}</div>}
         <label className="form-label">{label}</label>
       </div>
-      {feedback && <Feedback>{feedback}</Feedback>}
+      {feedback && <Feedback>
+        <span style={{ marginRight: '2px' }}><img src="/assets/icon/alert-circle.svg" alt="warning" /></span>
+        {feedback}
+      </Feedback>}
     </div>
   )
 }
