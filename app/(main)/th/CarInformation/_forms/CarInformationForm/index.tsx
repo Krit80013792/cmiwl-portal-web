@@ -567,11 +567,12 @@ const CarInformationForm = () => {
           </span>
         </div>
       </div>
-      <div className="container">
+      <div className="">
         <button
           type="button"
           onClick={() => handleSubmit(handleSubmitForm)}
           className="btn btn-primary fs-6 d-flex justify-content-center align-items-center mx-auto mb-4 f-bd"
+          style={{ width: '100%' }}
         >
           ดำเนินการต่อ
         </button>
