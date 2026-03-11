@@ -34,8 +34,8 @@ const CoverageCondition = () => {
     }, [])
 
     return (
-        <section id="select-insurer-list">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <section id="coverage-condition-list">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', }}>
                 {coverage.map((insurer: any) => (
                     <div
                         key={insurer.id}
@@ -43,7 +43,7 @@ const CoverageCondition = () => {
                             display: 'flex', gap: '8px', alignItems: 'center', borderRadius: '12px', padding: '8px', height: '56px', border: '1px solid #DDDDDF',
                         }}
                     >
-                        <div style={{ padding: '4px', borderRadius: '8px', borderColor: '#F2F2F2' }}>
+                        <div style={{ padding: '4px', border: '1px solid #F2F2F2', borderRadius: '8px' }}>
                             <img src={insurer.image} alt={insurer.name} />
                         </div>
                         <span style={{ flex: '1', textAlign: 'start' }}>{insurer.name}</span>

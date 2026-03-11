@@ -28,18 +28,20 @@ export default async function ConverageConditionPage() {
                             id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_VehicleCategory_lbHeaderBar"
                             className="text-center mb-0 w-100 fs-18 f-bd"
                         >
-                            พ.ร.บ.
+                            เงื่อนไขและรายละเอียดความคุ้มครอง
                         </p>
                     </div>
                 </div>
 
                 <div className="container pt-48">
-                    <Image
-                        src="/assets/coverage-condition/coverage-condition.svg"
-                        alt="เงื่อนไขการรับประกันแต่ละบริษัท"
-                        width={556}
-                        height={584}
-                    />
+                    <div style={{ marginTop: '32px' }}>
+                        <Image
+                            src="/assets/coverage-condition/coverage-condition.svg"
+                            alt="เงื่อนไขการรับประกันแต่ละบริษัท"
+                            width={556}
+                            height={584}
+                        />
+                    </div>
                 </div>
 
 

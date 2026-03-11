@@ -19,10 +19,12 @@ const SelectInsurer = () => {
     useEffect(() => {
         const fetchInsurers = async () => {
             //todo: fetch insurer here
-            setInsurer([{
+            //todo: sort price should sort in be
+            const insurers = [{
                 id: 'ergo',
                 name: 'เออร์โก',
                 image: '/assets/insurer/ergo.svg',
+                sortOrder: 1,
                 discountPrice: {
                     value: 10000,
                     unit: 'บาท/ปี',
@@ -36,12 +38,14 @@ const SelectInsurer = () => {
                 id: 'viriya',
                 name: 'วิริยะ',
                 image: '/assets/insurer/viriya.svg',
+                sortOrder: 2,
                 originalPrice: {
                     value: 11500,
                     unit: 'บาท/ปี',
                 },
                 isRecommended: false,
-            }])
+            }]
+            setInsurer(insurers)
         }
         fetchInsurers()
     }, [])
