@@ -275,7 +275,7 @@ const CarInformationForm = () => {
                     fetchCarModelData(brand.carBrandId)
                   }}
                 >
-                  <div className={`rounded-4 text-center js-listdata choice-card h-100${isActive ? ' active' : ''}`}>
+                  <div style={{ height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${errors.carBrandId ? '#EB5848' : '#F2F2F2'}`, borderRadius: '8px' }} className={`rounded-4 text-center js-listdata choice-card ${isActive ? ' active' : ''}`}>
                     <Image alt={brand?.carBrandName} width="48" height="48" src={brand?.carBrandImage} />
                   </div>
                 </button>
