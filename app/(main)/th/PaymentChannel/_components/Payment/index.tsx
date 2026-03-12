@@ -20,9 +20,27 @@ const Payment = () => {
   const fetchData = useCallback(async () => {
     try {
       openLoading()
-      const res = await getPaymentType()
-      const data = res.data.data
-      setPaymentMethodList(data ?? [])
+
+      // MOCK: hardcoded payment methods for local viewing without backend
+      // Comment this block out and restore the real API call when integrating.
+      const mockData = [
+        {
+          paymentMethodId: 1,
+          paymentMethodTh: 'บัตรเครดิต',
+          payTypeCode: 'CRDC',
+        },
+        {
+          paymentMethodId: 2,
+          paymentMethodTh: 'QR Code',
+          payTypeCode: 'QRCS',
+        },
+      ]
+      setPaymentMethodList(mockData)
+
+      // Real implementation:
+      // const res = await getPaymentType()
+      // const data = res.data.data
+      // setPaymentMethodList(data ?? [])
     } catch (error) {
       console.error('Error fetching payment types:', error)
     } finally {

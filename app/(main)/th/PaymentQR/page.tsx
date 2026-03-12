@@ -14,8 +14,15 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PaymentQR() {
-  const { channelData } = await getDataFromSession()
-  const configValue: Record<string, any> = JSON.parse(channelData?.channelConfig?.configValue ?? '{}')
+  // MOCK: use hard-coded channel config so this page can open without session/backend
+  // Restore the original `getDataFromSession` usage when integrating.
+  // const { channelData } = await getDataFromSession()
+  // const configValue: Record<string, any> = JSON.parse(channelData?.channelConfig?.configValue ?? '{}')
+
+  const configValue: Record<string, any> = {
+    primaryColor: '#045ffc',
+    secondaryColor: '#ffffff',
+  }
 
   return (
     <MainWithDynamicStyle primaryColor={configValue?.primaryColor} secondaryColor={configValue?.secondaryColor}>

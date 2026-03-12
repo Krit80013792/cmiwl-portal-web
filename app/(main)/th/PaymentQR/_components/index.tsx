@@ -31,83 +31,36 @@ const PaymentQRComponents = () => {
   const fetchPayment = useCallback(async () => {
     try {
       openLoading()
-      if (!data?.channel?.channelOrderID) return
-      const res = await getPaymentQrCode({ channelOrderID: data?.channel?.channelOrderID })
-      const qrData = res?.data?.data
-      const qrExpiryDate = dayjs(qrData?.qrExpiryDate)
-        .add(543, 'year')
-        .subtract(7, 'hour')
-        .format('DD MMM YYYY - HH:mm น.')
-      if (res?.data) {
-        dispatch(
-          paymentSlice.actions.setPayment({
-            paymentNo: qrData?.paymentNo,
-            paymentStatus: 'idle',
-          }),
-        )
-        setQrData({ ...qrData, qrExpiryDate })
-      } else {
-        openModal({
-          title: 'ไม่สามารถดำเนินการต่อได้',
-          content: 'กรุณาทำรายการใหม่อีกครั้ง',
-          type: 'error',
-          renderActions: () => {
-            return (
-              <div className="d-flex">
-                <button
-                  className="btn btn-secondary w-100 fs-6 d-flex justify-content-center align-items-center me-2"
-                  onClick={() => {
-                    route.push('/th/PaymentChannel')
-                  }}
-                  type="button"
-                >
-                  <strong>{'เลือกช่องทางอื่น'}</strong>
-                </button>
-                <button
-                  className="btn btn-primary w-100 fs-6 d-flex justify-content-center align-items-center ms-2"
-                  onClick={async () => {
-                    closeModal()
-                    await fetchPayment()
-                  }}
-                  type="button"
-                >
-                  <strong>{'ตกลง'}</strong>
-                </button>
-              </div>
-            )
-          },
-        })
+
+      // MOCK: bypass backend and error modal, use static QR data so page can be viewed locally
+      const mockQrData = {
+        paymentNo: 'MOCK_PAYMENT_NO',
+        fileImage: '/assets/object/omise.png', // any existing image path just to show something
+        qrExpiryDate: dayjs().add(30, 'minute').add(543, 'year').format('DD MMM YYYY - HH:mm น.'),
       }
+
+      dispatch(
+        paymentSlice.actions.setPayment({
+          paymentNo: mockQrData.paymentNo,
+          paymentStatus: 'idle',
+        }),
+      )
+      setQrData(mockQrData)
     } catch (error) {
       console.error('Error fetching payment types:', error)
     } finally {
       closeLoading()
     }
-  }, [openLoading, closeLoading, data?.channel?.channelOrderID])
+  }, [openLoading, closeLoading, dispatch])
 
   useEffect(() => {
     fetchPayment()
   }, [fetchPayment])
 
   const handleCheckPaymentStatus = useCallback(async () => {
-    try {
-      const res = await getPaymentQrStatus({ paymentNo: qrData?.paymentNo })
-      const data = res?.data?.data
-      dispatch(
-        paymentSlice.actions.setPayment({
-          paymentNo: qrData?.paymentNo,
-          paymentStatus: data?.isPaymentSuccess ? 'success' : 'idle',
-        }),
-      )
-      if (data?.isPaymentSuccess) {
-        dispatch(paymentSlice.actions.setPayment({ paymentNo: qrData?.paymentNo, paymentStatus: 'success' }))
-      } else {
-        dispatch(paymentSlice.actions.setPayment({ paymentNo: qrData?.paymentNo, paymentStatus: 'idle' }))
-      }
-    } catch (error) {
-      console.error('Error checking payment status:', error)
-    }
-  }, [qrData?.paymentNo, dispatch])
+    // MOCK: skip polling backend for status in local view
+    return
+  }, [])
 
   useEffect(() => {
     if (data.paymentStatus === 'idle' && qrData?.paymentNo) {
