@@ -19,7 +19,6 @@ export default async function OicCertificate() {
         <main>
             <div className="head-bar">
                 <div className="container d-flex align-items-center">
-                    {/* onclick="if (!window.__cfRLUnblockHandlers) return false; return backOnclick();" */}
                     <a href="/th/intro-channel" className="back-btn"><img alt="กลับ" width="36" height="36" src="/assets/icon/back.png" /></a>
                     <p id="p_lt_ctl00_pageplaceholder_p_lt_ctl00_OicCertificate_lbHeaderBar" className="text-center mb-0 w-100 fs-18 f-bd">พ.ร.บ.</p>
                 </div>
@@ -27,7 +26,7 @@ export default async function OicCertificate() {
 
             <div className="container pt-48">
                 <div className="pt-4">
-                    <h1 className="mb-0 fs-18 text-black"><strong className="f-bd">เลขที่ใบอนุญาตประกันวินาศภัย</strong></h1>
+                    <h1 className="mb-0 fs-18 text-black" style={{ textAlign: 'center' }}><strong className="f-bd">เลขที่ใบอนุญาตประกันวินาศภัย</strong></h1>
                 </div>
             </div>
 

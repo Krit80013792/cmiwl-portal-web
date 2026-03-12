@@ -27,7 +27,7 @@ export default async function OicCertificate() {
 
             <div className="container pt-48">
                 <div className="pt-4">
-                    <h1 className="mb-0 fs-18 text-black"><strong className="f-bd">เลขที่ใบอนุญาตเสนอขายประกันภัยผ่านช่องทางอิเล็กทรอนิกส์</strong></h1>
+                    <h1 className="mb-0 fs-18 text-black" style={{ textAlign: 'center' }}><strong className="f-bd">เลขที่ใบอนุญาตเสนอขายประกันภัยผ่านช่องทางอิเล็กทรอนิกส์</strong></h1>
                 </div>
             </div>
             <div className="container px-0">

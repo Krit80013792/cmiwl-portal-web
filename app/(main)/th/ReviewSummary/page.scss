@@ -12,7 +12,7 @@
 
         .review-summary-content {
 
-            overflow-y: auto;
+            overflow-y: scroll;
             max-height: calc(100vh - 122px);
 
             @include respond(tl) {}

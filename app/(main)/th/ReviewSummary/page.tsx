@@ -7,6 +7,7 @@ import { getDataFromSession } from '@/helpers/functions/getDataFromSession'
 import MainWithDynamicStyle from '@/cmi-layout/components/MainWithDynamicStyle'
 import Review from './_components/Review/Review'
 import Footer from './_components/Footer'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
@@ -108,7 +109,7 @@ export default async function ReviewSummary() {
                 <Review reviewType="coverage_date" />
               </div>
 
-              <div className="customer-info">
+              <div className="customer-info" style={{ paddingBottom: '100px' }}>
                 <div className="d-flex justify-content-between mb-12">
                   <h2 className="mb-0 text-black fs-18">
                     <strong>
@@ -120,8 +121,17 @@ export default async function ReviewSummary() {
                   <EditReview psAction="customer_info" />
                 </div>
                 <Review reviewType="customer_info" />
+                <div style={{ fontSize: '10px', display: 'flex', flexDirection: 'column' }}>
+                  <Link href={"/th/oic-certificate"} style={{ color: '#414243' }}>
+                    เลขที่ใบอนุญาตประกันวินาศภัย ว00015/2556
+                  </Link>
+                  <Link href={"/th/oic-certificate-electronic"} style={{ color: '#414243' }}>
+                    เลขที่ใบอนุญาตเสนอขายประกันภัยผ่านช่องทางอิเล็กทรอนิกส์ อลว 015521000/2563
+                  </Link>
+                </div>
               </div>
             </div>
+
           </div>
 
           <div className='review-summary-footer'>
@@ -250,6 +260,6 @@ export default async function ReviewSummary() {
         </div>
 
       </MainWithDynamicStyle>
-    </section>
+    </section >
   )
 }
