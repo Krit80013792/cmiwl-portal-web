@@ -25,12 +25,12 @@ const Payment = () => {
       // Comment this block out and restore the real API call when integrating.
       const mockData = [
         {
-          paymentMethodId: 1,
+          paymentMethodId: 2,
           paymentMethodTh: 'คิวอาร์โค้ด',
           payTypeCode: 'QRCS',
         },
         {
-          paymentMethodId: 2,
+          paymentMethodId: 1,
           paymentMethodTh: 'บัตรเครดิต',
           payTypeCode: 'CRDC',
         },
@@ -118,7 +118,9 @@ const Payment = () => {
             type="button"
             style={{
               width: '100%',
-              marginTop: '24px'
+              marginTop: '24px',
+              backgroundColor: '#3F74F5',
+              borderRadius: '12px'
             }}
             className={`btn btn-primary fs-6 d-flex text-center align-items-center justify-content-center ${!selectedPaymentMethod ? 'disabled' : ''}`}
             disabled={!selectedPaymentMethod}
@@ -130,7 +132,9 @@ const Payment = () => {
               }
             }}
           >
-            ดำเนินการชำระเงิน
+            <span style={{ fontSize: '18px', fontWeight: '600' }}>
+              ชำระเงิน
+            </span>
           </button>
 
           {/* <div className="text-center mt-12">
