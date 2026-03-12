@@ -95,7 +95,7 @@
 
 .payment-options .active {
     border: solid 2px var(--primary);
-    background-color: var(--bg-active)
+    /* background-color: var(--bg-active) */
 }
 
 .tidlor-active {

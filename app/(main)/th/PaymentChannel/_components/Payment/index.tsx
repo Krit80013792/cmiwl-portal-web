@@ -110,30 +110,36 @@ const Payment = () => {
           <div style={{ fontSize: '15px', color: '#414243' }}>
             <span style={{ fontWeight: '700' }}>หมายเหตุ : </span>
             <span>
-              หากคุณชำระเงินหลัง 23:00 วันที่เริ่ม ความคุ้มครองที่เลือกไว้ จะเริ่มคุ้มครองเป็นวันถัดไป ยกเว้นกรณีซื้อประกันล่วงหน้า
+              หากคุณชำระเงินหลัง 23:00 วันที่เริ่มความคุ้มครองที่เลือกไว้ จะเริ่มคุ้มครองเป็นวันถัดไป ยกเว้นกรณีซื้อประกันล่วงหน้า
             </span>
           </div>
+
+          <button
+            type="button"
+            style={{
+              width: '100%',
+              marginTop: '24px'
+            }}
+            className={`btn btn-primary fs-6 d-flex text-center align-items-center justify-content-center ${!selectedPaymentMethod ? 'disabled' : ''}`}
+            disabled={!selectedPaymentMethod}
+            onClick={() => {
+              if (selectedPaymentMethod === 1) {
+                route.push('/th/PaymentCredit')
+              } else if (selectedPaymentMethod === 2) {
+                route.push('/th/PaymentQR')
+              }
+            }}
+          >
+            ดำเนินการชำระเงิน
+          </button>
+
           {/* <div className="text-center mt-12">
             <img alt="Omise" width="150" height="24" src="/assets/object/omise.png" />
           </div> */}
         </div>
       </div>
-      <div className="btn-footer-wraper py-20 px-20 bg-white text-center">
-        <button
-          type="button"
-          className={`btn btn-primary fs-6 mx-auto d-flex text-center align-items-center justify-content-center ${!selectedPaymentMethod ? 'disabled' : ''}`}
-          disabled={!selectedPaymentMethod}
-          onClick={() => {
-            if (selectedPaymentMethod === 1) {
-              route.push('/th/PaymentCredit')
-            } else if (selectedPaymentMethod === 2) {
-              route.push('/th/PaymentQR')
-            }
-          }}
-        >
-          ดำเนินการชำระเงิน
-        </button>
-      </div>
+      {/* <div className="btn-footer-wraper py-20 px-20 bg-white text-center">
+      </div> */}
     </>
   )
 }
