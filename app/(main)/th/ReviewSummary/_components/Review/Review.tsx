@@ -18,7 +18,7 @@ const Review = ({ reviewType }: { reviewType: string }) => {
   switch (reviewType) {
     case 'vehicle_category':
       return (
-        <div className="info-box  rounded-4 pt-12 px-3 pb-12 mb-4" style={{ border: '1px solid #F2F2F2' }}>
+        <div className="info-box  rounded-4 pt-12 px-3 pb-12 mb-4" style={{ border: '1px solid #F2F2F2', backgroundColor: 'white' }}>
           <div className="d-flex justify-content-between mb-12">
             <span className="text-grey-2">ประเภทรถ</span>
             <span className="" style={{ color: '#1e1e1f' }}>{prefill?.productCmiDetail?.carTypeName?.replace(':', '/')}</span>
@@ -31,7 +31,7 @@ const Review = ({ reviewType }: { reviewType: string }) => {
       )
     case 'car_info':
       return (
-        <div className="info-box  rounded-4 pt-12 px-3 pb-12 mb-4" style={{ border: '1px solid #F2F2F2' }}>
+        <div className="info-box  rounded-4 pt-12 px-3 pb-12 mb-4" style={{ border: '1px solid #F2F2F2', backgroundColor: 'white' }}>
           <div className="d-flex justify-content-between mb-12">
             <span className="text-grey-2">ยี่ห้อรถ</span>
             <span className="" style={{ color: '#1e1e1f' }}>{prefill?.productCmiDetail?.carBrandName}</span>
@@ -71,7 +71,7 @@ const Review = ({ reviewType }: { reviewType: string }) => {
       )
     case 'coverage_date':
       return (
-        <div className="info-box  rounded-4 pt-12 px-3 pb-12 mb-4" style={{ border: '1px solid #F2F2F2' }}>
+        <div className="info-box  rounded-4 pt-12 px-3 pb-12 mb-4" style={{ border: '1px solid #F2F2F2', backgroundColor: 'white' }}>
           <div className="d-flex justify-content-between mb-12">
             <span className="text-grey-2">วันที่เริ่มความคุ้มครอง</span>
             <span className="" style={{ color: '#1e1e1f' }}>{dayjs(prefill?.customer?.coverageStartDate).format('DD MMMM YYYY')}</span>
@@ -84,7 +84,7 @@ const Review = ({ reviewType }: { reviewType: string }) => {
       )
     case 'customer_info':
       return (
-        <div className="info-box  rounded-4 pt-12 px-3 pb-12 mb-4" style={{ border: '1px solid #F2F2F2' }}>
+        <div className="info-box  rounded-4 pt-12 px-3 pb-12 mb-4" style={{ border: '1px solid #F2F2F2', backgroundColor: 'white' }}>
           <div className="d-flex justify-content-between mb-12">
             <span className="text-grey-2">ชื่อ-นามสกุล</span>
             <span className="" style={{ color: '#1e1e1f' }}>{`${prefill?.customer?.title} ${prefill?.customer?.firstName} ${prefill?.customer?.lastName}`}</span>

@@ -96,24 +96,22 @@ const Footer = () => {
 
   return (
     <>
-      <Modal {...modal} onClose={closeModal} />
-      <div className="btn-footer-wraper bg-white text-center d-flex justify-content-between">
-        <div className="container d-flex justify-content-between">
-          <div className="total-price text-grey">
-            <p className="mb-0 text-start f-md">ยอดชำระ</p>
-            <span className="mb-0 text-start f-bd fs-26">
-              {prefill?.productCmiDetail?.cmiCoverage?.total?.toLocaleString()}
-            </span>
-            <span className="fs-6 f-bd"> บาท</span>
-          </div>
-          <button
-            onClick={handleSubmitForm}
-            className="btn btn-primary submit-summary fs-6 d-flex justify-content-center align-items-center me-0"
-          >
-            <strong>ยืนยัน</strong>
-          </button>
-        </div>
+      {/* <Modal {...modal} onClose={closeModal} /> */}
+      {/* <div className="btn-footer-wraper bg-white text-center d-flex justify-content-between"> */}
+      <div className="total-price text-grey">
+        <p className="mb-0 text-start f-md" style={{ fontWeight: '700' }}>ยอดชำระ</p>
+        <span className="mb-0 text-start f-bd fs-26" style={{ color: '#3F74F5' }}>
+          {prefill?.productCmiDetail?.cmiCoverage?.total?.toLocaleString()}
+        </span>
+        <span className="fs-6"> บาท</span>
       </div>
+      <button
+        onClick={handleSubmitForm}
+        className="btn btn-primary submit-summary fs-6 d-flex justify-content-center align-items-center me-0 button"
+      >
+        <strong>ยืนยัน</strong>
+      </button>
+      {/* </div> */}
     </>
   )
 }

@@ -1,0 +1,57 @@
+@use '@/styles/layout/mixins' as *;
+
+#review-summary-page {
+    .review-summary-container {
+
+        @include respond(tl) {
+            display: flex;
+            gap: 24px;
+            justify-content: center;
+            max-height: unset;
+        }
+
+        .review-summary-content {
+
+            overflow-y: auto;
+            max-height: calc(100vh - 122px);
+
+            @include respond(tl) {}
+
+        }
+
+        .review-summary-footer {
+            display: flex;
+            justify-content: space-around;
+            background-color: white;
+            box-shadow: 0 4px 12px 0 rgba(30, 30, 31, 0.08);
+            height: fit-content;
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            padding: 16px;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+
+            @include respond(tl) {
+                position: static;
+                justify-content: center;
+                width: fit-content;
+                padding: 24px;
+                flex-direction: column;
+                justify-content: start;
+                border-radius: 16px !important;
+            }
+
+            .button {
+                width: 160px;
+                border-radius: 12px;
+
+                @include respond(tl) {
+                    margin-top: 16px;
+                    width: 192px;
+                }
+            }
+
+        }
+    }
+}

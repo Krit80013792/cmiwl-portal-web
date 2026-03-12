@@ -62,7 +62,7 @@ export default async function AppLayout({ children }: AppLayoutProps) {
         <link id="custom-css" href={`/themes/cmi/css/custom-select2.css`} rel="stylesheet" />
         <link id="select2-css" href={`/custom/plugin/select2/css/select2.min.css`} rel="stylesheet" />
       </head>
-      <body className="LTR Chrome THTH ContentBody" data-scroll-behavior="smooth">
+      <body className="LTR Chrome THTH ContentBody" data-scroll-behavior="smooth" style={{ backgroundColor: '#FCFCFC' }}>
         <MainWithDynamicStyle primaryColor={configValue?.primaryColor} secondaryColor={configValue?.secondaryColor}>
           <Providers>
             <PrimeReactProvider>
