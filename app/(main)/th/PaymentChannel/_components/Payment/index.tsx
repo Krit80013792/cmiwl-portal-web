@@ -107,6 +107,12 @@ const Payment = () => {
               )
             })}
           </div>
+          <div style={{ fontSize: '15px', color: '#414243' }}>
+            <span style={{ fontWeight: '700' }}>หมายเหตุ : </span>
+            <span>
+              หากคุณชำระเงินหลัง 23:00 วันที่เริ่ม ความคุ้มครองที่เลือกไว้ จะเริ่มคุ้มครองเป็นวันถัดไป ยกเว้นกรณีซื้อประกันล่วงหน้า
+            </span>
+          </div>
           {/* <div className="text-center mt-12">
             <img alt="Omise" width="150" height="24" src="/assets/object/omise.png" />
           </div> */}
