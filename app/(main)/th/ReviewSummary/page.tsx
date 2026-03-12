@@ -122,10 +122,10 @@ export default async function ReviewSummary() {
                 </div>
                 <Review reviewType="customer_info" />
                 <div style={{ fontSize: '10px', display: 'flex', flexDirection: 'column' }}>
-                  <Link href={"/th/oic-certificate"} style={{ color: '#414243' }}>
+                  <Link href={"/th/ReviewSummary/oic-certificate"} style={{ color: '#414243' }}>
                     เลขที่ใบอนุญาตประกันวินาศภัย ว00015/2556
                   </Link>
-                  <Link href={"/th/oic-certificate-electronic"} style={{ color: '#414243' }}>
+                  <Link href={"/th/ReviewSummary/oic-certificate-electronic"} style={{ color: '#414243' }}>
                     เลขที่ใบอนุญาตเสนอขายประกันภัยผ่านช่องทางอิเล็กทรอนิกส์ อลว 015521000/2563
                   </Link>
                 </div>
