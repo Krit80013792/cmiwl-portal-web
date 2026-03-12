@@ -55,63 +55,74 @@ export default async function ReviewSummary() {
         </div>
       </div>
 
-      <div className="content-section fullPage-100">
-        <div className="container">
-          <div className="bg-beige rounded-4 my-3 px-12 py-12">
-            <Image
-              className="img-fluid me-2"
-              alt="กรุณาตรวจสอบข้อมูล"
-              width="24"
-              height="24"
-              src="/assets/icon/warning.png"
-            />
-            <span className="text-orangePeel f-bd">กรุณาตรวจสอบข้อมูลก่อนชำระเงิน</span>
-          </div>
-          <div className="type-of-ctp">
-            <div className="d-flex justify-content-between mb-12">
-              <h2 className="mb-0 text-black fs-18">
-                <strong>ประเภท พ.ร.บ.</strong>
-              </h2>
-              <EditReview psAction="vehicle_category" />
+      <div>
+        <div className="content-section fullPage-100">
+          <div className="container">
+            <div>
+              <div className="d-flex justify-content-between mb-12" style={{ marginTop: '32px' }}>
+                <h2 className="mb-0 text-black fs-18">
+                  <strong>สรุปรายการ</strong>
+                </h2>
+              </div>
+            </div>
+            <div className="bg-beige rounded-4 my-3 px-12 py-12" style={{ border: '1px solid #FDCB12' }}>
+              <Image
+                className="img-fluid me-2"
+                alt="กรุณาตรวจสอบข้อมูล"
+                width="24"
+                height="24"
+                src="/assets/icon/alert-circle-solid.svg"
+              />
+              <span className="f-bd" style={{ color: '#723E11' }}>กรุณาตรวจสอบข้อมูลก่อนชำระเงิน</span>
+            </div>
+            <div className="type-of-ctp">
+              <div className="d-flex justify-content-between mb-12">
+                <h2 className="mb-0 text-black fs-18">
+                  <strong>ประเภท พ.ร.บ.</strong>
+                </h2>
+                <EditReview psAction="vehicle_category" />
+              </div>
+
+              <Review reviewType="vehicle_category" />
             </div>
 
-            <Review reviewType="vehicle_category" />
-          </div>
-
-          <div className="car-info">
-            <div className="d-flex justify-content-between mb-12">
-              <h2 className="mb-0 text-black fs-18">
-                <strong>รถยนต์เอาประกัน</strong>
-              </h2>
-              <EditReview psAction="car_info" />
+            <div className="car-info">
+              <div className="d-flex justify-content-between mb-12">
+                <h2 className="mb-0 text-black fs-18">
+                  <strong>รถยนต์เอาประกัน</strong>
+                </h2>
+                <EditReview psAction="car_info" />
+              </div>
+              <Review reviewType="car_info" />
             </div>
-            <Review reviewType="car_info" />
-          </div>
 
-          <div className="coverage-date">
-            <div className="d-flex justify-content-between mb-12">
-              <h2 className="mb-0 text-black fs-18">
-                <strong>ระยะเวลาความคุ้มครอง</strong>
-              </h2>
-              <EditReview psAction="coverage_date" />
+            <div className="coverage-date">
+              <div className="d-flex justify-content-between mb-12">
+                <h2 className="mb-0 text-black fs-18">
+                  <strong>ระยะเวลาความคุ้มครอง</strong>
+                </h2>
+                <EditReview psAction="coverage_date" />
+              </div>
+              <Review reviewType="coverage_date" />
             </div>
-            <Review reviewType="coverage_date" />
-          </div>
 
-          <div className="customer-info">
-            <div className="d-flex justify-content-between mb-12">
-              <h2 className="mb-0 text-black fs-18">
-                <strong>
-                  ผู้เอาประกันภัย
-                  <br className="d-block d-sm-none" />
-                  และการจัดส่งกรมธรรม์
-                </strong>
-              </h2>
-              <EditReview psAction="customer_info" />
+            <div className="customer-info">
+              <div className="d-flex justify-content-between mb-12">
+                <h2 className="mb-0 text-black fs-18">
+                  <strong>
+                    ผู้เอาประกันภัย
+                    <br className="d-block d-sm-none" />
+                    และการจัดส่งกรมธรรม์
+                  </strong>
+                </h2>
+                <EditReview psAction="customer_info" />
+              </div>
+              <Review reviewType="customer_info" />
             </div>
-            <Review reviewType="customer_info" />
           </div>
         </div>
+
+        <Footer />
       </div>
 
       <div
@@ -234,7 +245,6 @@ export default async function ReviewSummary() {
         </div>
       </div>
 
-      <Footer />
     </MainWithDynamicStyle>
   )
 }

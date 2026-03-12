@@ -40,7 +40,7 @@ export default function EditReview({ psAction }: Props) {
   return (
     <>
       <Button onClick={handleBackToEdit} className="p-button-text p-button-plain p-0">
-        <img className="img-fluid me-1" alt="แก้ไข" width="63" height="24" src="/assets/icon/edit-text.png" />
+        <img className="img-fluid me-1" alt="แก้ไข" width="63" height="24" src="/assets/icon/edit.svg" />
       </Button>
       <Modal {...modal} onClose={closeModal} />
 
