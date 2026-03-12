@@ -10,12 +10,12 @@ interface ChassisDialogProps {
 const TabButton = styled.button.withConfig({
   shouldForwardProp: (prop) => prop !== 'active',
 }) <{ active?: boolean }>`
-  color: #3e3e3e;
   padding: 8px 16px;
   border-radius: 50px;
-  // border: solid ${({ active }) => (active ? '2px var(--primary)' : '1px #c9c9c9')} !important;
-  // background-color: ${({ active }) => (active ? 'var(--bg-active)' : '#fff')} !important;
-  // font-weight: ${({ active }) => (active ? 'bold' : 'normal')};
+  color: #3e3e3e;
+  color: ${({ active }) => (active ? '#FFFFFF !important' : '#1E1E1F !important')};
+  background-color: ${({ active }) => (active ? '#3F74F5 !important' : '#F2F2F2 !important')};
+
 `
 
 const TABS = [
