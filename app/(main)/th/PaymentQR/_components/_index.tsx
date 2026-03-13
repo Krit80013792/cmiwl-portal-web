@@ -12,7 +12,6 @@ import Modal from '@/cmi-layout/components/Modal'
 import { useModal } from '@/helpers/hooks/useModal'
 import { useRouter } from 'next/navigation'
 import { paymentSlice } from '@/stores/redux/slices/paymentSlice'
-import Link from 'next/link'
 dayjs.locale('th')
 
 const PaymentQRComponents = () => {
@@ -201,169 +200,61 @@ const PaymentQRComponents = () => {
   ) : data.paymentStatus === 'idle' ? (
     <div>
       <Modal {...modal} onClose={closeModal} />
-      <div className="content-section fullPage-92" style={{ padding: '80px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '364px', margin: '0 auto' }}>
-        <div id="gradient-container"
-          className="rounded-4 overflow-hidden shadow-sm"
-          style={{
-            width: '100%',
-            borderRadius: '24px',
-            position: 'relative',
-          }}
-        >
-          {/* <div
-            style={{
-              width: '182px',
-              height: '182px',
-              borderRadius: '1263.889px 0 0 0',
-              background: 'linear-gradient(170deg, #1747BA -2.28%, rgba(31, 89, 227, 0.00) 88.33%)',
-              position: 'absolute',
-              zIndex: '-1',
-              transform: 'rotate(-180deg)'
-            }}
-          >
-          </div>
-          <div
-            style={{
-              width: '292.211px',
-              height: '182px',
-              borderRadius: '1263.889px 0 0 0',
-              background: 'linear-gradient(156deg, #1F59E3 24.17%, rgba(31, 89, 227, 0.00) 62.82%)',
-              position: 'absolute',
-              zIndex: '-1',
-              transform: 'rotate(-180deg)'
-            }}
-          >
-          </div> */}
-
-
-          <div
-            style={{ backgroundColor: '#2F80ED' }}
-          >
-            <div
-              className="text-center text-white f-bd"
-              style={{ padding: '16px 0', fontSize: '20px', fontWeight: 700 }}
-            >
-              สแกนเพื่อชำระเงิน
-            </div>
-            <div
-              className="rounded-4 p-3 p-md-4 text-center"
-              style={{
-                maxWidth: 'min(100%, 340px)',
-                backgroundColor: '#fff',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                margin: '0 18px'
-              }}
-            >
-              {/* {qrData?.fileImage && (
-                <div className="mb-2 mb-md-3">
-                  <Image
-                    src={qrData.fileImage}
-                    unoptimized
-                    priority
-                    alt="QR Code"
-                    width={140} height={140}
-                    className="img-fluid"
-                    style={{ maxWidth: '100%', height: 'auto' }}
-                  />
-                </div>
-                //todo: uncomment
-              )} */}
-
-              <div className="mb-2 mb-md-3">
-                <Image
-                  src="/assets/icon/cash.svg"
-                  unoptimized
-                  priority
-                  alt="QR Code"
-                  width={140} height={140}
-                  className="img-fluid"
-                  style={{ maxWidth: '100%', height: 'auto' }}
-                />
-              </div>
-              <div className="text-danger fs-14" style={{ fontWeight: 400, marginBottom: '12px' }}>
-                คิวอาร์โค้ดนี้จะหมดอายุ <span>{qrData?.qrExpiryDate ?? '–'}</span>
-              </div>
-              <p className="text-dark mb-1 fs-6">
-                พ.ร.บ. <span>{data?.productCmiDetail?.compulsoryText ?? '–'}</span>
-              </p>
-              <p className="text-secondary mb-3 fs-14">
-                เลขทะเบียน{' '}
-                <span>{[data?.productCmiDetail?.licensePrefix, data?.productCmiDetail?.licenseNo].filter(Boolean).join('') || '–'}</span>
-              </p>
-              <div
-                className="d-flex align-items-center px-3 py-2"
-                style={{ backgroundColor: '#EFF5FF', justifyContent: 'center', borderRadius: '12px', height: '40px' }}
-              >
-                <span className="text-dark fs-14" style={{ fontWeight: 600, marginRight: '4px' }}>ยอดที่ต้องชำระ</span>
-                <span className="f-bd" style={{ fontSize: '24px', color: '#2F80ED', transform: 'translateY(-2px)' }}>
-                  {data?.productCmiDetail?.cmiCoverage?.total ?? '–'}{' '}
-                  <span className="fs-14 f-normal">บาท</span>
-                </span>
-              </div>
-              {true &&
-                //todo: if online type -> show , offline (print docs)  not show
-                <>
-                  <div style={{ borderTop: '1px solid #DDD', margin: '12px 0' }}></div>
-                  <p className="text-dark mb-2 fs-14" style={{ fontWeight: 600 }}>สิ่งที่คุณจะได้รับหลังจากชำระเงิน</p>
-                  <section id="delivery-type-container">
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      <Image src="/assets/icon/email-solid.svg" alt="email-solic" width={16} height={16} />
-                      <div>
-                        <div className="mb-1 fs-14" style={{ color: '#1E1E1F', fontWeight: '600' }}>
-                          อีเมล (ภายใน 15 นาที)
-                        </div>
-                        <div className="text-muted fs-14 mb-0" style={{ color: '#616166', textAlign: 'start' }}>
-                          {data?.deliveryType?.isEmail ? data?.deliveryType?.policyEmail : '–'}
-                        </div>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: 4 }}>
-                      <Image src="/assets/icon/pin-solid.svg" alt="email-solic" width={16} height={16} />
-                      <div>
-                        <div className="mb-1 fs-14" style={{ color: '#1E1E1F', fontWeight: '600', textAlign: 'start' }}>
-                          ที่อยู่จัดส่ง (ภายใน 15 วัน)
-                        </div>
-                        <div className="text-muted fs-14 mb-0" style={{ color: '#616166', textAlign: 'start' }}>
-                          address mock texttttttttttttttttt
-                        </div>
-                      </div>
-                    </div>
-                  </section>
-                </>
-              }
+      <div className="content-section fullPage-92 pt-48">
+        <div className="container">
+          <h1 className="typ-of-vehicle fs-6 text-grey mb-0 mt-3 f-bd">
+            พ.ร.บ. <span>{data?.productCmiDetail?.compulsoryText}</span>
+          </h1>
+          <p className="registered-id text-lightgrey mb-0">
+            เลขทะเบียน <span>{`${data?.productCmiDetail?.licensePrefix}-${data?.productCmiDetail?.licenseNo}`}</span>
+          </p>
+          <div className="d-flex justify-content-between align-items-center my-2">
+            <span className="text-grey f-bd align-center">ยอดที่ต้องชำระ</span>
+            <div>
+              <span className="mb-0 text-start f-bd fs-26">{`${data?.productCmiDetail?.cmiCoverage?.total} `}</span>
+              <span className="fs-6 f-bd">บาท/ปี</span>
             </div>
           </div>
+          <div className="bg-lightgrey rounded-4 py-3 mb-12">
+            <div className="text-center mb-2">
+              {qrData?.fileImage && (
+                <Image src={qrData?.fileImage} unoptimized priority alt="QR Code" width={152} height={213} />
+              )}
+            </div>
+            <div className="text-center mb-2">
+              <Image className="d-inline me-1" alt="Clock" width="16" height="17" src="/assets/icon/clock.png" />
+              <p className="text-red mb-0 fs-14 text-center f-bd d-inline">
+                คิวอาร์โค้ดนี้มีอายุถึง <span>{qrData?.qrExpiryDate}</span>
+              </p>
+            </div>
+            <p className="text-center text-lightgrey mb-0 fs-14">
+              หากคุณชำระเงินหลังวันที่เริ่มความคุ้มครองที่เลือกไว้
+              <br />
+              ประกันจะเริ่มคุ้มครองเป็นวันถัดไป
+              <br />
+              ยกเว้นกรณีซื้อประกันล่วงหน้า
+            </p>
+          </div>
+          <h2 className="f-bd mb-0 fs-6">หลังจากชำระเงิน</h2>
+          <p className="fs-14">
+            <span>กรมธรรม์อิเล็กทรอนิกส์จะถูกจัดส่งภายใน 15 นาที</span>
+          </p>
         </div>
 
-        <div style={{ width: '100%', display: 'flex', justifyContent: 'center', gap: 16, marginTop: 24 }}>
-          <Button
-            type="button"
-            outlined
-            className="btn fs-6 d-flex align-items-center justify-content-center w-100"
-            style={{ height: '48px', backgroundColor: '#DBE7FE', borderRadius: '12px', color: '#3F74F5' }}
-            onClick={() => route.push('/th/VehicleCTP')}
-          >
-            กลับหน้าหลัก
-          </Button>
-          <Button
-            type="button"
-            className="btn btn-primary fs-6 d-flex align-items-center justify-content-center w-100"
-            style={{
-              height: '48px', borderRadius: '12px'
-            }}
-            onClick={() => {
-              //todo: click download link
-              //todo: after download success -> show success toast
-            }}
-          >
-            บันทึกคิวอาร์โค้ด
-          </Button>
+        <div className="text-center mt-12">
+          <Image alt="Omise" width="150" height="24" src="/assets/object/omise.png" />
         </div>
-
       </div>
-
-
-    </div >
+      <div className="btn-footer-wraper qrPayment-backHomeBTN py-20 px-20 bg-white text-center">
+        <Button
+          type="button"
+          className="btn btn-primary fs-6 mx-auto d-flex text-center align-items-center justify-content-center"
+          onClick={() => route.replace('https://app.tidlor.com/main')}
+        >
+          กลับหน้าหลัก
+        </Button>
+      </div>
+    </div>
   ) : null
 }
 

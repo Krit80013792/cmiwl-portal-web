@@ -2,7 +2,7 @@ import React from 'react'
 import { Metadata } from 'next'
 import { getDataFromSession } from '@/helpers/functions/getDataFromSession'
 import MainWithDynamicStyle from '@/cmi-layout/components/MainWithDynamicStyle'
-import PaymentQRComponents from './_components'
+import PaymentQRComponents from './_components/index'
 import './page.scss'
 
 export const dynamic = 'force-dynamic'
