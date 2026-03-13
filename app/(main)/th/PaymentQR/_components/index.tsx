@@ -3,7 +3,7 @@
 import useLoading from '@/helpers/hooks/useLoading'
 import Image from 'next/image'
 import { Button } from 'primereact/button'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { getPaymentQrCode, getPaymentQrStatus } from '../_actions'
 import dayjs from 'dayjs'
@@ -12,7 +12,6 @@ import Modal from '@/cmi-layout/components/Modal'
 import { useModal } from '@/helpers/hooks/useModal'
 import { useRouter } from 'next/navigation'
 import { paymentSlice } from '@/stores/redux/slices/paymentSlice'
-import Link from 'next/link'
 dayjs.locale('th')
 
 const PaymentQRComponents = () => {
@@ -24,10 +23,31 @@ const PaymentQRComponents = () => {
   const paymentData = useSelector((state: any) => state.payment)
   const [data, setData] = useState<any>({})
   const [qrData, setQrData] = useState<any>({})
+  const [isToastVisible, setIsToastVisible] = useState(false)
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     setData({ ...prefillData, ...paymentData })
   }, [prefillData, paymentData])
+
+  const showSuccessToast = useCallback(() => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current)
+    }
+    setIsToastVisible(true)
+    toastTimeoutRef.current = setTimeout(() => {
+      setIsToastVisible(false)
+    }, 3000)
+  }, [])
+
+  useEffect(
+    () => () => {
+      if (toastTimeoutRef.current) {
+        clearTimeout(toastTimeoutRef.current)
+      }
+    },
+    [],
+  )
 
   const fetchPayment = useCallback(async () => {
     try {
@@ -135,8 +155,43 @@ const PaymentQRComponents = () => {
     }
   }, [data.paymentStatus, handleCheckPaymentStatus, qrData?.paymentNo])
 
+  const toast = (
+    <div
+      style={{
+        position: 'fixed',
+        top: '90px',
+        left: '50%',
+        transform: isToastVisible ? 'translate(-50%, 0)' : 'translate(-50%, -16px)',
+        zIndex: 1060,
+        transition: 'opacity 0.3s ease, transform 0.3s ease',
+        opacity: isToastVisible ? 1 : 0,
+        pointerEvents: 'none',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          padding: '10px 8px',
+          borderRadius: 12,
+          border: '1px solid #1BB05E',
+          backgroundColor: '#F1FFF7',
+          minWidth: 328,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
+        }}
+      >
+        <Image src="/assets/icon/check-circle-solid.svg" alt="check-circle" width={24} height={24} />
+        <div style={{ textAlign: 'left' }}>
+          <div style={{ fontWeight: 700, fontSize: '15px', color: '#1B5E20', marginBottom: 2 }}>บันทึกลงเครื่องเรียบร้อยแล้ว</div>
+        </div>
+      </div>
+    </div>
+  )
+
   return data.paymentStatus === 'success' ? (
     <div>
+      {toast}
       <div className="content-section fullPage-92 pt-48">
         <div className="container text-center my-4">
           {/* Success Icon */}
@@ -211,6 +266,7 @@ const PaymentQRComponents = () => {
           }}
         >
           {/* <div
+          //todo: implement later
             style={{
               width: '182px',
               height: '182px',
@@ -243,6 +299,7 @@ const PaymentQRComponents = () => {
               className="text-center text-white f-bd"
               style={{ padding: '16px 0', fontSize: '20px', fontWeight: 700 }}
             >
+              {toast}
               สแกนเพื่อชำระเงิน
             </div>
             <div
@@ -266,7 +323,7 @@ const PaymentQRComponents = () => {
                     style={{ maxWidth: '100%', height: 'auto' }}
                   />
                 </div>
-                //todo: uncomment
+                //todo: uncomment when want real QR code
               )} */}
 
               <div className="mb-2 mb-md-3">
@@ -305,7 +362,7 @@ const PaymentQRComponents = () => {
                 <>
                   <div style={{ borderTop: '1px solid #DDD', margin: '12px 0' }}></div>
                   <p className="text-dark mb-2 fs-14" style={{ fontWeight: 600 }}>สิ่งที่คุณจะได้รับหลังจากชำระเงิน</p>
-                  <section id="delivery-type-container">
+                  <section id="delivery-type-container" style={{ overflowWrap: 'anywhere' }}>
                     <div style={{ display: 'flex', gap: 4 }}>
                       <Image src="/assets/icon/email-solid.svg" alt="email-solic" width={16} height={16} />
                       <div>
@@ -352,8 +409,8 @@ const PaymentQRComponents = () => {
               height: '48px', borderRadius: '12px'
             }}
             onClick={() => {
-              //todo: click download link
-              //todo: after download success -> show success toast
+              // todo: click download link
+              showSuccessToast()
             }}
           >
             บันทึกคิวอาร์โค้ด
