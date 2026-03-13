@@ -196,67 +196,63 @@ const PaymentQRComponents = () => {
 
   return data.paymentStatus === 'success' ? (
     <div>
-      {toast}
-      <div className="content-section fullPage-92 pt-48">
-        <div className="container text-center my-4">
+      <div
+        className="content-section fullPage-92"
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          paddingTop: 0,
+          paddingBottom: 0,
+        }}
+      >
+        <div className="container text-center my-4" style={{ width: '100%', maxWidth: 500 }}>
           {/* Success Icon */}
           <div className="d-flex justify-content-center mb-4">
             <Image alt="Success" width="80" height="80" src="/assets/icon/icon-success.png" />
           </div>
 
           {/* Success Message */}
-          <h1 className="f-bd mb-4" style={{ color: '#4CAF50', fontSize: '24px' }}>
+          <h1 className="f-bd mb-3" style={{ color: '#1E1E1F', fontSize: '18px' }}>
             ขอบคุณที่ซื้อประกันกับเรา
           </h1>
 
           {/* Email Confirmation Box */}
-          <div className="bg-lightgrey rounded-4 p-4 mb-3 mx-auto" style={{ maxWidth: '500px' }}>
-            <p className="text-grey mb-2 fs-14">
-              {`บริษัท วิริยะประกันภัย จำกัด (มหาชน) จะจัดส่งเอกสารกรมธรรม์ และรายละเอียดอื่นๆ ให้คุณทาง ${[data?.channel?.isPolicyEmail && 'อีเมล', data?.channel?.isPolicySms && 'SMS']
-                .filter(Boolean)
-                .join(', ') || '-'
-                }`}
-            </p>
-            <p className="f-bd mb-2" style={{ fontSize: '18px', color: '#333' }}>
-              {[
-                data?.deliveryType?.isEmail && `${data?.deliveryType?.policyEmail}`,
-                data?.deliveryType?.isSms && `${data?.deliveryType?.policySms}`,
-              ]
-                .filter(Boolean)
-                .join(', ') || '-'}
-            </p>
-            <p className="text-grey mb-0 fs-14">
-              ภายใน 15 นาที หากไม่พบเอกสาร
-              <br />
-              สามารถตรวจสอบได้ใน Junk Email
-            </p>
+          <div className="rounded-4 p-4 mb-3 mx-auto" style={{ maxWidth: '500px', backgroundColor: '#EFF5FF' }}>
+            <>
+              <p className="text-start text-dark mb-2 fs-14" style={{ fontWeight: 600 }}>ช่องทางรับเอกสารและกรมธรรม์</p>
+              <section id="delivery-type-container" style={{ overflowWrap: 'anywhere' }}>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  <Image src="/assets/icon/email-solid.svg" alt="email-solic" width={16} height={16} />
+                  <div>
+                    <div className="mb-1 fs-14" style={{ color: '#1E1E1F', fontWeight: '600' }}>
+                      อีเมล (ภายใน 15 นาที)
+                    </div>
+                    <div className="text-muted fs-14 mb-0" style={{ color: '#616166', textAlign: 'start' }}>
+                      {data?.deliveryType?.isEmail ? data?.deliveryType?.policyEmail : '–'}
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ borderTop: '1px solid #DDD', margin: '12px 0' }}></div>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  <Image src="/assets/icon/pin-solid.svg" alt="email-solic" width={16} height={16} />
+                  <div>
+                    <div className="mb-1 fs-14" style={{ color: '#1E1E1F', fontWeight: '600', textAlign: 'start' }}>
+                      ที่อยู่จัดส่ง (ภายใน 15 วัน)
+                    </div>
+                    <div className="text-muted fs-14 mb-0" style={{ color: '#616166', textAlign: 'start' }}>
+                      address mock texttttttttttttttttt
+                    </div>
+                  </div>
+                </div>
+              </section>
+            </>
           </div>
         </div>
       </div>
 
-      {/* Footer Buttons */}
-      <div className="btn-footer-wraper py-3 px-3 bg-white" style={{ position: 'fixed', bottom: 0, left: 0, right: 0 }}>
-        <div className="container">
-          <Button
-            type="button"
-            outlined
-            className="btn btn-outline-primary fs-6 w-100 mb-2 d-flex text-center align-items-center justify-content-center"
-            style={{ padding: '12px' }}
-            // TODO: Update link to user's products page
-            onClick={() => route.replace('https://app.tidlor.com/main')}
-          >
-            ดูผลิตภัณฑ์ของฉัน
-          </Button>
-          <Button
-            type="button"
-            className="btn btn-primary fs-6 w-100 d-flex text-center align-items-center justify-content-center"
-            style={{ padding: '12px' }}
-            onClick={() => route.replace('https://app.tidlor.com/main')}
-          >
-            กลับหน้าหลัก
-          </Button>
-        </div>
-      </div>
     </div>
   ) : data.paymentStatus === 'idle' ? (
     <div>
