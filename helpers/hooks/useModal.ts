@@ -28,9 +28,9 @@ export function useModal(initial?: Omit<ModalOptions, 'isOpen'>) {
 
   const openModal = useCallback(
     (options?: Omit<ModalOptions, 'isOpen'>) => {
-      setModal({ ...modal, ...options, isOpen: true })
+      setModal((prev) => ({ ...prev, ...options, isOpen: true }))
     },
-    [modal],
+    [],
   )
 
   const closeModal = useCallback(() => {
@@ -47,8 +47,8 @@ export function useModal(initial?: Omit<ModalOptions, 'isOpen'>) {
       onCancel?: () => void
       hasImg?: boolean
     }) => {
-      setModal({
-        ...modal,
+      setModal((prev) => ({
+        ...prev,
         isOpen: true,
         type: 'confirm',
         title: options.title,
@@ -61,9 +61,9 @@ export function useModal(initial?: Omit<ModalOptions, 'isOpen'>) {
         },
         hasImg: options.hasImg,
         renderActions: undefined,
-      })
+      }))
     },
-    [modal],
+    [],
   )
 
   return { modal, openModal, closeModal, openConfirmModal }

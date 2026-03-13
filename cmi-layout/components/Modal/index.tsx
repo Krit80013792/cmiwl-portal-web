@@ -24,6 +24,7 @@ const typeConfig: Record<ModalType, { imageSrc?: string; imageAlt: string; color
     colorClass: 'text-primary',
   },
   info: {
+    imageSrc: '/assets/icon/system.svg',
     imageAlt: 'ข้อมูล',
     colorClass: 'text-info',
   },
@@ -156,7 +157,11 @@ const Modal: React.FC<Props> = ({
   }
 
   return (
-    <div className={`modal confirm-modal fade show`} style={{ display: 'block' }} aria-modal="true">
+    <div
+      className={`modal confirm-modal fade show`}
+      style={{ display: 'block', backgroundColor: 'rgba(30, 30, 31, 0.80)' }}
+      aria-modal="true"
+    >
       <div className="modal-dialog modal-dialog-centered mx-4 mx-sm-auto">
         <div className="modal-content rounded-4">
           <div className="modal-body pt-20 px-20 pb-20 text-center">

@@ -3,6 +3,7 @@ import { Metadata } from 'next'
 import { getDataFromSession } from '@/helpers/functions/getDataFromSession'
 import MainWithDynamicStyle from '@/cmi-layout/components/MainWithDynamicStyle'
 import PaymentQRComponents from './_components'
+import './page.scss'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,16 +26,18 @@ export default async function PaymentQR() {
   }
 
   return (
-    <MainWithDynamicStyle primaryColor={configValue?.primaryColor} secondaryColor={configValue?.secondaryColor}>
-      <div className="head-bar">
-        <div className="container d-flex align-items-center">
-          <a href="/th/PaymentChannel" className="back-btn">
-            <img alt="กลับ" width="36" height="36" src="/assets/icon/back.png" />
-          </a>
-          <p className="text-center mb-0 w-100 fs-18 f-bd">พ.ร.บ.</p>
+    <section id="payment-qr-page">
+      <MainWithDynamicStyle primaryColor={configValue?.primaryColor} secondaryColor={configValue?.secondaryColor}>
+        <div className="head-bar">
+          <div className="container d-flex align-items-center">
+            <a href="/th/PaymentChannel" className="back-btn">
+              <img alt="กลับ" width="36" height="36" src="/assets/icon/back.png" />
+            </a>
+            <p className="text-center mb-0 w-100 fs-18 f-bd">พ.ร.บ.</p>
+          </div>
         </div>
-      </div>
-      <PaymentQRComponents />
-    </MainWithDynamicStyle>
+        <PaymentQRComponents />
+      </MainWithDynamicStyle>
+    </section>
   )
 }

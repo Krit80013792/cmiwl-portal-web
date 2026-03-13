@@ -46,12 +46,45 @@ const PaymentQRComponents = () => {
         }),
       )
       setQrData(mockQrData)
+
+      const now = dayjs()
+      const isAfterElevenThirty = now.hour() > 23 || (now.hour() === 23 && now.minute() >= 30)
+      // todo: check this to true to test modal 
+      if (isAfterElevenThirty) {
+        openModal({
+          hasImg: false,
+          type: 'info',
+          title: '',
+          content: (
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                paddingLeft: 24,
+                paddingRight: 24,
+                fontWeight: 700,
+                fontSize: '18px',
+                color: '#1E1E1F',
+                gap: 16,
+              }}
+            >
+              <Image src="/assets/icon/guard.svg" alt="guard" width={54} height={54} />
+              <div>
+                <span>วันเริ่มต้นความคุ้มครองจะปรับเป็น</span>
+                <span>วันถัดไป หลังชำระเงินสำเร็จ</span>
+              </div>
+            </div>
+          ),
+        })
+      }
     } catch (error) {
       console.error('Error fetching payment types:', error)
     } finally {
       closeLoading()
     }
-  }, [openLoading, closeLoading, dispatch])
+  }, [openLoading, closeLoading, dispatch, openModal])
 
   useEffect(() => {
     fetchPayment()
@@ -99,11 +132,10 @@ const PaymentQRComponents = () => {
           {/* Email Confirmation Box */}
           <div className="bg-lightgrey rounded-4 p-4 mb-3 mx-auto" style={{ maxWidth: '500px' }}>
             <p className="text-grey mb-2 fs-14">
-              {`บริษัท วิริยะประกันภัย จำกัด (มหาชน) จะจัดส่งเอกสารกรมธรรม์ และรายละเอียดอื่นๆ ให้คุณทาง ${
-                [data?.channel?.isPolicyEmail && 'อีเมล', data?.channel?.isPolicySms && 'SMS']
-                  .filter(Boolean)
-                  .join(', ') || '-'
-              }`}
+              {`บริษัท วิริยะประกันภัย จำกัด (มหาชน) จะจัดส่งเอกสารกรมธรรม์ และรายละเอียดอื่นๆ ให้คุณทาง ${[data?.channel?.isPolicyEmail && 'อีเมล', data?.channel?.isPolicySms && 'SMS']
+                .filter(Boolean)
+                .join(', ') || '-'
+                }`}
             </p>
             <p className="f-bd mb-2" style={{ fontSize: '18px', color: '#333' }}>
               {[
