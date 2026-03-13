@@ -316,7 +316,7 @@ const PaymentQRComponents = () => {
                 margin: '0 18px'
               }}
             >
-              {/* {qrData?.fileImage && (
+              {qrData?.fileImage && (
                 <div className="mb-2 mb-md-3">
                   <Image
                     src={qrData.fileImage}
@@ -328,20 +328,8 @@ const PaymentQRComponents = () => {
                     style={{ maxWidth: '100%', height: 'auto' }}
                   />
                 </div>
-                //todo: uncomment when want real QR code
-              )} */}
+              )}
 
-              <div className="mb-2 mb-md-3">
-                <Image
-                  src="/assets/icon/cash.svg"
-                  unoptimized
-                  priority
-                  alt="QR Code"
-                  width={140} height={140}
-                  className="img-fluid"
-                  style={{ maxWidth: '100%', height: 'auto' }}
-                />
-              </div>
               <div className="text-danger fs-14" style={{ fontWeight: 400, marginBottom: '12px' }}>
                 คิวอาร์โค้ดนี้จะหมดอายุ <span>{qrData?.qrExpiryDate ?? '–'}</span>
               </div>
@@ -363,7 +351,7 @@ const PaymentQRComponents = () => {
                 </span>
               </div>
               {true &&
-                //todo: if online type -> show , offline (print docs)  not show
+                //todo: implement document delivery type , offline (print docs)  not show
                 <>
                   <div style={{ borderTop: '1px solid #DDD', margin: '12px 0' }}></div>
                   <p className="text-dark mb-2 fs-14" style={{ fontWeight: 600 }}>สิ่งที่คุณจะได้รับหลังจากชำระเงิน</p>
