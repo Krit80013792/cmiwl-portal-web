@@ -258,23 +258,24 @@ const PaymentQRComponents = () => {
     <div>
       <Modal {...modal} onClose={closeModal} />
       <div className="content-section fullPage-92" style={{ padding: '80px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', maxWidth: '364px', margin: '0 auto' }}>
-        <div id="gradient-container"
-          className="rounded-4 overflow-hidden shadow-sm"
+        <div
+          id="gradient-container"
+          className="rounded-4 overflow-hidden"
           style={{
             width: '100%',
             borderRadius: '24px',
             position: 'relative',
+            background: 'linear-gradient(180deg, #0D50F2 0%, #3F74F5 52%, #FFFFFF 100%)',
           }}
         >
-          {/* <div
-          //todo: implement later
+          <div
             style={{
               width: '182px',
               height: '182px',
               borderRadius: '1263.889px 0 0 0',
-              background: 'linear-gradient(170deg, #1747BA -2.28%, rgba(31, 89, 227, 0.00) 88.33%)',
+              background: 'linear-gradient(45deg, #1747BA -2.28%, rgba(31, 89, 227, 0.00) 88.33%)',
               position: 'absolute',
-              zIndex: '-1',
+              zIndex: '2',
               transform: 'rotate(-180deg)'
             }}
           >
@@ -284,17 +285,15 @@ const PaymentQRComponents = () => {
               width: '292.211px',
               height: '182px',
               borderRadius: '1263.889px 0 0 0',
-              background: 'linear-gradient(156deg, #1F59E3 24.17%, rgba(31, 89, 227, 0.00) 62.82%)',
+              background: 'linear-gradient(45deg, #1F59E3 24.17%, rgba(31, 89, 227, 0.00) 62.82%)',
               position: 'absolute',
-              zIndex: '-1',
+              zIndex: '1',
               transform: 'rotate(-180deg)'
             }}
           >
-          </div> */}
-
-
+          </div>
           <div
-            style={{ backgroundColor: '#2F80ED' }}
+            style={{ position: 'relative', zIndex: '3', padding: '16px 0' }}
           >
             <div
               className="text-center text-white f-bd"
