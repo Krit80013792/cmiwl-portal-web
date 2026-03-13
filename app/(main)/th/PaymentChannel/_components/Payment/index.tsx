@@ -21,8 +21,7 @@ const Payment = () => {
     try {
       openLoading()
 
-      // MOCK: hardcoded payment methods for local viewing without backend
-      // Comment this block out and restore the real API call when integrating.
+      // todo: hardcoded payment methods for local viewing without backend
       const mockData = [
         {
           paymentMethodId: 2,
@@ -30,14 +29,27 @@ const Payment = () => {
           payTypeCode: 'QRCS',
         },
         {
+          //todo: mock
           paymentMethodId: 1,
           paymentMethodTh: 'บัตรเครดิต',
-          payTypeCode: 'CRDC',
+          payTypeCode: 'MOCK1',
+        },
+        {
+          //todo: mock
+          paymentMethodId: 98,
+          paymentMethodTh: 'เงินสด',
+          payTypeCode: 'MOCK2',
+        },
+        {
+          //todo: mock
+          paymentMethodId: 99,
+          paymentMethodTh: 'หักยอดสินเชื่อ ( CV/On Top)',
+          payTypeCode: 'MOCK3',
         },
       ]
       setPaymentMethodList(mockData)
 
-      // Real implementation:
+      // todo: real implementation:
       // const res = await getPaymentType()
       // const data = res.data.data
       // setPaymentMethodList(data ?? [])
@@ -78,27 +90,30 @@ const Payment = () => {
                     className={`w-100 border-grey d-flex align-items-center mb-3 ${isActive}`}
                     style={{ border: `1px solid ${isActive ? '#1E3FD7' : '#DDDDDF'}`, padding: '16px', gap: '8px', borderRadius: '16px', height: '56px' }}
                   >
-                    {e.payTypeCode === 'QRCS' ? (
+                    {e.payTypeCode === 'QRCS' && (
                       <div>
                         <Image alt="qr-scan" width="24" height="24" src="/assets/icon/qr-scan.svg" />
                       </div>
-                    ) : (
+                    )}
+
+                    {e.payTypeCode === 'MOCK1' && (
                       <div>
-                        {/* <Image className="me-2" alt="Visa" width="42" height="32" src="/assets/icon/visa.png" />
-                        <Image
-                          className="me-2"
-                          alt="Mastercard"
-                          width="42"
-                          height="32"
-                          src="/assets/icon/mastercard.png"
-                        />
-                        <Image alt="JCB" width="42" height="32" src="/assets/icon/jcb.png" /> */}
                         <Image
                           alt="credit-card-solid"
                           width="24"
                           height="24"
                           src="/assets/icon/credit-card-solid.svg"
                         />
+                      </div>
+                    )}
+                    {e.payTypeCode === 'MOCK2' && (
+                      <div>
+                        <Image alt="cash" width="24" height="24" src="/assets/icon/cash.svg" />
+                      </div>
+                    )}
+                    {e.payTypeCode === 'MOCK3' && (
+                      <div>
+                        <Image alt="deduct-amount-solid" width="24" height="24" src="/assets/icon/deduct-amount-solid.svg" />
                       </div>
                     )}
                     <span style={{ color: '#1E1E1F', fontWeight: '600' }}>{e.paymentMethodTh}</span>
@@ -130,20 +145,20 @@ const Payment = () => {
               } else if (selectedPaymentMethod === 2) {
                 route.push('/th/PaymentQR')
               }
+              else if (selectedPaymentMethod === 98) {
+                route.push('/th/PaymentCash')
+              }
+              else if (selectedPaymentMethod === 99) {
+                route.push('/th/PaymentDeductAmount')
+              }
             }}
           >
             <span style={{ fontSize: '18px', fontWeight: '600' }}>
               ชำระเงิน
             </span>
           </button>
-
-          {/* <div className="text-center mt-12">
-            <img alt="Omise" width="150" height="24" src="/assets/object/omise.png" />
-          </div> */}
         </div>
       </div>
-      {/* <div className="btn-footer-wraper py-20 px-20 bg-white text-center">
-      </div> */}
     </>
   )
 }
