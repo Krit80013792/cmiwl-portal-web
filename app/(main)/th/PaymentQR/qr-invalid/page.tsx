@@ -1,7 +1,7 @@
 import React from 'react'
 import { Metadata } from 'next'
 import MainWithDynamicStyle from '@/cmi-layout/components/MainWithDynamicStyle'
-import QRError from './QRError'
+import QRInvalid from './QRInvalid'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +28,7 @@ export default async function PaymentQRError() {
           <p className="text-center mb-0 w-100 fs-18 f-bd">พ.ร.บ.</p>
         </div>
       </div>
-      <QRError />
+      <QRInvalid />
     </MainWithDynamicStyle>
   )
 }

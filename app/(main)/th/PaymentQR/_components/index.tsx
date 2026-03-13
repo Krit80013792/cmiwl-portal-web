@@ -130,6 +130,11 @@ const PaymentQRComponents = () => {
       } else {
         dispatch(paymentSlice.actions.setPayment({ paymentNo: qrData?.paymentNo, paymentStatus: 'idle' }))
       }
+
+      //todo: uncomment this for qr code already invalid
+      // route.push('/th/PaymentQR/qr-invalid')
+
+
     } catch (error) {
       console.error('Error checking payment status:', error)
     }
