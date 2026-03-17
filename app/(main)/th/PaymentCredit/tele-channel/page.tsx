@@ -3,9 +3,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import Image from 'next/image'
 import { Button } from 'primereact/button'
-import { useDispatch, useSelector } from 'react-redux'
-import { paymentSlice } from '@/stores/redux/slices/paymentSlice'
-import { getPaymentStatus } from '@/app/(main)/th/PaymentCC/_actions'
 
 const PaymentCreditTeleChannelPage = () => {
     const [cooldown, setCooldown] = useState<number>(0)
