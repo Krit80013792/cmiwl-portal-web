@@ -31,7 +31,7 @@ const PaymentCashPage = async () => {
             Current layout is a simplified, static version based on the provided screenshot.
             All numbers and labels are hard-coded just to unblock navigation from /th/PaymentChannel.
         */}
-      <div className="content-section bg-lightgrey">
+      <div className="content-section bg-lightgrey" style={{ minHeight: '100vh' }}>
         <div
           className="py-24"
           style={{ paddingTop: '32px', maxWidth: 384, margin: '0 auto' }}
