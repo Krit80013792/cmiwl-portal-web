@@ -24,7 +24,7 @@ const PaymentCreditSuccess: React.FC = () => {
     const data = dummyData; // replace with real data if available
 
     return (
-        <div>
+        <div className="container fullPage-92">
             <div
                 className="content-section fullPage-92"
                 style={{
