@@ -89,7 +89,7 @@ const Modal: React.FC<Props> = ({
       return (
         <div className="d-flex">
           <button
-            className="btn btn-primary w-100 fs-6 d-flex justify-content-center align-items-center"
+            className="confirm-modal-info-confirm-btn btn btn-primary w-100 fs-6 d-flex justify-content-center align-items-center"
             onClick={onClose}
             type="button"
           >
