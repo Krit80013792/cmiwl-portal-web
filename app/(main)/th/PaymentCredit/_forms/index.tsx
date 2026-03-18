@@ -67,7 +67,7 @@ const PaymentCreditForm = () => {
             onConfirm: () => {
               window.location.href = 'tel:02-710-3100'
             },
-            onCancel: () => {},
+            onCancel: () => { },
             cancelText: 'ตรวจสอบข้อมูล',
           },
         })
@@ -83,7 +83,7 @@ const PaymentCreditForm = () => {
           onConfirm: () => {
             window.location.href = 'tel:02-710-3100'
           },
-          onCancel: () => {},
+          onCancel: () => { },
           cancelText: 'ตรวจสอบข้อมูล',
         },
       })
@@ -96,26 +96,44 @@ const PaymentCreditForm = () => {
     <div>
       <div className="content-section fullPage-116 pt-48">
         <form className="container">
-          <div className="bg-lightgrey rounded-4 d-flex justify-content-between align-items-center mt-4 mb-4 px-12 py-12 ">
-            <span className="text-grey f-bd align-center">ยอดที่ต้องชำระ</span>
-            <div>
-              <span className="mb-0 text-start f-bd fs-26">{data?.productCmiDetail?.cmiCoverage?.total}</span>
-              <span className="fs-6 f-bd">บาท</span>
+          <div
+            style={{
+              marginTop: '32px',
+              color: '#1E1E1F',
+              fontSize: '20px',
+              fontStyle: 'normal',
+              fontWeight: 700,
+            }}
+          >
+            ชำระเงิน
+          </div>
+          <div
+            className="d-flex justify-content-between align-items-center mt-4"
+            style={{ borderRadius: '16px', marginBottom: '12px', padding: '12px 16px', backgroundColor: '#EFF5FF' }}
+          >
+            <span style={{ color: '#1E1E1F', fontSize: '16px', fontWeight: 700 }}>ยอดที่ต้องชำระ</span>
+            <div style={{ color: '#2652EA', fontWeight: 700 }}>
+              <span className="mb-0 text-start" style={{ fontSize: '24px' }}>
+                {data?.productCmiDetail?.cmiCoverage?.total}
+              </span>
+              <span className="" style={{ fontSize: '16px' }}>บาท</span>
             </div>
           </div>
-          <div className="mb-12">
-            <Image className="me-2" alt="Visa" width="42" height="32" src="/assets/icon/visa.png" />
-            <Image className="me-2" alt="Mastercard" width="42" height="32" src="/assets/icon/mastercard.png" />
-            <Image alt="JCB" width="42" height="32" src="/assets/icon/jcb.png" />
+          <div className="mb-12 d-flex" style={{ gap: '8px' }}>
+            <Image alt="Visa" width="24" height="24" src="/assets/icon/visa.svg" />
+            <Image alt="Mastercard" width="24" height="24" src="/assets/icon/mastercard.svg" />
+            <Image alt="JCB" width="24" height="24" src="/assets/icon/jcb.svg" />
+            <Image alt="unionpay" width="24" height="24" src="/assets/icon/unionpay.svg" />
           </div>
           <div className="formMain">
             <div className="form-group mb-12">
+              <span>หมายเลขบัตร</span>
               <Input
-                label="หมายเลขบัตร"
+                label=""
                 name="creditCardNo"
                 type="text"
                 maxLength={19}
-                placeholder="0000 0000 0000 0000"
+                placeholder="XXXX XXXX XXXX XXXX"
                 value={convertStrToFormat(values.creditCardNo, 'credit_card')}
                 onChange={({ target: { name, value } }) => {
                   handleChange({ name, value })
