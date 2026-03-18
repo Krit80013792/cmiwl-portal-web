@@ -24,7 +24,7 @@ const PaymentCreditForm = () => {
   const [data, setData] = useState<any>({})
   const [cardType, setCardType] = useState<string>('unknown')
   //todo start: mock zone
-  const [paymentDataIncorrect, setPaymentDataIncorrect] = useState<boolean>(true)
+  const [paymentDataIncorrect, setPaymentDataIncorrect] = useState<boolean>(false)
   //todo end: mock zone
   const { handleChange, values, errors, handleSubmit } = useForm(
     {
@@ -179,6 +179,86 @@ const PaymentCreditForm = () => {
         if (paymentDataIncorrect) {
           setPaymentDataIncorrect(true)
         }
+
+        // //todo start scenario 2: transaction failed
+        const transactionFailed = true
+        if (transactionFailed) {
+          openModal({
+            hasImg: false,
+            title: '',
+            message: '',
+            content: (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '18px',
+                  color: '#1E1E1F',
+                  gap: 12,
+                }}
+              >
+                <div>
+                  <Image alt="QR Error" width={54} height={54} src="/assets/icon/system.svg" />
+                </div>
+                <div>
+                  <div
+                    style={{
+                      fontSize: '18px',
+                      color: '#1E1E1F',
+                      fontWeight: 700,
+                    }}
+                  >
+                    ทำรายการไม่สำเร็จ
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '18px',
+                      color: '#1E1E1F',
+                      fontWeight: 700,
+                    }}
+                  >
+                    พบข้อขัดข้องระหว่างทำรายการ
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '14px', color: '#6B6C6F' }}>
+                      กรุณาลองอีกครั้ง
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ),
+            renderActions: () => (
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 18,
+                  fontWeight: 600,
+                }}
+              >
+                <button
+                  type="button"
+                  style={{
+                    padding: '8px 24px',
+                    backgroundColor: '#3F74F5',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 12,
+                    fontWeight: 600,
+                    fontSize: 16,
+                    cursor: 'pointer',
+                    height: 48,
+                  }}
+                  onClick={closeModal}
+                >
+                  ตกลง
+                </button>
+              </div>
+            ),
+          })
+        }
       }
     } catch (error) {
       openModal({
@@ -199,6 +279,11 @@ const PaymentCreditForm = () => {
       closeLoading()
     }
   }, [openLoading, closeLoading, data, values, prefillData, dispatch, openModal, route])
+
+
+  useEffect(() => {
+
+  }, [])
 
   return (
     <div>
