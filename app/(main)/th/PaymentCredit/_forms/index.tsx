@@ -23,6 +23,7 @@ const PaymentCreditForm = () => {
   const paymentData = useSelector((state: any) => state.payment)
   const [data, setData] = useState<any>({})
   const [cardType, setCardType] = useState<string>('unknown')
+  const router = useRouter()
   //todo start: mock zone
   const [paymentDataIncorrect, setPaymentDataIncorrect] = useState<boolean>(false)
   //todo end: mock zone
@@ -37,6 +38,7 @@ const PaymentCreditForm = () => {
   )
 
   const isExpiryInvalid = useMemo(() => {
+    //todo start scenario : card expiry date invalid
     const expiry = values.creditExpiry;
     if (!expiry) return false;
     if (errors?.creditExpiry) return false;
@@ -55,99 +57,375 @@ const PaymentCreditForm = () => {
     const isExpired = year < currentYear || (year === currentYear && month < currentMonth);
 
     return isExpired;
+
   }, [values.creditExpiry, errors?.creditExpiry]);
 
   useEffect(() => {
     if (isExpiryInvalid) {
-      openModal({
-        hasImg: false,
-        title: '',
-        message: '',
-        content: (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '18px',
-              color: '#1E1E1F',
-              gap: 12,
-            }}
-          >
-            <div>
-              <Image alt="QR Error" width={54} height={54} src="/assets/icon/system.svg" />
-            </div>
-            <div>
-              <div
-                style={{
-                  fontSize: '18px',
-                  color: '#1E1E1F',
-                  fontWeight: 700,
-                }}
-              >
-                บัตรใบนี้หมดอายุแล้ว
-              </div>
-              <div>
-                <div style={{ fontSize: '14px', color: '#6B6C6F' }}>
-                  ไม่สามารถใช้งานได้ กรุณาลองบัตรใบอื่น
-                </div>
-                <div style={{ fontSize: '14px', color: '#6B6C6F' }}>
-                  หรือเปลี่ยนช่องทางการชำระเงิน
-                </div>
-              </div>
-            </div>
-          </div>
-        ),
-        renderActions: () => (
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 18,
-              fontWeight: 600,
-            }}
-          >
-            <button
-              type="button"
-              style={{
-                padding: '8px 24px',
-                backgroundColor: '#3F74F5',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 12,
-                fontWeight: 600,
-                fontSize: 16,
-                cursor: 'pointer',
-                height: 48,
-              }}
-              onClick={closeModal}
-            >
-              ลองบัตรใบอื่น
-            </button>
-            <button
-              type="button"
-              style={{
-                padding: '8px 24px',
-                backgroundColor: '#DBE7FE',
-                color: '#2652EA',
-                border: 'none',
-                borderRadius: 12,
-                fontWeight: 600,
-                fontSize: 16,
-                cursor: 'pointer',
-                height: 48,
-              }}
-              onClick={() => route.replace('/th/PaymentChannel')}
-            >
-              เปลี่ยนช่องทางการชำระเงิน
-            </button>
-          </div>
-        ),
-      })
-
+      handleExpiryDateInvalid()
     }
   }, [isExpiryInvalid, openModal, closeModal]);
+
+  const handleExpiryDateInvalid = useCallback(() => {
+    openModal({
+      hasImg: false,
+      title: '',
+      message: '',
+      content: (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '18px',
+            color: '#1E1E1F',
+            gap: 12,
+          }}
+        >
+          <div>
+            <Image alt="QR Error" width={54} height={54} src="/assets/icon/system.svg" />
+          </div>
+          <div>
+            <div
+              style={{
+                fontSize: '18px',
+                color: '#1E1E1F',
+                fontWeight: 700,
+              }}
+            >
+              บัตรใบนี้หมดอายุแล้ว
+            </div>
+            <div>
+              <div style={{ fontSize: '14px', color: '#6B6C6F' }}>
+                ไม่สามารถใช้งานได้ กรุณาลองบัตรใบอื่น
+              </div>
+              <div style={{ fontSize: '14px', color: '#6B6C6F' }}>
+                หรือเปลี่ยนช่องทางการชำระเงิน
+              </div>
+            </div>
+          </div>
+        </div>
+      ),
+      renderActions: () => (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 18,
+            fontWeight: 600,
+          }}
+        >
+          <button
+            type="button"
+            style={{
+              padding: '8px 24px',
+              backgroundColor: '#3F74F5',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 12,
+              fontWeight: 600,
+              fontSize: 16,
+              cursor: 'pointer',
+              height: 48,
+            }}
+            onClick={closeModal}
+          >
+            ลองบัตรใบอื่น
+          </button>
+          <button
+            type="button"
+            style={{
+              padding: '8px 24px',
+              backgroundColor: '#DBE7FE',
+              color: '#2652EA',
+              border: 'none',
+              borderRadius: 12,
+              fontWeight: 600,
+              fontSize: 16,
+              cursor: 'pointer',
+              height: 48,
+            }}
+            onClick={() => route.replace('/th/PaymentChannel')}
+          >
+            เปลี่ยนช่องทางการชำระเงิน
+          </button>
+        </div>
+      ),
+    })
+  }, [openModal, closeModal])
+
+  const handleTransactionFailed = useCallback(() => {
+    openModal({
+      hasImg: false,
+      title: '',
+      message: '',
+      content: (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '18px',
+            color: '#1E1E1F',
+            gap: 12,
+          }}
+        >
+          <div>
+            <Image alt="QR Error" width={54} height={54} src="/assets/icon/system.svg" />
+          </div>
+          <div>
+            <div
+              style={{
+                fontSize: '18px',
+                color: '#1E1E1F',
+                fontWeight: 700,
+              }}
+            >
+              ทำรายการไม่สำเร็จ
+            </div>
+            <div
+              style={{
+                fontSize: '18px',
+                color: '#1E1E1F',
+                fontWeight: 700,
+              }}
+            >
+              พบข้อขัดข้องระหว่างทำรายการ
+            </div>
+            <div>
+              <div style={{ fontSize: '14px', color: '#6B6C6F' }}>
+                กรุณาลองอีกครั้ง
+              </div>
+            </div>
+          </div>
+        </div>
+      ),
+      renderActions: () => (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 18,
+            fontWeight: 600,
+          }}
+        >
+          <button
+            type="button"
+            style={{
+              padding: '8px 24px',
+              backgroundColor: '#3F74F5',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 12,
+              fontWeight: 600,
+              fontSize: 16,
+              cursor: 'pointer',
+              height: 48,
+            }}
+            onClick={closeModal}
+          >
+            ตกลง
+          </button>
+        </div>
+      ),
+    })
+  }, [openModal, closeModal])
+
+  const handleInsufficientCardLimit = useCallback(() => {
+    openModal({
+      hasImg: false,
+      title: '',
+      message: '',
+      content: (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '18px',
+            color: '#1E1E1F',
+            gap: 12,
+          }}
+        >
+          <div>
+            <Image alt="QR Error" width={54} height={54} src="/assets/icon/system.svg" />
+          </div>
+          <div>
+            <div
+              style={{
+                fontSize: '18px',
+                color: '#1E1E1F',
+                fontWeight: 700,
+              }}
+            >
+              วงเงินในบัตรของคุณ
+            </div>
+            <div
+              style={{
+                fontSize: '18px',
+                color: '#1E1E1F',
+                fontWeight: 700,
+              }}
+            >
+              ไม่เพียงพอสำหรับทำรายการ
+            </div>
+            <div>
+              <div style={{ fontSize: '14px', color: '#6B6C6F' }}>
+                กรุณาตรวจสอบ หรือเปลี่ยนช่องทาง
+              </div>
+              <div style={{ fontSize: '14px', color: '#6B6C6F' }}>
+                การชำระเงิน
+              </div>
+            </div>
+          </div>
+        </div>
+      ),
+      renderActions: () => (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 18,
+            fontWeight: 600,
+          }}
+        >
+          <button
+            type="button"
+            style={{
+              padding: '8px 24px',
+              backgroundColor: '#3F74F5',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 12,
+              fontWeight: 600,
+              fontSize: 16,
+              cursor: 'pointer',
+              height: 48,
+            }}
+
+            onClick={() => route.replace('/th/PaymentChannel')}
+          >
+            เปลี่ยนช่องทางการชำระเงิน
+          </button>
+          <button
+            type="button"
+            style={{
+              padding: '8px 24px',
+              backgroundColor: '#DBE7FE',
+              color: '#2652EA',
+              border: 'none',
+              borderRadius: 12,
+              fontWeight: 600,
+              fontSize: 16,
+              cursor: 'pointer',
+              height: 48,
+            }}
+
+            onClick={closeModal}
+          >
+            ปิด
+          </button>
+        </div>
+      ),
+    })
+  }, [openModal, closeModal]);
+
+  const handleDeclinedByBankOrFraud = useCallback(() => {
+    openModal({
+      hasImg: false,
+      title: '',
+      message: '',
+      content: (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '18px',
+            color: '#1E1E1F',
+            gap: 12,
+          }}
+        >
+          <div>
+            <Image alt="QR Error" width={54} height={54} src="/assets/icon/system.svg" />
+          </div>
+          <div>
+            <div
+              style={{
+                fontSize: '18px',
+                color: '#1E1E1F',
+                fontWeight: 700,
+              }}
+            >
+              บัตรของคุณไม่สามารถทำรายการได้
+            </div>
+            <div>
+              <div style={{ fontSize: '14px', color: '#6B6C6F' }}>
+                กรุณาติดต่อธนาคารเพื่อตรวจสอบ
+              </div>
+              <div style={{ fontSize: '14px', color: '#6B6C6F' }}>
+                หรือเปลี่ยนช่องทางการชำระเงิน
+              </div>
+            </div>
+          </div>
+        </div>
+      ),
+      renderActions: () => (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 18,
+            fontWeight: 600,
+          }}
+        >
+          <button
+            type="button"
+            style={{
+              padding: '8px 24px',
+              backgroundColor: '#3F74F5',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 12,
+              fontWeight: 600,
+              fontSize: 16,
+              cursor: 'pointer',
+              height: 48,
+            }}
+
+            onClick={() => route.replace('/th/PaymentChannel')}
+          >
+            เปลี่ยนช่องทางการชำระเงิน
+          </button>
+          <button
+            type="button"
+            style={{
+              padding: '8px 24px',
+              backgroundColor: '#DBE7FE',
+              color: '#2652EA',
+              border: 'none',
+              borderRadius: 12,
+              fontWeight: 600,
+              fontSize: 16,
+              cursor: 'pointer',
+              height: 48,
+            }}
+
+            onClick={closeModal}
+          >
+            ปิด
+          </button>
+        </div>
+      ),
+    })
+  }, [openModal, closeModal]);
+
+
+
 
   useEffect(() => {
     setData({ ...prefillData, ...paymentData })
@@ -178,87 +456,43 @@ const PaymentCreditForm = () => {
         const paymentDataIncorrect = true
         if (paymentDataIncorrect) {
           setPaymentDataIncorrect(true)
+          return
         }
 
-        // //todo start scenario 2: transaction failed
+        //todo start scenario 2: transaction failed
         const transactionFailed = true
         if (transactionFailed) {
-          openModal({
-            hasImg: false,
-            title: '',
-            message: '',
-            content: (
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '18px',
-                  color: '#1E1E1F',
-                  gap: 12,
-                }}
-              >
-                <div>
-                  <Image alt="QR Error" width={54} height={54} src="/assets/icon/system.svg" />
-                </div>
-                <div>
-                  <div
-                    style={{
-                      fontSize: '18px',
-                      color: '#1E1E1F',
-                      fontWeight: 700,
-                    }}
-                  >
-                    ทำรายการไม่สำเร็จ
-                  </div>
-                  <div
-                    style={{
-                      fontSize: '18px',
-                      color: '#1E1E1F',
-                      fontWeight: 700,
-                    }}
-                  >
-                    พบข้อขัดข้องระหว่างทำรายการ
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '14px', color: '#6B6C6F' }}>
-                      กรุณาลองอีกครั้ง
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ),
-            renderActions: () => (
-              <div
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 18,
-                  fontWeight: 600,
-                }}
-              >
-                <button
-                  type="button"
-                  style={{
-                    padding: '8px 24px',
-                    backgroundColor: '#3F74F5',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 12,
-                    fontWeight: 600,
-                    fontSize: 16,
-                    cursor: 'pointer',
-                    height: 48,
-                  }}
-                  onClick={closeModal}
-                >
-                  ตกลง
-                </button>
-              </div>
-            ),
-          })
+          handleTransactionFailed()
+          return
         }
+        //todo start scenario 3: insufficient card limit
+        const insufficientCardLimit = true
+        if (insufficientCardLimit) {
+          handleInsufficientCardLimit()
+          return
+        }
+
+        //todo start scenario 4: declined by bank or fraud
+        const declinedByBankOrFraud = true
+        if (declinedByBankOrFraud) {
+          handleDeclinedByBankOrFraud()
+          return
+        }
+
+        //todo start scenario 5: payment failed
+        const paymentFailed = true
+        if (paymentFailed) {
+          router.replace('/th/PaymentCredit/payment-failed')
+          return
+        }
+        //todo end scenario 6: peyment success 
+        const paymentSuccess = true
+        if (paymentSuccess) {
+          router.replace('/th/PaymentCredit/success')
+          return
+        }
+
+
       }
     } catch (error) {
       openModal({
@@ -281,8 +515,15 @@ const PaymentCreditForm = () => {
   }, [openLoading, closeLoading, data, values, prefillData, dispatch, openModal, route])
 
 
-  useEffect(() => {
 
+  useEffect(() => {
+    //todo: for test each scenario
+    // handleTransactionFailed()
+    // handleExpiryDateInvalid()
+    // handleInsufficientCardLimit()
+    // handleDeclinedByBankOrFraud()
+    router.replace('/th/PaymentCredit/payment-failed')
+    // router.replace('/th/PaymentCredit/success')
   }, [])
 
   return (
