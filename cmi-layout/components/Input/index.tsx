@@ -47,7 +47,7 @@ const StyledInput = styled.input.withConfig({
 
   &.form-control + .form-label {
     color: ${({ error }) => error && '#eb5748 !important'};
-}
+  }
 `
 
 const Feedback = styled.span`

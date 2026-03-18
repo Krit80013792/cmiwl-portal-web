@@ -203,7 +203,7 @@ const CustomerInformationForm: React.FC = () => {
                 onChange={(value) => handleChange({ name: 'title', value })}
                 value={values?.title || ''}
               />
-              <label className="form-label">{'คำนำหน้า'}</label>
+              {/* <label className="form-label">{'คำนำหน้า'}</label> */}
               <div className="feedback">กรุณาเลือก</div>
             </div>
 
@@ -256,12 +256,12 @@ const CustomerInformationForm: React.FC = () => {
                       options={
                         mounted
                           ? Array.from({ length: 80 }, (_, i) => {
-                              const year = dayjs().year() - 20 - i
-                              return {
-                                label: (year + 543).toString(),
-                                value: year.toString(),
-                              }
-                            })
+                            const year = dayjs().year() - 20 - i
+                            return {
+                              label: (year + 543).toString(),
+                              value: year.toString(),
+                            }
+                          })
                           : []
                       }
                       onChange={(value) => handleChange({ name: 'birthYear', value })}
@@ -421,7 +421,7 @@ const CustomerInformationForm: React.FC = () => {
                     name="provinceId"
                     disabled={provinceList?.length === 0}
                     options={provinceList}
-                    onChange={() => {}}
+                    onChange={() => { }}
                     value={values?.provinceId || ''}
                     firstOptionLabel="เลือกจังหวัด"
                     feedback={errors?.provinceId}
