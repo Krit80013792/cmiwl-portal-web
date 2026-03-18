@@ -23,6 +23,7 @@ const PaymentCreditForm = () => {
   const paymentData = useSelector((state: any) => state.payment)
   const [data, setData] = useState<any>({})
   const [cardType, setCardType] = useState<string>('unknown')
+  const [paymentDataIncorrect, setPaymentDataIncorrect] = useState<boolean>(false)
   const { handleChange, values, errors, handleSubmit } = useForm(
     {
       creditCardNo: '',
@@ -48,6 +49,13 @@ const PaymentCreditForm = () => {
         cvv: values.creditCVV,
       })
       const payment = res.data.data
+      //todo start: incorrect payment credit data
+      const paymentDataIncorrect = true
+      if (paymentDataIncorrect) {
+        setPaymentDataIncorrect(true)
+      }
+      //todo end: incorrect payment credit data
+
       if (!payment.error) {
         dispatch(
           paymentSlice.actions.setPayment({
@@ -116,7 +124,7 @@ const PaymentCreditForm = () => {
               <span className="mb-0 text-start" style={{ fontSize: '24px' }}>
                 {data?.productCmiDetail?.cmiCoverage?.total}
               </span>
-              <span className="" style={{ fontSize: '16px' }}>บาท</span>
+              <span className="" style={{ fontSize: '16px' }}> บาท</span>
             </div>
           </div>
           <div className="mb-12 d-flex" style={{ gap: '8px' }}>
@@ -125,6 +133,11 @@ const PaymentCreditForm = () => {
             <Image alt="JCB" width="24" height="24" src="/assets/icon/jcb.svg" />
             <Image alt="unionpay" width="24" height="24" src="/assets/icon/unionpay.svg" />
           </div>
+          {paymentDataIncorrect && (
+            <div className="mb-12 d-flex" style={{ gap: '8px' }}>
+              <span style={{ color: '#1E1E1F', fontSize: '16px', fontWeight: 700 }}>ข้อมูลการชำระเงินไม่ถูกต้อง</span>
+            </div>
+          )}
           <div className="formMain">
             <div className="form-group mb-12">
               <Input
@@ -139,28 +152,29 @@ const PaymentCreditForm = () => {
                   setCardType(getCreditCardType(value))
                 }}
                 suffix={
-                  cardType !== 'unknown' ? (
-                    <Image
-                      className="me-2"
-                      alt={cardType}
-                      width="42"
-                      height="32"
-                      src={`/assets/icon/${cardType}.png`}
-                    />
-                  ) : null
+                  <span className="d-inline-flex align-items-center" style={{ gap: 8 }}>
+                    {!!values.creditCardNo && (
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Clear card number"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          handleChange({ name: 'creditCardNo', value: '' })
+                          setCardType('unknown')
+                        }}
+                        style={{ cursor: 'pointer', display: 'inline-flex' }}
+                      >
+                        <Image alt="Clear" width="20" height="20" src="/assets/icon/remove-circle-solid.svg" />
+                      </span>
+                    )}
+                    {cardType !== 'unknown' ? (
+                      <Image alt={cardType} width="42" height="32" src={`/assets/icon/${cardType}.svg`} />
+                    ) : null}
+                  </span>
                 }
                 feedback={errors?.creditCardNo}
-              />
-            </div>
-            <div className="form-group mb-12 creditname">
-              <Input
-                label="ชื่อผู้ถือบัตร"
-                name="creditName"
-                type="text"
-                placeholder="กรอกชื่อผู้ถือบัตร (ภาษาอังกฤษ)"
-                value={values.creditName}
-                onChange={({ target: { name, value } }) => handleChange({ name, value })}
-                feedback={errors?.creditName}
               />
             </div>
             <div className="d-flex">
@@ -174,6 +188,23 @@ const PaymentCreditForm = () => {
                   value={convertStrToFormat(values.creditExpiry, 'credit_expiry')}
                   onChange={({ target: { name, value } }) => handleChange({ name, value })}
                   feedback={errors?.creditExpiry}
+                  suffix={
+                    !!values.creditExpiry ? (
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        aria-label="Clear expiry"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          handleChange({ name: 'creditExpiry', value: '' })
+                        }}
+                        style={{ cursor: 'pointer', display: 'inline-flex' }}
+                      >
+                        <Image alt="Clear" width="20" height="20" src="/assets/icon/remove-circle-solid.svg" />
+                      </span>
+                    ) : null
+                  }
                 />
               </div>
               <div className="form-group form-cvv creditcvv mb-12">
@@ -187,61 +218,126 @@ const PaymentCreditForm = () => {
                   onChange={({ target: { name, value } }) => handleChange({ name, value })}
                   feedback={errors?.creditCVV}
                   suffix={
-                    <Image
-                      alt="ตัวช่วย"
-                      width="24"
-                      height="24"
-                      src="/assets/icon/icon-question.png"
-                      onClick={() => {
-                        openModal({
-                          title: 'รหัส CVV/CVC',
-                          content: (
-                            <div className="text-center">
-                              <Image
-                                alt="CVV/CVC"
-                                width="240"
-                                height="160"
-                                src="/assets/object/cvv.png"
-                                className="mb-4"
-                              />
-                              <div
-                                style={{
-                                  display: 'flex',
-                                  flexDirection: 'column',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  fontSize: '16px',
-                                  color: '#414243',
-                                }}
-                              >
-                                <span>
-                                  กรอก <span style={{ fontWeight: 700 }}>ตัวเลข 3 หลัก</span> ที่อยู่บนหลังบัตร
-                                </span>
-                                <span>ทางด้านขวาของแถบลายเซ็น</span>
+                    <span className="d-inline-flex align-items-center" style={{ gap: 8 }}>
+                      {!!values.creditCVV && (
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          aria-label="Clear CVV"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            handleChange({ name: 'creditCVV', value: '' })
+                          }}
+                          style={{ cursor: 'pointer', display: 'inline-flex' }}
+                        >
+                          <Image alt="Clear" width="20" height="20" src="/assets/icon/remove-circle-solid.svg" />
+                        </span>
+                      )}
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        aria-label="CVV help"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          openModal({
+                            title: 'รหัส CVV/CVC',
+                            content: (
+                              <div className="text-center">
+                                <Image
+                                  alt="CVV/CVC"
+                                  width="240"
+                                  height="160"
+                                  src="/assets/object/cvv.png"
+                                  className="mb-4"
+                                />
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '16px',
+                                    color: '#414243',
+                                  }}
+                                >
+                                  <span>
+                                    กรอก <span style={{ fontWeight: 700 }}>ตัวเลข 3 หลัก</span> ที่อยู่บนหลังบัตร
+                                  </span>
+                                  <span>ทางด้านขวาของแถบลายเซ็น</span>
+                                </div>
                               </div>
-                            </div>
-                          ),
-                          type: 'info',
-                          hasImg: false,
-                        })
-                      }}
-                    />
+                            ),
+                            type: 'info',
+                            hasImg: false,
+                          })
+                        }}
+                        style={{ cursor: 'pointer', display: 'inline-flex' }}
+                      >
+                        <Image alt="ตัวช่วย" width="24" height="24" src="/assets/icon/question-circle.svg" />
+                      </span>
+                    </span>
                   }
                 />
               </div>
               <Modal {...modal} onClose={closeModal} />
             </div>
-            <p className="mb-0 fs-14 text-lighgrey">
+            <div className="form-group mb-12 creditname">
+              <Input
+                label="ชื่อผู้ถือบัตร (ภาษาอังกฤษ)"
+                name="creditName"
+                type="text"
+                placeholder="กรอกชื่อผู้ถือบัตร (ภาษาอังกฤษ)"
+                value={values.creditName}
+                onChange={({ target: { name, value } }) => handleChange({ name, value })}
+                feedback={errors?.creditName}
+                suffix={
+                  !!values.creditName ? (
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      aria-label="Clear cardholder name"
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        handleChange({ name: 'creditName', value: '' })
+                      }}
+                      style={{ cursor: 'pointer', display: 'inline-flex' }}
+                    >
+                      <Image alt="Clear" width="20" height="20" src="/assets/icon/remove-circle-solid.svg" />
+                    </span>
+                  ) : null
+                }
+              />
+            </div>
+            {/* <p className="mb-0 fs-14 text-lighgrey">
               <strong>หมายเหตุ</strong> : หากคุณชำระเงินหลังวันที่เริ่มความคุ้มครอง ที่เลือกไว้
               ประกันจะเริ่มคุ้มครองเป็นวันถัดไป ยกเว้นกรณี ซื้อประกันล่วงหน้า
-            </p>
+            </p> */}
           </div>
           <div className="text-center mt-12">
-            <Image alt="Omise" width="150" height="24" src="/assets/object/omise.png" />
+            <Image alt="Omise" width="150" height="24" src="/assets/object/Secure badge-dark.svg" />
           </div>
         </form>
+
+        <button
+          type="button"
+          className="btn btn-primary fs-6 mx-auto d-flex text-center align-items-center justify-content-center"
+          onClick={() => handleSubmit(handlePayment)}
+          style={{
+            marginTop: 24,
+            backgroundColor: '#3F74F5',
+            borderRadius: 12,
+            height: 48,
+            border: 'none'
+          }}
+        >
+          ชำระเงิน
+        </button>
+
       </div>
-      <div className="btn-footer-wraper py-20 px-20 bg-white text-center">
+      {/* <div className="btn-footer-wraper py-20 px-20 bg-white text-center">
         <button
           type="button"
           className="btn btn-primary fs-6 mx-auto d-flex text-center align-items-center justify-content-center"
@@ -249,7 +345,7 @@ const PaymentCreditForm = () => {
         >
           ชำระเงิน
         </button>
-      </div>
+      </div> */}
     </div>
   )
 }
