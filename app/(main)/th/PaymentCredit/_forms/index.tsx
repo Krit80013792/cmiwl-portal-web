@@ -127,9 +127,8 @@ const PaymentCreditForm = () => {
           </div>
           <div className="formMain">
             <div className="form-group mb-12">
-              <span>หมายเลขบัตร</span>
               <Input
-                label=""
+                label="หมายเลขบัตร"
                 name="creditCardNo"
                 type="text"
                 maxLength={19}
