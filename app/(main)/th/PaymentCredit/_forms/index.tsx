@@ -195,7 +195,7 @@ const PaymentCreditForm = () => {
                       src="/assets/icon/icon-question.png"
                       onClick={() => {
                         openModal({
-                          title: 'CVV/CVC',
+                          title: 'รหัส CVV/CVC',
                           content: (
                             <div className="text-center">
                               <Image
@@ -205,6 +205,21 @@ const PaymentCreditForm = () => {
                                 src="/assets/object/cvv.png"
                                 className="mb-4"
                               />
+                              <div
+                                style={{
+                                  display: 'flex',
+                                  flexDirection: 'column',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '16px',
+                                  color: '#414243',
+                                }}
+                              >
+                                <span>
+                                  กรอก <span style={{ fontWeight: 700 }}>ตัวเลข 3 หลัก</span> ที่อยู่บนหลังบัตร
+                                </span>
+                                <span>ทางด้านขวาของแถบลายเซ็น</span>
+                              </div>
                             </div>
                           ),
                           type: 'info',
