@@ -275,7 +275,17 @@ const CarInformationForm = () => {
                     fetchCarModelData(brand.carBrandId)
                   }}
                 >
-                  <div style={{ height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${errors.carBrandId ? '#EB5848' : '#F2F2F2'}`, borderRadius: '8px' }} className={`rounded-4 text-center js-listdata choice-card ${isActive ? ' active' : ''}`}>
+                  <div style={{ position: 'relative', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${errors.carBrandId ? '#EB5848' : '#F2F2F2'}`, borderRadius: '8px' }} className={`rounded-4 text-center js-listdata choice-card ${isActive ? ' active' : ''}`}>
+                    {isActive && (
+                      <Image
+                        src="/assets/icon/icon-success.png"
+                        alt="Success Icon"
+                        width={16}
+                        height={16}
+                        style={{ position: 'absolute', top: 3, right: 3 }}
+                      />
+                    )
+                    }
                     <Image alt={brand?.carBrandName} width="48" height="48" src={brand?.carBrandImage} />
                   </div>
                 </button>
