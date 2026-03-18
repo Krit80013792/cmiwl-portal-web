@@ -13,6 +13,7 @@ export interface InputProps {
   suffix?: React.ReactNode
   style?: React.CSSProperties
   disabled?: boolean
+  autoComplete?: string
 }
 
 const StyledInput = styled.input.withConfig({
@@ -72,6 +73,7 @@ export const Input = ({
   suffix,
   style,
   disabled,
+  autoComplete,
 }: InputProps) => {
   return (
     <div className="w-100">
@@ -87,6 +89,7 @@ export const Input = ({
           value={value}
           error={!!feedback}
           disabled={disabled}
+          autoComplete={autoComplete}
         />
         <label htmlFor={name} className="form-label">{label}</label>
         {suffix && <button type='button' className="position-absolute top-50 end-0 translate-middle-y me-3">{suffix}</button>}

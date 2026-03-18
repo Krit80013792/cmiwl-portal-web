@@ -2,7 +2,7 @@
 
 import { useForm } from '@/helpers/hooks/useForm'
 import Image from 'next/image'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import creditCardSchema from '../_schemas'
 import { Input } from '@/cmi-layout/components/Input'
@@ -34,6 +34,119 @@ const PaymentCreditForm = () => {
     creditCardSchema,
   )
 
+  const isExpiryInvalid = useMemo(() => {
+    const expiry = values.creditExpiry;
+    if (!expiry) return false;
+    if (errors?.creditExpiry) return false;
+
+    const regex = /^(0[1-9]|1[0-2])\/\d{2}$/;
+    if (!regex.test(expiry)) return false;
+
+    const [mm, yy] = expiry.split('/');
+    const month = Number(mm);
+    const year = Number(yy);
+
+    const now = new Date();
+    const currentYear = now.getFullYear() % 100;
+    const currentMonth = now.getMonth() + 1;
+
+    const isExpired = year < currentYear || (year === currentYear && month < currentMonth);
+
+    return isExpired;
+  }, [values.creditExpiry, errors?.creditExpiry]);
+
+  useEffect(() => {
+    if (isExpiryInvalid) {
+      openModal({
+        hasImg: false,
+        title: '',
+        message: '',
+        content: (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '18px',
+              color: '#1E1E1F',
+              gap: 12,
+            }}
+          >
+            <div>
+              <Image alt="QR Error" width={54} height={54} src="/assets/icon/system.svg" />
+            </div>
+            <div>
+              <div
+                style={{
+                  fontSize: '18px',
+                  color: '#1E1E1F',
+                  fontWeight: 700,
+                }}
+              >
+                บัตรใบนี้หมดอายุแล้ว
+              </div>
+              <div>
+                <div style={{ fontSize: '14px', color: '#6B6C6F' }}>
+                  ไม่สามารถใช้งานได้ กรุณาลองบัตรใบอื่น
+                </div>
+                <div style={{ fontSize: '14px', color: '#6B6C6F' }}>
+                  หรือเปลี่ยนช่องทางการชำระเงิน
+                </div>
+              </div>
+            </div>
+          </div>
+        ),
+        renderActions: () => (
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 18,
+              fontWeight: 600,
+            }}
+          >
+            <button
+              type="button"
+              style={{
+                padding: '8px 24px',
+                backgroundColor: '#3F74F5',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 12,
+                fontWeight: 600,
+                fontSize: 16,
+                cursor: 'pointer',
+                height: 48,
+              }}
+              onClick={closeModal}
+            >
+              ลองบัตรใบอื่น
+            </button>
+            <button
+              type="button"
+              style={{
+                padding: '8px 24px',
+                backgroundColor: '#DBE7FE',
+                color: '#2652EA',
+                border: 'none',
+                borderRadius: 12,
+                fontWeight: 600,
+                fontSize: 16,
+                cursor: 'pointer',
+                height: 48,
+              }}
+              onClick={() => route.replace('/th/PaymentChannel')}
+            >
+              เปลี่ยนช่องทางการชำระเงิน
+            </button>
+          </div>
+        ),
+      })
+
+    }
+  }, [isExpiryInvalid, openModal, closeModal]);
+
   useEffect(() => {
     setData({ ...prefillData, ...paymentData })
   }, [prefillData, paymentData])
@@ -49,12 +162,6 @@ const PaymentCreditForm = () => {
         cvv: values.creditCVV,
       })
       const payment = res.data.data
-      //todo start: incorrect payment credit data
-      const paymentDataIncorrect = true
-      if (paymentDataIncorrect) {
-        setPaymentDataIncorrect(true)
-      }
-      //todo end: incorrect payment credit data
 
       if (!payment.error) {
         dispatch(
@@ -65,20 +172,11 @@ const PaymentCreditForm = () => {
         )
         route.push(payment.authorizeUri)
       } else {
-        openModal({
-          title: 'ชำระเงินไม่สำเร็จ',
-          content: <p>กรุณาตรวจสอบข้อมูลหรือพบปัญหาการชำระเงิน กรุณาติดต่อเจ้าหน้าที่</p>,
-          type: 'warning',
-          hasImg: true,
-          confirmOptions: {
-            confirmText: 'ติดต่อเจ้าหน้าที่',
-            onConfirm: () => {
-              window.location.href = 'tel:02-710-3100'
-            },
-            onCancel: () => { },
-            cancelText: 'ตรวจสอบข้อมูล',
-          },
-        })
+        //todo start scenario 1: incorrect payment credit data
+        const paymentDataIncorrect = true
+        if (paymentDataIncorrect) {
+          setPaymentDataIncorrect(true)
+        }
       }
     } catch (error) {
       openModal({
@@ -133,14 +231,15 @@ const PaymentCreditForm = () => {
             <Image alt="JCB" width="24" height="24" src="/assets/icon/jcb.svg" />
             <Image alt="unionpay" width="24" height="24" src="/assets/icon/unionpay.svg" />
           </div>
-          {paymentDataIncorrect && (
+          {/* {isExpiryInvalid && (
             <div className="mb-12 d-flex" style={{ gap: '8px' }}>
               <span style={{ color: '#1E1E1F', fontSize: '16px', fontWeight: 700 }}>ข้อมูลการชำระเงินไม่ถูกต้อง</span>
             </div>
-          )}
+          )} */}
           <div className="formMain">
             <div className="form-group mb-12">
               <Input
+                autoComplete="cc-number"
                 label="หมายเลขบัตร"
                 name="creditCardNo"
                 type="text"
@@ -180,13 +279,16 @@ const PaymentCreditForm = () => {
             <div className="d-flex">
               <div className="form-group mb-12 me-3 creditexpiry">
                 <Input
+                  autoComplete="cc-exp"
                   label="วันหมดอายุ"
                   name="creditExpiry"
                   type="text"
                   maxLength={5}
                   placeholder="MM/YY"
                   value={convertStrToFormat(values.creditExpiry, 'credit_expiry')}
-                  onChange={({ target: { name, value } }) => handleChange({ name, value })}
+                  onChange={({ target: { name, value } }) => {
+                    handleChange({ name, value })
+                  }}
                   feedback={errors?.creditExpiry}
                   suffix={
                     !!values.creditExpiry ? (
@@ -209,6 +311,7 @@ const PaymentCreditForm = () => {
               </div>
               <div className="form-group form-cvv creditcvv mb-12">
                 <Input
+                  autoComplete="cc-csc"
                   label="CVV/CVC"
                   name="creditCVV"
                   type="text"
@@ -281,7 +384,6 @@ const PaymentCreditForm = () => {
                   }
                 />
               </div>
-              <Modal {...modal} onClose={closeModal} />
             </div>
             <div className="form-group mb-12 creditname">
               <Input
@@ -337,6 +439,8 @@ const PaymentCreditForm = () => {
         </button>
 
       </div>
+
+      <Modal {...modal} onClose={closeModal} />
       {/* <div className="btn-footer-wraper py-20 px-20 bg-white text-center">
         <button
           type="button"
