@@ -234,8 +234,22 @@ const PaymentCreditForm = () => {
             <Image alt="unionpay" width="24" height="24" src="/assets/icon/unionpay.svg" />
           </div>
           {paymentDataIncorrect && (
-            <div className="mb-12 d-flex" style={{ gap: '8px' }}>
-              <span style={{ color: '#1E1E1F', fontSize: '16px', fontWeight: 700 }}>ข้อมูลการชำระเงินไม่ถูกต้อง</span>
+            <div
+              className="mb-12 d-flex align-items-center"
+              style={{
+                gap: 12,
+                padding: '10px 12px 12px',
+                borderRadius: 12,
+                border: '1px solid #F62D28',
+                backgroundColor: '#FFFAFA',
+                height: '64px'
+              }}
+            >
+              <Image alt="warning" width="28" height="28" src="/assets/icon/alert-circle-solid-red.svg" />
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ color: '#7A1F1F', fontSize: 15, fontWeight: 700 }}>ข้อมูลบัตรเครดิตไม่ถูกต้อง</span>
+                <span style={{ color: '#7A1F1F', fontSize: 14, fontWeight: 400 }}>กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง</span>
+              </div>
             </div>
           )}
           <div className="formMain">
