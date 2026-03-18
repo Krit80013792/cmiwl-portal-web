@@ -63,7 +63,7 @@ export const Input = ({
           disabled={disabled}
         />
         {suffix && <button type='button' className="position-absolute top-50 end-0 translate-middle-y me-3">{suffix}</button>}
-        <label className="form-label">{label}</label>
+        {/* <label className="form-label">{label}</label> */}
       </div>
       {feedback && <Feedback>
         <span style={{ marginRight: '2px' }}><img src="/assets/icon/alert-circle.svg" alt="warning" /></span>
