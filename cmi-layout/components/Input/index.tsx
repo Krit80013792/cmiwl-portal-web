@@ -2,7 +2,7 @@ import styled, { css } from 'styled-components'
 
 export interface InputProps {
   name: string
-  id: string
+  id?: string
   type: string
   maxLength?: number
   placeholder?: string
@@ -64,7 +64,7 @@ export const Input = ({
   id = name,
   type,
   maxLength,
-  placeholder,
+  // placeholder,
   onChange,
   value,
   label,
