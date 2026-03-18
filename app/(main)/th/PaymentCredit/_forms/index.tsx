@@ -23,7 +23,9 @@ const PaymentCreditForm = () => {
   const paymentData = useSelector((state: any) => state.payment)
   const [data, setData] = useState<any>({})
   const [cardType, setCardType] = useState<string>('unknown')
-  const [paymentDataIncorrect, setPaymentDataIncorrect] = useState<boolean>(false)
+  //todo start: mock zone
+  const [paymentDataIncorrect, setPaymentDataIncorrect] = useState<boolean>(true)
+  //todo end: mock zone
   const { handleChange, values, errors, handleSubmit } = useForm(
     {
       creditCardNo: '',
@@ -231,11 +233,11 @@ const PaymentCreditForm = () => {
             <Image alt="JCB" width="24" height="24" src="/assets/icon/jcb.svg" />
             <Image alt="unionpay" width="24" height="24" src="/assets/icon/unionpay.svg" />
           </div>
-          {/* {isExpiryInvalid && (
+          {paymentDataIncorrect && (
             <div className="mb-12 d-flex" style={{ gap: '8px' }}>
               <span style={{ color: '#1E1E1F', fontSize: '16px', fontWeight: 700 }}>ข้อมูลการชำระเงินไม่ถูกต้อง</span>
             </div>
-          )} */}
+          )}
           <div className="formMain">
             <div className="form-group mb-12">
               <Input
@@ -413,12 +415,8 @@ const PaymentCreditForm = () => {
                 }
               />
             </div>
-            {/* <p className="mb-0 fs-14 text-lighgrey">
-              <strong>หมายเหตุ</strong> : หากคุณชำระเงินหลังวันที่เริ่มความคุ้มครอง ที่เลือกไว้
-              ประกันจะเริ่มคุ้มครองเป็นวันถัดไป ยกเว้นกรณี ซื้อประกันล่วงหน้า
-            </p> */}
           </div>
-          <div className="text-center mt-12">
+          <div className="text-center" style={{ marginTop: 24 }}>
             <Image alt="Omise" width="150" height="24" src="/assets/object/Secure badge-dark.svg" />
           </div>
         </form>
@@ -441,15 +439,6 @@ const PaymentCreditForm = () => {
       </div>
 
       <Modal {...modal} onClose={closeModal} />
-      {/* <div className="btn-footer-wraper py-20 px-20 bg-white text-center">
-        <button
-          type="button"
-          className="btn btn-primary fs-6 mx-auto d-flex text-center align-items-center justify-content-center"
-          onClick={() => handleSubmit(handlePayment)}
-        >
-          ชำระเงิน
-        </button>
-      </div> */}
     </div>
   )
 }
