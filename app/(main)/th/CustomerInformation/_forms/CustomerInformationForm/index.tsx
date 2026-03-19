@@ -17,6 +17,7 @@ import { useDebounce } from '@/helpers/hooks/useDebounce'
 import { RadioButton } from 'primereact/radiobutton'
 dayjs.locale('th')
 
+
 const CustomerInformationForm: React.FC = () => {
   const { openLoading, closeLoading } = useLoading()
   const route = useRouter()
@@ -71,9 +72,12 @@ const CustomerInformationForm: React.FC = () => {
       //todo: mock new scenario
       personType: 'normal-person',
       paperless: true,
-      juristic: {
-
-      }
+      juristicTitle: prefillData?.juristic?.juristicTitle || '',
+      juristicCompanyName: prefillData?.juristic?.juristicCompanyName || '',
+      juristicId: prefillData?.juristic?.juristicId || '',
+      juristicRegistrationDate: prefillData?.juristic?.juristicRegistrationDate || '',
+      juristicCertificateIssueDate: prefillData?.juristic?.juristicCertificateIssueDate || '',
+      juristicTelephoneNo: prefillData?.juristic?.juristicTelephoneNo || '',
     })
   }, [prefillData, setValues])
 
@@ -176,6 +180,7 @@ const CustomerInformationForm: React.FC = () => {
         policyEmail: values.policyEmail,
         policySms: values.policySms,
       },
+      juristic: values?.juristic || {},
     }
     dispatch(prefillDataSlice.actions.setPrefillData(data))
     route.push('/th/ReviewSummary')
@@ -185,7 +190,6 @@ const CustomerInformationForm: React.FC = () => {
     setPrefill(prefillData)
   }, [prefillData])
   console.log('errors', errors);
-
 
   return (
     <div>
@@ -228,22 +232,24 @@ const CustomerInformationForm: React.FC = () => {
                     name="normal-person"
                     value={'normal-person'}
                     onChange={(e) => {
-                      //todo: reset PersonType == 'juristic-person' 
                       setValues({
                         ...values,
-                        title: '',
-                        firstName: '',
-                        lastName: '',
-                        taxId: '',
-                        birthYear: '',
-                        birthMonth: '',
-                        birthDay: '',
+                        juristicTitle: '',
+                        juristicCompanyName: '',
+                        juristicId: '',
+                        juristicRegistrationDate: '',
+                        juristicCertificateIssueDate: '',
+                        juristicTelephoneNo: '',
                       })
-
-                      //todo: reset error
-                      setErrors({})
-
-                      //todo: need to implement follow person
+                      setErrors((prevErrors: any) => ({
+                        ...prevErrors,
+                        juristicTitle: undefined,
+                        juristicCompanyName: undefined,
+                        juristicId: undefined,
+                        juristicRegistrationDate: undefined,
+                        juristicCertificateIssueDate: undefined,
+                        juristicTelephoneNo: undefined,
+                      }))
                       handleChange({ name: 'personType', value: e.value })
                     }}
                     checked={values?.personType == 'normal-person'}
@@ -266,7 +272,6 @@ const CustomerInformationForm: React.FC = () => {
                     name="juristic-person"
                     value={'juristic-person'}
                     onChange={(e) => {
-                      //todo: reset PersonType == 'normal-person' 
                       setValues({
                         ...values,
                         title: '',
@@ -276,12 +281,19 @@ const CustomerInformationForm: React.FC = () => {
                         birthYear: '',
                         birthMonth: '',
                         birthDay: '',
+                        telephoneNo: '',
                       })
-
-                      //todo: reset error
-                      setErrors({})
-
-                      //todo: need to implement follow person
+                      setErrors((prevErrors: any) => ({
+                        ...prevErrors,
+                        title: undefined,
+                        firstName: undefined,
+                        lastName: undefined,
+                        taxId: undefined,
+                        birthYear: undefined,
+                        birthMonth: undefined,
+                        birthDay: undefined,
+                        telephoneNo: undefined,
+                      }))
                       handleChange({ name: 'personType', value: e.value })
                     }}
                     checked={values?.personType == 'juristic-person'}
@@ -290,137 +302,251 @@ const CustomerInformationForm: React.FC = () => {
                 </label>
               </div>
             </div>
-            <div className="form-group mb-12">
-              <Select
-                name="title"
-                label="คำนำหน้า"
-                firstOptionLabel="เลือกคำนำหน้า"
-                options={[
-                  { label: 'นาย', value: 'นาย' },
-                  { label: 'นาง', value: 'นาง' },
-                  { label: 'นางสาว', value: 'นางสาว' },
-                ]}
-                feedback={errors?.title}
-                onChange={(value) => handleChange({ name: 'title', value })}
-                value={values?.title || ''}
-              />
-              {/* <label className="form-label">{'คำนำหน้า'}</label> */}
-              <div className="feedback">กรุณาเลือก</div>
-            </div>
 
-            <div className="form-group mb-12">
-              <Input
-                label="ชื่อตามบัตรประชาชน"
-                name="firstName"
-                type="text"
-                maxLength={50}
-                placeholder="กรอกชื่อตามบัตรประชาชน"
-                onChange={({ target: { name, value } }) => handleChange({ name, value: value?.replaceAll(' ', '') })}
-                value={values?.firstName || ''}
-                feedback={errors?.firstName}
-              />
-            </div>
-            <div className="form-group mb-12">
-              <Input
-                label="นามสกุลตามบัตรประชาชน"
-                name="lastName"
-                type="text"
-                maxLength={50}
-                placeholder="กรอกนามสกุลตามบัตรประชาชน"
-                onChange={({ target: { name, value } }) => handleChange({ name, value })}
-                value={values?.lastName || ''}
-                feedback={errors?.lastName}
-              />
-            </div>
-            <div className="form-group mb-12">
-              <Input
-                name="taxId"
-                type="text"
-                maxLength={17}
-                placeholder="กรอกรหัสบัตรประชาชน 13 หลัก"
-                onChange={({ target: { name, value } }) => handleChange({ name, value: value?.replaceAll('-', '') })}
-                value={convertStrToFormat(values?.taxId, 'id_card') || ''}
-                label="เลขบัตรประชาชน"
-                feedback={errors?.taxId}
-              />
-            </div>
-            <div className="form-group mb-12" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
-              <div>
-                <div className="d-flex">
-                  { /* //todo: change to calendar later */}
-                  <div className="w-100 position-relative">
-                    <Select
-                      label="ปี"
-                      name="birthYear"
-                      firstOptionLabel="เลือกปี"
-                      options={
-                        mounted
-                          ? Array.from({ length: 80 }, (_, i) => {
-                            const year = dayjs().year() - 20 - i
-                            return {
-                              label: (year + 543).toString(),
-                              value: year.toString(),
-                            }
-                          })
-                          : []
-                      }
-                      onChange={(value) => handleChange({ name: 'birthYear', value })}
-                      value={values?.birthYear || ''}
-                      feedback={errors?.birthYear}
-                    />
-                  </div>
-                  <div className="ms-2 me-2 w-100 position-relative">
-                    <Select
-                      label="เดือน"
-                      name="birthMonth"
-                      firstOptionLabel="เลือกเดือน"
-                      options={Array.from({ length: 12 }, (_, i) => ({
-                        label: dayjs().month(i).format('MMMM'),
-                        value: (i + 1).toString(),
-                      }))}
-                      onChange={(value) => handleChange({ name: 'birthMonth', value })}
-                      value={values?.birthMonth || ''}
-                      feedback={errors?.birthMonth}
-                    />
-                  </div>
-                  <div className="ms-0 w-100 position-relative">
-                    <Select
-                      label="วัน"
-                      name="birthDay"
-                      firstOptionLabel="เลือกวัน"
-                      options={birthDayList}
-                      onChange={(value) => handleChange({ name: 'birthDay', value })}
-                      value={values?.birthDay || ''}
-                      feedback={errors?.birthDay}
-                    />
-                  </div>
+            {/* บุคคลธรรมดา */}
+            {values?.personType === 'normal-person' && (
+              <>
+                <div className="form-group mb-12">
+                  <Select
+                    name="title"
+                    label="คำนำหน้า"
+                    firstOptionLabel="เลือกคำนำหน้า"
+                    options={[
+                      { label: 'นาย', value: 'นาย' },
+                      { label: 'นาง', value: 'นาง' },
+                      { label: 'นางสาว', value: 'นางสาว' },
+                    ]}
+                    feedback={errors?.title}
+                    onChange={(value) => handleChange({ name: 'title', value })}
+                    value={values?.title || ''}
+                  />
                 </div>
-                <div className="feedback">กรุณาเลือก</div>
-              </div>
 
-              <Input
-                label={`เบอร์โทรศัพท์ ${!prefill?.deliveryType?.isEmail && prefill?.deliveryType?.isSms ? '(ใช้สำหรับรับกรมธรรม์อิเล็กทรอนิกส์)' : ''}`}
-                name="telephoneNo"
-                type="text"
-                maxLength={12}
-                placeholder="กรอกเบอร์โทรศัพท์"
-                onChange={({ target: { name, value } }) => handleChange({ name, value: value?.replaceAll('-', '') })}
-                value={convertStrToFormat(values?.telephoneNo, 'phone_number') || ''}
-                feedback={errors?.telephoneNo}
-              />
-            </div>
-            {/* <div className="form-group mb-12">
-              <Input
-                label={`อีเมล ${prefill?.deliveryType?.isEmail && !prefill?.deliveryType?.isSms ? '(ใช้สำหรับรับกรมธรรม์อิเล็กทรอนิกส์)' : ''}`}
-                name="email"
-                type="text"
-                maxLength={50}
-                placeholder="กรอกอีเมล"
-                onChange={({ target: { name, value } }) => handleChange({ name, value })}
-                value={values?.email || ''}
-                feedback={errors?.email}
-              />
-            </div> */}
+                <div className="form-group mb-12">
+                  <Input
+                    label="ชื่อตามบัตรประชาชน"
+                    name="firstName"
+                    type="text"
+                    maxLength={50}
+                    placeholder="กรอกชื่อตามบัตรประชาชน"
+                    onChange={({ target: { name, value } }) =>
+                      handleChange({ name, value: value?.replaceAll(' ', '') })}
+                    value={values?.firstName || ''}
+                    feedback={errors?.firstName}
+                  />
+                </div>
+                <div className="form-group mb-12">
+                  <Input
+                    label="นามสกุลตามบัตรประชาชน"
+                    name="lastName"
+                    type="text"
+                    maxLength={50}
+                    placeholder="กรอกนามสกุลตามบัตรประชาชน"
+                    onChange={({ target: { name, value } }) => handleChange({ name, value })}
+                    value={values?.lastName || ''}
+                    feedback={errors?.lastName}
+                  />
+                </div>
+                <div className="form-group mb-12">
+                  <Input
+                    name="taxId"
+                    type="text"
+                    maxLength={17}
+                    placeholder="กรอกรหัสบัตรประชาชน 13 หลัก"
+                    onChange={({ target: { name, value } }) => handleChange({ name, value: value?.replaceAll('-', '') })}
+                    value={convertStrToFormat(values?.taxId, 'id_card') || ''}
+                    label="เลขบัตรประชาชน"
+                    feedback={errors?.taxId}
+                  />
+                </div>
+                <div className="form-group mb-12" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
+                  <div>
+                    <div className="d-flex">
+                      <div className="w-100 position-relative">
+                        <Select
+                          label="ปี"
+                          name="birthYear"
+                          firstOptionLabel="เลือกปี"
+                          options={
+                            mounted
+                              ? Array.from({ length: 80 }, (_, i) => {
+                                const year = dayjs().year() - 20 - i
+                                return {
+                                  label: (year + 543).toString(),
+                                  value: year.toString(),
+                                }
+                              })
+                              : []
+                          }
+                          onChange={(value) => handleChange({ name: 'birthYear', value })}
+                          value={values?.birthYear || ''}
+                          feedback={errors?.birthYear}
+                        />
+                      </div>
+                      <div className="ms-2 me-2 w-100 position-relative">
+                        <Select
+                          label="เดือน"
+                          name="birthMonth"
+                          firstOptionLabel="เลือกเดือน"
+                          options={Array.from({ length: 12 }, (_, i) => ({
+                            label: dayjs().month(i).format('MMMM'),
+                            value: (i + 1).toString(),
+                          }))}
+                          onChange={(value) => handleChange({ name: 'birthMonth', value })}
+                          value={values?.birthMonth || ''}
+                          feedback={errors?.birthMonth}
+                        />
+                      </div>
+                      <div className="ms-0 w-100 position-relative">
+                        <Select
+                          label="วัน"
+                          name="birthDay"
+                          firstOptionLabel="เลือกวัน"
+                          options={birthDayList}
+                          onChange={(value) => handleChange({ name: 'birthDay', value })}
+                          value={values?.birthDay || ''}
+                          feedback={errors?.birthDay}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <Input
+                    label={`เบอร์โทรศัพท์ ${!prefill?.deliveryType?.isEmail && prefill?.deliveryType?.isSms ? '(ใช้สำหรับรับกรมธรรม์อิเล็กทรอนิกส์)' : ''}`}
+                    name="telephoneNo"
+                    type="text"
+                    maxLength={12}
+                    placeholder="กรอกเบอร์โทรศัพท์"
+                    onChange={({ target: { name, value } }) => handleChange({ name, value: value?.replaceAll('-', '') })}
+                    value={convertStrToFormat(values?.telephoneNo, 'phone_number') || ''}
+                    feedback={errors?.telephoneNo}
+                  />
+                </div>
+              </>
+            )}
+
+            {/* นิติบุคคล */}
+            {values?.personType === 'juristic-person' && (
+              <>
+                <div className="form-group mb-12">
+                  <Select
+                    name="juristicTitle"
+                    label="คำนำหน้าชื่อบริษัท"
+                    firstOptionLabel="เลือกคำนำหน้า"
+                    options={[
+                      { label: 'บริษัท', value: 'บริษัท' },
+                      { label: 'ห้างหุ้นส่วน', value: 'ห้างหุ้นส่วน' },
+                      { label: 'ห้างหุ้นส่วนจำกัด', value: 'ห้างหุ้นส่วนจำกัด' },
+                    ]}
+                    feedback={errors?.juristicTitle}
+                    // IMPORTANT: use handleChange here for juristicTitle
+                    onChange={(value) =>
+                      handleChange({ name: 'juristicTitle', value })
+                    }
+                    value={values?.juristicTitle || ''}
+                  />
+                </div>
+                <div className="form-group mb-12">
+                  <Input
+                    label="ชื่อบริษัท"
+                    name="juristicCompanyName"
+                    type="text"
+                    maxLength={50}
+                    placeholder="กรอกชื่อบริษัท"
+                    onChange={({ target: { value } }) =>
+                      setValues((prev: any) => ({
+                        ...prev,
+                        juristic: {
+                          ...prev?.juristic,
+                          juristicCompanyName: value,
+                        }
+                      }))
+                    }
+                    value={values?.juristic?.juristicCompanyName || ''}
+                    feedback={errors?.juristicCompanyName}
+                  />
+                </div>
+                <div className="form-group mb-12">
+                  <Input
+                    label="เลขนิติบุคคล"
+                    name="juristicId"
+                    type="text"
+                    maxLength={13}
+                    placeholder="กรอกเลขนิติบุคคล 13 หลัก"
+                    onChange={({ target: { value } }) =>
+                      setValues((prev: any) => ({
+                        ...prev,
+                        juristic: {
+                          ...prev?.juristic,
+                          juristicId: value.replaceAll('-', ''),
+                        }
+                      }))
+                    }
+                    value={values?.juristic?.juristicId || ''}
+                    feedback={errors?.juristicId}
+                  />
+                </div>
+                <div className="form-group mb-12">
+                  <Input
+                    label="วันจดทะเบียนบริษัท"
+                    name="juristicRegistrationDate"
+                    type="date"
+                    placeholder="กรอกวันจดทะเบียนบริษัท"
+                    onChange={({ target: { value } }) =>
+                      setValues((prev: any) => ({
+                        ...prev,
+                        juristic: {
+                          ...prev?.juristic,
+                          juristicRegistrationDate: value,
+                        }
+                      }))
+                    }
+                    value={values?.juristic?.juristicRegistrationDate || ''}
+                    feedback={errors?.juristicRegistrationDate}
+                  />
+                </div>
+                <div className="form-group mb-12">
+                  <Input
+                    label="วันออกหนังสือรับรองบริษัท"
+                    name="juristicCertificateIssueDate"
+                    type="date"
+                    placeholder="กรอกวันออกหนังสือรับรองบริษัท"
+                    onChange={({ target: { value } }) =>
+                      setValues((prev: any) => ({
+                        ...prev,
+                        juristic: {
+                          ...prev?.juristic,
+                          juristicCertificateIssueDate: value,
+                        }
+                      }))
+                    }
+                    value={values?.juristic?.juristicCertificateIssueDate || ''}
+                    feedback={errors?.juristicCertificateIssueDate}
+                  />
+                </div>
+                <div className="form-group mb-12">
+                  <Input
+                    label="เบอร์โทรศัพท์บริษัท"
+                    name="juristicTelephoneNo"
+                    type="text"
+                    maxLength={10}
+                    placeholder="กรอกเบอร์โทรศัพท์ 10 หลัก"
+                    onChange={({ target: { value } }) =>
+                      setValues((prev: any) => ({
+                        ...prev,
+                        juristic: {
+                          ...prev?.juristic,
+                          juristicTelephoneNo: value.replaceAll('-', ''),
+                        }
+                      }))
+                    }
+                    value={values?.juristic?.juristicTelephoneNo || ''}
+                    feedback={errors?.juristicTelephoneNo}
+                  />
+                </div>
+              </>
+            )}
+
             <h2
               className="mb-12 mt-4 text-black"
               style={{
@@ -590,7 +716,6 @@ const CustomerInformationForm: React.FC = () => {
                 >
                   ช่องทางการจัดส่งกรมธรรม์
                 </span>
-                {/* <p>กรมธรรม์อิเล็กทรอนิกส์จะถูกจัดส่งภายใน 15 นาที หลังจากชำระเงินสำเร็จ</p> */}
                 <div
                   style={{ display: 'flex', width: '100%', alignItems: 'center', marginBottom: '12px', gap: '10px' }}
                 >
