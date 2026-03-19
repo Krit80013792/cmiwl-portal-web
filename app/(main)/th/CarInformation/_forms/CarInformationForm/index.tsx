@@ -386,7 +386,7 @@ const CarInformationForm = () => {
                 <label
                   htmlFor="isNotRed"
                   className={`red-license-option ${!values?.isRedLicense ? 'red-license-option--selected' : ''}`}
-                  style={{ display: 'flex', width: '100%', cursor: 'pointer' }}
+                  style={{ display: 'flex', width: '100%', cursor: 'pointer', alignItems: 'center' }}
                 >
                   <RadioButton
                     inputId="isNotRed"
@@ -402,7 +402,7 @@ const CarInformationForm = () => {
                 <label
                   htmlFor="isRedLicense"
                   className={`red-license-option ${values?.isRedLicense ? 'red-license-option--selected' : ''}`}
-                  style={{ display: 'flex', width: '100%', cursor: 'pointer' }}
+                  style={{ display: 'flex', width: '100%', cursor: 'pointer', alignItems: 'center' }}
                 >
                   <RadioButton
                     inputId="isRedLicense"

@@ -2,6 +2,8 @@ import { isValidThaiID } from '@/helpers/functions/utils'
 import { boolean, object, string } from 'yup'
 
 const customerInformationSchema = object({
+  //todo: personType = บุคคล
+  personType: string().required('กรุณาเลือกประเภทบุคคล'),
   title: string().required('กรุณาเลือกคำนำหน้า').notOneOf([null, '', 'NO_VALUE'], 'กรุณาเลือกคำนำหน้า'),
   firstName: string()
     .required('กรุณากรอกชื่อ')
@@ -25,7 +27,30 @@ const customerInformationSchema = object({
   telephoneNo: string()
     .required('กรุณากรอกเบอร์โทรศัพท์')
     .matches(/^\d{10}$/, 'กรุณากรอกเบอร์โทรศัพท์ 10 หลัก'),
-  email: string().required('กรุณากรอกอีเมล').email('กรุณากรอกอีเมลให้ถูกต้อง'),
+
+  //todo: personType = นิติบุคคล
+
+  juristicTitle: string()
+    .required('กรุณาเลือกคำนำหน้า')
+    .notOneOf([null, '', 'NO_VALUE'], 'กรุณาเลือกคำนำหน้า'),
+  juristicCompanyName: string()
+    .required('กรุณากรอกชื่อบริษัท')
+    .max(50, 'กรุณากรอกชื่อบริษัทไม่เกิน 50 ตัวอักษร'),
+  juristicId: string()
+    .required('กรุณากรอกเลขนิติบุคคล')
+    .matches(/^\d{13}$/, 'ต้องเป็นตัวเลข 13 หลัก'),
+  juristicRegistrationDate: string()
+    .required('กรุณากรอกวันจดทะเบียนบริษัท'),
+  juristicCertificateIssueDate: string()
+    .required('กรุณากรอกวันออกหนังสือรับรองบริษัท'),
+  juristicTelephoneNo: string()
+    .required('กรุณากรอกเบอร์โทรศัพท์')
+    .matches(/^\d{10}$/, 'กรุณากรอกเบอร์โทรศัพท์ 10 หลัก'),
+
+
+
+  // email: string().required('กรุณากรอกอีเมล').email('กรุณากรอกอีเมลให้ถูกต้อง'),
+
   houseNumber: string()
     .required('กรุณากรอกที่อยู่')
     .matches(/^(?!\s).*/, 'ไม่สามารถขึ้นต้นด้วยช่องว่างได้'),

@@ -1,0 +1,17 @@
+@use '@/styles/layout/mixins' as *;
+
+#customer-information {
+
+    .person-type-option {
+        cursor: pointer;
+        margin-top: 16px;
+        padding: 16px;
+        border-radius: var(--variable-radius-radius-12, 12px);
+        border: 1px solid var(--border-primary, #DDDDDF);
+        background: var(--background-lightest, #FFF);
+
+        &.person-type-option--selected {
+            border-color: var(--primary);
+        }
+    }
+}

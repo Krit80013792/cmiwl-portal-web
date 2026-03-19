@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation'
 import { getAdressByZipCode } from '../../_actions'
 import useLoading from '@/helpers/hooks/useLoading'
 import { useDebounce } from '@/helpers/hooks/useDebounce'
+import { RadioButton } from 'primereact/radiobutton'
 dayjs.locale('th')
 
 const CustomerInformationForm: React.FC = () => {
@@ -28,7 +29,7 @@ const CustomerInformationForm: React.FC = () => {
   const [addressData, setAddressData] = useState<any>(null)
   const [birthDayList, setBirthDayList] = useState<any[]>([])
   const [mounted, setMounted] = useState(false)
-  const { handleChange, handleSubmit, errors, values, setValues } = useForm({}, customerInformationSchema, {
+  const { handleChange, setErrors, handleSubmit, errors, values, setValues } = useForm({}, customerInformationSchema, {
     openLoading,
     closeLoading,
   })
@@ -67,6 +68,12 @@ const CustomerInformationForm: React.FC = () => {
       policySms:
         prefillData?.deliveryType?.policySms ||
         (prefillData?.deliveryType?.isSms ? prefillData?.personalInfo?.telephoneNo : ''),
+      //todo: mock new scenario
+      personType: 'normal-person',
+      paperless: true,
+      juristic: {
+
+      }
     })
   }, [prefillData, setValues])
 
@@ -177,6 +184,8 @@ const CustomerInformationForm: React.FC = () => {
   useEffect(() => {
     setPrefill(prefillData)
   }, [prefillData])
+  console.log('errors', errors);
+
 
   return (
     <div>
@@ -187,8 +196,100 @@ const CustomerInformationForm: React.FC = () => {
               <strong>ข้อมูลผู้เอาประกัน (เจ้าของรถ)</strong>
             </h2>
           </div>
+          <div>
+            <span
+              style={{
+                color: '#1E1E1F',
+                fontSize: '16px',
+                fontWeight: 700,
+                display: 'block',
+              }}
+            >
+              ประเภทผู้เอาประกัน
+            </span>
+          </div>
 
           <div className="formMain">
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <div className="gap-3 mb-12" style={{ display: 'flex', width: '100%' }}>
+                <label
+                  htmlFor="normal-person"
+                  className={`person-type-option ${values?.personType == 'normal-person' ? 'person-type-option--selected' : ''}`}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    height: '48px',
+                  }}
+                >
+                  <RadioButton
+                    inputId="normal-person"
+                    name="normal-person"
+                    value={'normal-person'}
+                    onChange={(e) => {
+                      //todo: reset PersonType == 'juristic-person' 
+                      setValues({
+                        ...values,
+                        title: '',
+                        firstName: '',
+                        lastName: '',
+                        taxId: '',
+                        birthYear: '',
+                        birthMonth: '',
+                        birthDay: '',
+                      })
+
+                      //todo: reset error
+                      setErrors({})
+
+                      //todo: need to implement follow person
+                      handleChange({ name: 'personType', value: e.value })
+                    }}
+                    checked={values?.personType == 'normal-person'}
+                  />
+                  <span>บุคคลธรรมดา</span>
+                </label>
+                <label
+                  htmlFor="juristic-person"
+                  className={`person-type-option ${values?.personType == 'juristic-person' ? 'person-type-option--selected' : ''}`}
+                  style={{
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    height: '48px',
+                  }}
+                >
+                  <RadioButton
+                    inputId="juristic-person"
+                    name="juristic-person"
+                    value={'juristic-person'}
+                    onChange={(e) => {
+                      //todo: reset PersonType == 'normal-person' 
+                      setValues({
+                        ...values,
+                        title: '',
+                        firstName: '',
+                        lastName: '',
+                        taxId: '',
+                        birthYear: '',
+                        birthMonth: '',
+                        birthDay: '',
+                      })
+
+                      //todo: reset error
+                      setErrors({})
+
+                      //todo: need to implement follow person
+                      handleChange({ name: 'personType', value: e.value })
+                    }}
+                    checked={values?.personType == 'juristic-person'}
+                  />
+                  <span>นิติบุคคล</span>
+                </label>
+              </div>
+            </div>
             <div className="form-group mb-12">
               <Select
                 name="title"
@@ -209,7 +310,7 @@ const CustomerInformationForm: React.FC = () => {
 
             <div className="form-group mb-12">
               <Input
-                label="ชื่อ"
+                label="ชื่อตามบัตรประชาชน"
                 name="firstName"
                 type="text"
                 maxLength={50}
@@ -221,7 +322,7 @@ const CustomerInformationForm: React.FC = () => {
             </div>
             <div className="form-group mb-12">
               <Input
-                label="นามสกุล"
+                label="นามสกุลตามบัตรประชาชน"
                 name="lastName"
                 type="text"
                 maxLength={50}
@@ -243,11 +344,10 @@ const CustomerInformationForm: React.FC = () => {
                 feedback={errors?.taxId}
               />
             </div>
-
-            <span className="fs-14 f-bd d-block mb-2 birtday-textFeild">วันเกิด</span>
-            <div className="form-group mb-12">
+            <div className="form-group mb-12" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
               <div>
                 <div className="d-flex">
+                  { /* //todo: change to calendar later */}
                   <div className="w-100 position-relative">
                     <Select
                       label="ปี"
@@ -297,8 +397,7 @@ const CustomerInformationForm: React.FC = () => {
                 </div>
                 <div className="feedback">กรุณาเลือก</div>
               </div>
-            </div>
-            <div className="form-group mb-12">
+
               <Input
                 label={`เบอร์โทรศัพท์ ${!prefill?.deliveryType?.isEmail && prefill?.deliveryType?.isSms ? '(ใช้สำหรับรับกรมธรรม์อิเล็กทรอนิกส์)' : ''}`}
                 name="telephoneNo"
@@ -310,7 +409,7 @@ const CustomerInformationForm: React.FC = () => {
                 feedback={errors?.telephoneNo}
               />
             </div>
-            <div className="form-group mb-12">
+            {/* <div className="form-group mb-12">
               <Input
                 label={`อีเมล ${prefill?.deliveryType?.isEmail && !prefill?.deliveryType?.isSms ? '(ใช้สำหรับรับกรมธรรม์อิเล็กทรอนิกส์)' : ''}`}
                 name="email"
@@ -321,9 +420,16 @@ const CustomerInformationForm: React.FC = () => {
                 value={values?.email || ''}
                 feedback={errors?.email}
               />
-            </div>
-            <h2 className="mb-12 mt-4 text-black fs-18">
-              <strong>ที่อยู่ปัจจุบัน</strong>
+            </div> */}
+            <h2
+              className="mb-12 mt-4 text-black"
+              style={{
+                fontSize: '16px',
+                fontWeight: 700,
+                color: '#1E1E1F'
+              }}
+            >
+              ที่อยู่ปัจจุบัน
             </h2>
             <div className="d-flex">
               <div className="form-group mb-12 me-2 w-100">
@@ -472,10 +578,19 @@ const CustomerInformationForm: React.FC = () => {
 
             {prefill?.channel?.isPolicyEmail && prefill?.channel?.isPolicySms && (
               <>
-                <h2 className="mb-12 mt-4 text-black fs-18">
-                  <strong>ช่องทางการจัดส่งกรมธรรม์</strong>
-                </h2>
-                <p>กรมธรรม์อิเล็กทรอนิกส์จะถูกจัดส่งภายใน 15 นาที หลังจากชำระเงินสำเร็จ</p>
+                <span
+                  style={{
+                    color: '#1E1E1F',
+                    fontSize: '16px',
+                    fontWeight: 700,
+                    display: 'block',
+                    marginBottom: '12px',
+                    marginTop: '16px',
+                  }}
+                >
+                  ช่องทางการจัดส่งกรมธรรม์
+                </span>
+                {/* <p>กรมธรรม์อิเล็กทรอนิกส์จะถูกจัดส่งภายใน 15 นาที หลังจากชำระเงินสำเร็จ</p> */}
                 <div
                   style={{ display: 'flex', width: '100%', alignItems: 'center', marginBottom: '12px', gap: '10px' }}
                 >
