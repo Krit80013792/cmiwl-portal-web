@@ -307,6 +307,8 @@ const CarInformationForm = () => {
             onChange={(value) => {
               handleChange({ name: 'carBrandId', value })
               fetchCarModelData(value)
+              handleChange({ name: 'carModelName', value: null })
+              handleChange({ name: 'carColorId', value: null })
             }}
             value={values?.carBrandId || ''}
             feedback={errors?.carBrandId}
@@ -318,14 +320,18 @@ const CarInformationForm = () => {
               label="รุ่นรถ"
               name="carModelName"
               firstOptionLabel="เลือกรุ่นรถ"
-              disabled={values?.carBrandId === 'NO_VALUE'}
+              disabled={!Boolean(values?.carBrandId)}
               options={carModelList?.slice()?.map((model: any) => ({
                 label: model,
                 value: model,
               }))}
-              onChange={(value) => handleChange({ name: 'carModelName', value })}
+              onChange={(value) => {
+                handleChange({ name: 'carModelName', value })
+                //todo: need to fetch new car color for the new car model
+                handleChange({ name: 'carColorId', value: null })
+              }}
               value={values?.carModelName || ''}
-              feedback={errors?.carModelName}
+              feedback={values?.carBrandId && errors?.carModelName}
             />
           </div>
           <div style={{ width: '100%' }} className="form-group mb-12 carcolor">
@@ -335,11 +341,13 @@ const CarInformationForm = () => {
               firstOptionLabel="เลือกสีรถ"
               value={values?.carColorId || ''}
               onChange={(value) => handleChange({ name: 'carColorId', value })}
+              disabled={!Boolean(values?.carModelName)}
               options={carColorList?.slice()?.map((color: any) => ({
                 label: color?.carColorNameTh,
                 value: color?.carColorId,
               }))}
-              feedback={errors?.carColorId}
+              feedback={values?.carBrandId && values?.carModelName && errors?.carColorId}
+
             />
           </div>
         </div>

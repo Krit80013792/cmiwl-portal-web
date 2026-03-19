@@ -14,9 +14,10 @@ interface SelectProps {
 
 const StyledSelect = styled.select.withConfig({
   shouldForwardProp: (prop) => prop !== 'error',
-}) <{ error: boolean }>`
+}) <{ error: boolean, disabled?: boolean }>`
   &.form-control {
-    background-color: ${({ error }) => (error ? '#FFFAFA' : '#FFFFFF')};
+    background-color: ${({ error, disabled }) =>
+    disabled ? '#DDDDDF' : error ? '#FFFAFA' : '#FFFFFF'};
     ${({ error }) =>
     error &&
     css`
