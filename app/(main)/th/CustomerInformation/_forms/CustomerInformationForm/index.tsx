@@ -454,15 +454,9 @@ const CustomerInformationForm: React.FC = () => {
                     maxLength={50}
                     placeholder="กรอกชื่อบริษัท"
                     onChange={({ target: { value } }) =>
-                      setValues((prev: any) => ({
-                        ...prev,
-                        juristic: {
-                          ...prev?.juristic,
-                          juristicCompanyName: value,
-                        }
-                      }))
+                      handleChange({ name: 'juristicCompanyName', value })
                     }
-                    value={values?.juristic?.juristicCompanyName || ''}
+                    value={values?.juristicCompanyName || ''}
                     feedback={errors?.juristicCompanyName}
                   />
                 </div>
@@ -474,15 +468,9 @@ const CustomerInformationForm: React.FC = () => {
                     maxLength={13}
                     placeholder="กรอกเลขนิติบุคคล 13 หลัก"
                     onChange={({ target: { value } }) =>
-                      setValues((prev: any) => ({
-                        ...prev,
-                        juristic: {
-                          ...prev?.juristic,
-                          juristicId: value.replaceAll('-', ''),
-                        }
-                      }))
+                      handleChange({ name: 'juristicId', value: value?.replaceAll('-', '') })
                     }
-                    value={values?.juristic?.juristicId || ''}
+                    value={values?.juristicId || ''}
                     feedback={errors?.juristicId}
                   />
                 </div>
@@ -490,18 +478,12 @@ const CustomerInformationForm: React.FC = () => {
                   <Input
                     label="วันจดทะเบียนบริษัท"
                     name="juristicRegistrationDate"
-                    type="date"
+                    type="text"
                     placeholder="กรอกวันจดทะเบียนบริษัท"
                     onChange={({ target: { value } }) =>
-                      setValues((prev: any) => ({
-                        ...prev,
-                        juristic: {
-                          ...prev?.juristic,
-                          juristicRegistrationDate: value,
-                        }
-                      }))
+                      handleChange({ name: 'juristicRegistrationDate', value })
                     }
-                    value={values?.juristic?.juristicRegistrationDate || ''}
+                    value={values?.juristicRegistrationDate || ''}
                     feedback={errors?.juristicRegistrationDate}
                   />
                 </div>
@@ -509,18 +491,12 @@ const CustomerInformationForm: React.FC = () => {
                   <Input
                     label="วันออกหนังสือรับรองบริษัท"
                     name="juristicCertificateIssueDate"
-                    type="date"
+                    type="text"
                     placeholder="กรอกวันออกหนังสือรับรองบริษัท"
                     onChange={({ target: { value } }) =>
-                      setValues((prev: any) => ({
-                        ...prev,
-                        juristic: {
-                          ...prev?.juristic,
-                          juristicCertificateIssueDate: value,
-                        }
-                      }))
+                      handleChange({ name: 'juristicCertificateIssueDate', value })
                     }
-                    value={values?.juristic?.juristicCertificateIssueDate || ''}
+                    value={values?.juristicCertificateIssueDate || ''}
                     feedback={errors?.juristicCertificateIssueDate}
                   />
                 </div>
@@ -532,15 +508,9 @@ const CustomerInformationForm: React.FC = () => {
                     maxLength={10}
                     placeholder="กรอกเบอร์โทรศัพท์ 10 หลัก"
                     onChange={({ target: { value } }) =>
-                      setValues((prev: any) => ({
-                        ...prev,
-                        juristic: {
-                          ...prev?.juristic,
-                          juristicTelephoneNo: value.replaceAll('-', ''),
-                        }
-                      }))
+                      handleChange({ name: 'juristicTelephoneNo', value: value?.replaceAll('-', '') })
                     }
-                    value={values?.juristic?.juristicTelephoneNo || ''}
+                    value={values?.juristicTelephoneNo || ''}
                     feedback={errors?.juristicTelephoneNo}
                   />
                 </div>
