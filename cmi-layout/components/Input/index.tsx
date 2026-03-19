@@ -37,7 +37,8 @@ const StyledInput = styled.input.withConfig({
   }
 
   &.form-control:focus + .form-label,
-  &.form-control.filled + .form-label {
+  &.form-control.filled + .form-label,
+  &.form-control:-webkit-autofill + .form-label {
     font-size: 12px;
     top: 12px;
     left: 0px;
