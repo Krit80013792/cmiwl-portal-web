@@ -17,7 +17,7 @@ const PaymentCashComponent: React.FC = () => {
 
     return (
         <div className="content-section bg-lightgrey" style={{ minHeight: '100vh' }}>
-            <div className="py-24" style={{ paddingTop: '32px', maxWidth: 384, margin: '0 auto' }}>
+            <div style={{ paddingTop: '72px', maxWidth: 384, margin: '0 auto' }}>
                 <h2
                     className="mb-3"
                     style={{ fontWeight: 700, fontSize: '20px', color: '#1E1E1F' }}
