@@ -37,10 +37,10 @@ const PaymentCreditTeleChannel = () => {
                             gap: 16,
                         }}
                     >
-                        <Image src="/assets/icon/guard.svg" alt="guard" width={54} height={54} />
+                        <Image src="/assets/icon/system.svg" alt="system" width={54} height={54} />
                         <div>
                             <div>ไม่พบรายการชำระเงิน</div>
-                            <div style={{ fontSize: 15, color: '#414243' }}>กรุณาตรวจสอบการชำระเงินอีกครั้ง</div>
+                            <div style={{ fontSize: 15, color: '#414243', fontWeight: '400' }}>กรุณาตรวจสอบการชำระเงินอีกครั้ง</div>
                         </div>
                         <Button
                             type="button"
