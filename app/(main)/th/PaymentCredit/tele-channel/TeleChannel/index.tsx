@@ -17,8 +17,7 @@ const PaymentCreditTeleChannel = () => {
         closeModal()
         //todo: implement checkPaymentStatus API
         const paymentSuccess = false
-        // if (!paymentSuccess) {
-        if (paymentSuccess) {
+        if (!paymentSuccess) {
             openModal({
                 type: 'info',
                 hasImg: false,

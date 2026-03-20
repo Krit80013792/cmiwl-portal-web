@@ -514,15 +514,13 @@ const PaymentCreditForm = () => {
     }
   }, [openLoading, closeLoading, data, values, prefillData, dispatch, openModal, route])
 
-
-
   useEffect(() => {
     //todo: for test each scenario
     // handleTransactionFailed()
     // handleExpiryDateInvalid()
     // handleInsufficientCardLimit()
     // handleDeclinedByBankOrFraud()
-    router.replace('/th/PaymentCredit/payment-failed')
+    // router.replace('/th/PaymentCredit/payment-failed')
     // router.replace('/th/PaymentCredit/success')
   }, [])
 
