@@ -275,7 +275,17 @@ const CarInformationForm = () => {
                     fetchCarModelData(brand.carBrandId)
                   }}
                 >
-                  <div style={{ height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${errors.carBrandId ? '#EB5848' : '#F2F2F2'}`, borderRadius: '8px' }} className={`rounded-4 text-center js-listdata choice-card ${isActive ? ' active' : ''}`}>
+                  <div style={{ position: 'relative', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${errors.carBrandId ? '#EB5848' : '#F2F2F2'}`, borderRadius: '8px' }} className={`rounded-4 text-center js-listdata choice-card ${isActive ? ' active' : ''}`}>
+                    {isActive && (
+                      <Image
+                        src="/assets/icon/icon-success.png"
+                        alt="Success Icon"
+                        width={16}
+                        height={16}
+                        style={{ position: 'absolute', top: 3, right: 3 }}
+                      />
+                    )
+                    }
                     <Image alt={brand?.carBrandName} width="48" height="48" src={brand?.carBrandImage} />
                   </div>
                 </button>
@@ -297,6 +307,8 @@ const CarInformationForm = () => {
             onChange={(value) => {
               handleChange({ name: 'carBrandId', value })
               fetchCarModelData(value)
+              handleChange({ name: 'carModelName', value: null })
+              handleChange({ name: 'carColorId', value: null })
             }}
             value={values?.carBrandId || ''}
             feedback={errors?.carBrandId}
@@ -308,14 +320,18 @@ const CarInformationForm = () => {
               label="รุ่นรถ"
               name="carModelName"
               firstOptionLabel="เลือกรุ่นรถ"
-              disabled={values?.carBrandId === 'NO_VALUE'}
+              disabled={!Boolean(values?.carBrandId)}
               options={carModelList?.slice()?.map((model: any) => ({
                 label: model,
                 value: model,
               }))}
-              onChange={(value) => handleChange({ name: 'carModelName', value })}
+              onChange={(value) => {
+                handleChange({ name: 'carModelName', value })
+                //todo: need to fetch new car color for the new car model
+                handleChange({ name: 'carColorId', value: null })
+              }}
               value={values?.carModelName || ''}
-              feedback={errors?.carModelName}
+              feedback={values?.carBrandId && errors?.carModelName}
             />
           </div>
           <div style={{ width: '100%' }} className="form-group mb-12 carcolor">
@@ -325,11 +341,13 @@ const CarInformationForm = () => {
               firstOptionLabel="เลือกสีรถ"
               value={values?.carColorId || ''}
               onChange={(value) => handleChange({ name: 'carColorId', value })}
+              disabled={!Boolean(values?.carModelName)}
               options={carColorList?.slice()?.map((color: any) => ({
                 label: color?.carColorNameTh,
                 value: color?.carColorId,
               }))}
-              feedback={errors?.carColorId}
+              feedback={values?.carBrandId && values?.carModelName && errors?.carColorId}
+
             />
           </div>
         </div>
@@ -368,7 +386,7 @@ const CarInformationForm = () => {
                 <label
                   htmlFor="isNotRed"
                   className={`red-license-option ${!values?.isRedLicense ? 'red-license-option--selected' : ''}`}
-                  style={{ display: 'flex', width: '100%', cursor: 'pointer' }}
+                  style={{ display: 'flex', width: '100%', cursor: 'pointer', alignItems: 'center' }}
                 >
                   <RadioButton
                     inputId="isNotRed"
@@ -384,7 +402,7 @@ const CarInformationForm = () => {
                 <label
                   htmlFor="isRedLicense"
                   className={`red-license-option ${values?.isRedLicense ? 'red-license-option--selected' : ''}`}
-                  style={{ display: 'flex', width: '100%', cursor: 'pointer' }}
+                  style={{ display: 'flex', width: '100%', cursor: 'pointer', alignItems: 'center' }}
                 >
                   <RadioButton
                     inputId="isRedLicense"

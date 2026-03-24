@@ -7,8 +7,8 @@ export interface PaymentSliceState {
 }
 
 const initialState: PaymentSliceState = {
-  paymentNo: null,
-  paymentStatus: 'idle',
+  paymentNo: '1234567890',
+  paymentStatus: 'processing',
 }
 
 export const paymentSlice = createSlice({

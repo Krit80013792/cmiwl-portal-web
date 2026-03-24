@@ -20,6 +20,7 @@ interface UseFormHook<T> {
   errors: Record<string, any>
   values: T
   setValues?: any
+  setErrors?: any
 }
 
 export const useForm = <T>(
@@ -105,5 +106,6 @@ export const useForm = <T>(
     values,
     setValues,
     handleError,
+    setErrors
   }
 }

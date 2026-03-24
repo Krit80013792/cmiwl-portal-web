@@ -112,5 +112,10 @@ export const getCreditCardType = (cardNumber: string): string => {
     return 'jcb'
   }
 
+  // JCB: starts with 35
+  if (cleanNumber.startsWith('62')) {
+    return 'unionpay'
+  }
+
   return 'unknown'
 }

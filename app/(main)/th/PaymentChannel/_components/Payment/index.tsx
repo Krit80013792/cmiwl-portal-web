@@ -20,9 +20,39 @@ const Payment = () => {
   const fetchData = useCallback(async () => {
     try {
       openLoading()
-      const res = await getPaymentType()
-      const data = res.data.data
-      setPaymentMethodList(data ?? [])
+
+      // todo: hardcoded payment methods for local viewing without backend
+      const mockData = [
+        {
+          paymentMethodId: 2,
+          paymentMethodTh: 'คิวอาร์โค้ด',
+          payTypeCode: 'QRCS',
+        },
+        {
+          //todo: mock
+          paymentMethodId: 1,
+          paymentMethodTh: 'บัตรเครดิต',
+          payTypeCode: 'MOCK1',
+        },
+        {
+          //todo: mock
+          paymentMethodId: 98,
+          paymentMethodTh: 'เงินสด',
+          payTypeCode: 'MOCK2',
+        },
+        {
+          //todo: mock
+          paymentMethodId: 99,
+          paymentMethodTh: 'หักยอดสินเชื่อ ( CV/On Top)',
+          payTypeCode: 'MOCK3',
+        },
+      ]
+      setPaymentMethodList(mockData)
+
+      // todo: real implementation:
+      // const res = await getPaymentType()
+      // const data = res.data.data
+      // setPaymentMethodList(data ?? [])
     } catch (error) {
       console.error('Error fetching payment types:', error)
     } finally {
@@ -39,15 +69,16 @@ const Payment = () => {
   return (
     <>
       <div className="content-section fullPage-182">
-        <div className="container">
-          <div className="bg-lightgrey rounded-4 d-flex justify-content-between align-items-center mt-3 mb-4 px-12 py-12 ">
-            <span className="text-grey f-bd align-center">ยอดที่ต้องชำระ</span>
-            <div>
-              <span className="mb-0 text-start f-bd fs-26">{data?.productCmiDetail?.cmiCoverage?.total}</span>
-              <span className="fs-6 f-bd">บาท</span>
+        <div className="container" style={{ maxWidth: '384px' }}>
+          <p style={{ fontSize: '20px', fontWeight: 'bold', color: '#1E1E1F', marginTop: '32px' }}>ชำระเงิน</p>
+          <div style={{ backgroundColor: '#EFF5FF', borderRadius: '16px' }} className="d-flex justify-content-between align-items-center mt-3 mb-4 px-12 py-12 ">
+            <span className="f-bd align-center" style={{ color: '#1E1E1F' }}>ยอดที่ต้องชำระ</span>
+            <div style={{ color: '#2652EA' }}>
+              <span className="mb-0 text-start f-bd fs-26" style={{ marginRight: '4px' }}>{data?.productCmiDetail?.cmiCoverage?.total}</span>
+              <span className="fs-6 f-bd" style={{ color: '#2652EA' }} > บาท</span>
             </div>
           </div>
-          <h1 className="fs-18 text-black f-bd mb-12">เลือกช่องทางการชำระเงิน</h1>
+          {/* <h1 className="fs-18 text-black f-bd mb-12">เลือกช่องทางการชำระเงิน</h1> */}
           <div className="payment-options">
             {paymentMethodList.map((e) => {
               const isActive = selectedPaymentMethod === e.paymentMethodId ? 'active' : ''
@@ -56,55 +87,79 @@ const Payment = () => {
                   <button
                     type="button"
                     onClick={() => setSelectedPaymentMethod(e.paymentMethodId)}
-                    className={`w-100 p-3 border-grey d-flex justify-content-between align-items-center rounded-4 mb-3 ${isActive}`}
-                    style={{ border: `2px solid ${isActive ? '#045ffc' : '#c9c9c9'}` }}
+                    className={`w-100 border-grey d-flex align-items-center mb-3 ${isActive}`}
+                    style={{ border: `1px solid ${isActive ? '#1E3FD7' : '#DDDDDF'}`, padding: '16px', gap: '8px', borderRadius: '16px', height: '56px' }}
                   >
-                    <span className="f-bd">{e.paymentMethodTh}</span>
-                    {e.payTypeCode === 'QRCS' ? (
+                    {e.payTypeCode === 'QRCS' && (
                       <div>
-                        <Image alt="QR Code" width="42" height="32" src="/assets/icon/qr.png" />
-                      </div>
-                    ) : (
-                      <div>
-                        <Image className="me-2" alt="Visa" width="42" height="32" src="/assets/icon/visa.png" />
-                        <Image
-                          className="me-2"
-                          alt="Mastercard"
-                          width="42"
-                          height="32"
-                          src="/assets/icon/mastercard.png"
-                        />
-                        <Image alt="JCB" width="42" height="32" src="/assets/icon/jcb.png" />
+                        <Image alt="qr-scan" width="24" height="24" src="/assets/icon/qr-scan.svg" />
                       </div>
                     )}
+
+                    {e.payTypeCode === 'MOCK1' && (
+                      <div>
+                        <Image
+                          alt="credit-card-solid"
+                          width="24"
+                          height="24"
+                          src="/assets/icon/credit-card-solid.svg"
+                        />
+                      </div>
+                    )}
+                    {e.payTypeCode === 'MOCK2' && (
+                      <div>
+                        <Image alt="cash" width="24" height="24" src="/assets/icon/cash.svg" />
+                      </div>
+                    )}
+                    {e.payTypeCode === 'MOCK3' && (
+                      <div>
+                        <Image alt="deduct-amount-solid" width="24" height="24" src="/assets/icon/deduct-amount-solid.svg" />
+                      </div>
+                    )}
+                    <span style={{ color: '#1E1E1F', fontWeight: '600' }}>{e.paymentMethodTh}</span>
                   </button>
                 </div>
               )
             })}
           </div>
-          <div className="text-center mt-12">
-            <img alt="Omise" width="150" height="24" src="/assets/object/omise.png" />
+          <div style={{ fontSize: '15px', color: '#414243' }}>
+            <span style={{ fontWeight: '700' }}>หมายเหตุ : </span>
+            <span>
+              หากคุณชำระเงินหลัง 23:00 วันที่เริ่มความคุ้มครองที่เลือกไว้ จะเริ่มคุ้มครองเป็นวันถัดไป ยกเว้นกรณีซื้อประกันล่วงหน้า
+            </span>
           </div>
+
+          <button
+            type="button"
+            style={{
+              width: '100%',
+              marginTop: '24px',
+              backgroundColor: '#3F74F5',
+              borderRadius: '12px'
+            }}
+            className={`btn btn-primary fs-6 d-flex text-center align-items-center justify-content-center ${!selectedPaymentMethod ? 'disabled' : ''}`}
+            disabled={!selectedPaymentMethod}
+            onClick={() => {
+              if (selectedPaymentMethod === 1) {
+                route.push('/th/PaymentCredit')
+              } else if (selectedPaymentMethod === 2) {
+                route.push('/th/PaymentQR')
+              }
+              else if (selectedPaymentMethod === 98) {
+                route.push('/th/PaymentCash')
+              }
+              else if (selectedPaymentMethod === 99) {
+                route.push('/th/PaymentDeductAmount')
+              }
+            }}
+          >
+            <span style={{ fontSize: '18px', fontWeight: '600' }}>
+              ชำระเงิน
+            </span>
+          </button>
         </div>
-      </div>
-      <div className="btn-footer-wraper py-20 px-20 bg-white text-center">
-        <button
-          type="button"
-          className={`btn btn-primary fs-6 mx-auto d-flex text-center align-items-center justify-content-center ${!selectedPaymentMethod ? 'disabled' : ''}`}
-          disabled={!selectedPaymentMethod}
-          onClick={() => {
-            if (selectedPaymentMethod === 1) {
-              route.push('/th/PaymentCredit')
-            } else if (selectedPaymentMethod === 2) {
-              route.push('/th/PaymentQR')
-            }
-          }}
-        >
-          ดำเนินการชำระเงิน
-        </button>
       </div>
     </>
   )
 }
-
 export default Payment
