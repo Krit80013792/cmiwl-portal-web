@@ -71,17 +71,13 @@ const CustomerInformationForm: React.FC = () => {
       juristicCertificateIssueDate: prefillData?.juristic?.juristicCertificateIssueDate || '',
       juristicTelephoneNo: prefillData?.juristic?.juristicTelephoneNo || '',
       //todo: mock scenario document contact 
-      isEmail: true,
-      isSms: false,
-      isPostCurrent: false,
-      isPostOther: false,
-      isPrintForCustomer: false,
-      // policyEmail:
-      //   prefillData?.deliveryType?.policyEmail ||
-      //   (prefillData?.deliveryType?.isEmail) ? prefillData?.personalInfo?.email :),
-      // policySms:
-      //   prefillData?.deliveryType?.policySms ||
-      //   (toBool(prefillData?.deliveryType?.isSms) ? prefillData?.personalInfo?.telephoneNo : ''),
+      isEmail: !!prefillData?.deliveryType?.isEmail,
+      isSms: !!prefillData?.deliveryType?.isSms,
+      isPostCurrent: !!prefillData?.deliveryType?.isPostCurrent,
+      isPostOther: !!prefillData?.deliveryType?.isPostOther,
+      isPrintForCustomer: !!prefillData?.deliveryType?.isPrintForCustomer,
+      policyEmail: prefillData?.deliveryType?.policyEmail || '',
+      policySms: prefillData?.deliveryType?.policySms || '',
     })
   }, [prefillData, setValues])
 
@@ -145,8 +141,17 @@ const CustomerInformationForm: React.FC = () => {
       isPostCurrent: option === 'postCurrent',
       isPostOther: option === 'postOther',
       isPrintForCustomer: option === 'print',
-      policyEmail: option === 'email' ? prev.policyEmail || prev.email || '' : prev.policyEmail,
-      policySms: option === 'sms' ? prev.policySms || prev.telephoneNo || '' : prev.policySms,
+
+      policyEmail:
+        option === 'email'
+          ? prev.policyEmail || prev.email || ''
+          : '',
+
+      policySms:
+        option === 'sms'
+          ? prev.policySms || prev.telephoneNo || ''
+          : '',
+
     }))
   }
 
