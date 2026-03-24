@@ -28,6 +28,10 @@ const CustomerInformationForm: React.FC = () => {
   const [districtList, setDistrictList] = useState<any[]>([])
   const [subDistrictList, setSubDistrictList] = useState<any[]>([])
   const [addressData, setAddressData] = useState<any>(null)
+  const [postOtherProvinceList, setPostOtherProvinceList] = useState<any[]>([])
+  const [postOtherDistrictList, setPostOtherDistrictList] = useState<any[]>([])
+  const [postOtherSubDistrictList, setPostOtherSubDistrictList] = useState<any[]>([])
+  const [postOtherAddressData, setPostOtherAddressData] = useState<any>(null)
   const [birthDayList, setBirthDayList] = useState<any[]>([])
   const [mounted, setMounted] = useState(false)
   const { handleChange, setErrors, handleSubmit, errors, values, setValues } = useForm({}, customerInformationSchema, {
@@ -35,6 +39,7 @@ const CustomerInformationForm: React.FC = () => {
     closeLoading,
   })
   const zipCodeDebounced = useDebounce(values?.zipCode, 1000)
+  const postOtherZipCodeDebounced = useDebounce(values?.postOtherZipCode, 1000)
 
   // Set mounted state to prevent hydration mismatch
   useEffect(() => {
@@ -78,6 +83,15 @@ const CustomerInformationForm: React.FC = () => {
       isPrintForCustomer: !!prefillData?.deliveryType?.isPrintForCustomer,
       policyEmail: prefillData?.deliveryType?.policyEmail || '',
       policySms: prefillData?.deliveryType?.policySms || '',
+      postOtherHouseNumber: prefillData?.deliveryType?.postOtherHouseNumber || '',
+      postOtherVillageNo: prefillData?.deliveryType?.postOtherVillageNo || '',
+      postOtherBuildingVillage: prefillData?.deliveryType?.postOtherBuildingVillage || '',
+      postOtherAlley: prefillData?.deliveryType?.postOtherAlley || '',
+      postOtherStreet: prefillData?.deliveryType?.postOtherStreet || '',
+      postOtherZipCode: prefillData?.deliveryType?.postOtherZipCode || '',
+      postOtherProvinceId: prefillData?.deliveryType?.postOtherProvinceId || '',
+      postOtherDistrictId: prefillData?.deliveryType?.postOtherDistrictId || '',
+      postOtherSubDistrictId: prefillData?.deliveryType?.postOtherSubDistrictId || '',
     })
   }, [prefillData, setValues])
 
@@ -127,11 +141,51 @@ const CustomerInformationForm: React.FC = () => {
     [setValues, values?.districtId],
   )
 
+  const fetchPostOtherAddressByZipCode = useCallback(
+    async (zipCode: string) => {
+      try {
+        const res = await getAddressByZipCode({ zipCode })
+        const data = res?.data?.data[0] || null
+        setPostOtherAddressData(data)
+        if (data) {
+          handleChange({ name: 'postOtherProvinceId', value: data?.province?.provinceId || '' })
+          setPostOtherProvinceList(
+            data?.province ? [{ label: data?.province?.provinceName, value: data?.province?.provinceId }] : [],
+          )
+          setPostOtherDistrictList(
+            data?.province?.districts?.map((e: any) => {
+              return { label: e.districtName, value: e.districtId }
+            }),
+          )
+          setPostOtherSubDistrictList(
+            data?.province?.districts
+              ?.find((d: any) => d.districtId.toString() === values?.postOtherDistrictId?.toString())
+              ?.subdistricts?.map((sd: any) => {
+                return { label: sd.subdistrictName, value: sd.subdistrictId }
+              }) || [],
+          )
+        }
+      } catch (error) {
+        console.error('Error fetching post other address by zip code:', error)
+      }
+    },
+    [values?.postOtherDistrictId],
+  )
+
   useEffect(() => {
     if (zipCodeDebounced.toString().length === 5 && values.zipCode === zipCodeDebounced) {
       fetchAddressByZipCode(zipCodeDebounced.toString())
     }
   }, [fetchAddressByZipCode, zipCodeDebounced, values.zipCode])
+
+  useEffect(() => {
+    if (
+      postOtherZipCodeDebounced.toString().length === 5 &&
+      values.postOtherZipCode === postOtherZipCodeDebounced
+    ) {
+      fetchPostOtherAddressByZipCode(postOtherZipCodeDebounced.toString())
+    }
+  }, [fetchPostOtherAddressByZipCode, postOtherZipCodeDebounced, values.postOtherZipCode])
 
   const selectPolicyDelivery = (option: 'email' | 'sms' | 'postCurrent' | 'postOther' | 'print') => {
     setValues((prev: any) => ({
@@ -211,6 +265,22 @@ const CustomerInformationForm: React.FC = () => {
         isPrintForCustomer: values.isPrintForCustomer === true || values.isPrintForCustomer === 'true',
         policyEmail,
         policySms,
+        postOtherHouseNumber: values.postOtherHouseNumber,
+        postOtherVillageNo: values.postOtherVillageNo,
+        postOtherBuildingVillage: values.postOtherBuildingVillage,
+        postOtherAlley: values.postOtherAlley,
+        postOtherStreet: values.postOtherStreet,
+        postOtherZipCode: values.postOtherZipCode,
+        postOtherProvinceId: values.postOtherProvinceId,
+        postOtherProvinceName:
+          postOtherProvinceList.find((p) => p.value?.toString() === values.postOtherProvinceId?.toString())?.label || '',
+        postOtherDistrictId: values.postOtherDistrictId,
+        postOtherDistrictName:
+          postOtherDistrictList.find((d) => d.value?.toString() === values.postOtherDistrictId?.toString())?.label || '',
+        postOtherSubDistrictId: values.postOtherSubDistrictId,
+        postOtherSubDistrictName:
+          postOtherSubDistrictList.find((sd) => sd.value?.toString() === values.postOtherSubDistrictId?.toString())
+            ?.label || '',
       },
       juristic: values?.juristic || {},
     }
@@ -813,6 +883,154 @@ const CustomerInformationForm: React.FC = () => {
                       />
                       <span>ส่งไปรษณีย์ตามที่อยู่อื่น</span>
                     </div>
+                    {values?.isPostOther && (
+                      <div className="mt-12">
+                        <div className="d-flex">
+                          <div className="form-group mb-12 me-2 w-100">
+                            <Input
+                              label="บ้านเลขที่"
+                              name="postOtherHouseNumber"
+                              type="text"
+                              maxLength={15}
+                              placeholder="กรอกบ้านเลขที่"
+                              onChange={({ target: { name, value } }) => handleChange({ name, value })}
+                              value={values?.postOtherHouseNumber || ''}
+                              feedback={errors?.postOtherHouseNumber}
+                            />
+                          </div>
+                          <div className="form-group mb-12 ms-2 w-100">
+                            <Input
+                              label="หมู่ที่"
+                              name="postOtherVillageNo"
+                              type="text"
+                              maxLength={5}
+                              placeholder="กรอกหมู่ที่"
+                              onChange={({ target: { name, value } }) => handleChange({ name, value })}
+                              value={values?.postOtherVillageNo || ''}
+                              feedback={errors?.postOtherVillageNo}
+                            />
+                          </div>
+                        </div>
+                        <div className="form-group mb-12">
+                          <Input
+                            label="ชื่อหมู่บ้าน/อาคาร"
+                            name="postOtherBuildingVillage"
+                            type="text"
+                            maxLength={50}
+                            placeholder="กรอกหมู่บ้าน/อาคาร"
+                            onChange={({ target: { name, value } }) => handleChange({ name, value })}
+                            value={values?.postOtherBuildingVillage || ''}
+                            feedback={errors?.postOtherBuildingVillage}
+                          />
+                        </div>
+                        <div className="d-flex">
+                          <div className="form-group mb-12 me-2 w-100">
+                            <Input
+                              label="ซอย/ตรอก"
+                              name="postOtherAlley"
+                              type="text"
+                              maxLength={25}
+                              placeholder="กรอกซอย/ตรอก"
+                              onChange={({ target: { name, value } }) => handleChange({ name, value })}
+                              value={values?.postOtherAlley || ''}
+                              feedback={errors?.postOtherAlley}
+                            />
+                          </div>
+                          <div className="form-group mb-12 ms-2 w-100">
+                            <Input
+                              label="ถนน"
+                              name="postOtherStreet"
+                              type="text"
+                              maxLength={25}
+                              placeholder="กรอกถนน"
+                              onChange={({ target: { name, value } }) => handleChange({ name, value })}
+                              value={values?.postOtherStreet || ''}
+                              feedback={errors?.postOtherStreet}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <div className="d-flex">
+                            <div className="form-group mb-12 me-2 w-100">
+                              <Input
+                                label="รหัสไปรษณีย์"
+                                name="postOtherZipCode"
+                                type="text"
+                                maxLength={5}
+                                placeholder="กรอกรหัสไปรษณีย์"
+                                onChange={({ target: { name, value } }) => {
+                                  handleChange({ name, value })
+                                  setPostOtherProvinceList([])
+                                  setPostOtherDistrictList([])
+                                  setPostOtherSubDistrictList([])
+                                  setValues((prevValues: any) => ({
+                                    ...prevValues,
+                                    postOtherProvinceId: '',
+                                    postOtherDistrictId: '',
+                                    postOtherSubDistrictId: '',
+                                  }))
+                                  setPostOtherAddressData(null)
+                                }}
+                                value={values?.postOtherZipCode || ''}
+                                feedback={errors?.postOtherZipCode}
+                              />
+                            </div>
+                            <div className="form-group mb-12 ms-2 w-100">
+                              <Select
+                                label="จังหวัด"
+                                name="postOtherProvinceId"
+                                disabled={postOtherProvinceList?.length === 0}
+                                options={postOtherProvinceList}
+                                onChange={() => { }}
+                                value={values?.postOtherProvinceId || ''}
+                                firstOptionLabel="เลือกจังหวัด"
+                                feedback={errors?.postOtherProvinceId}
+                              />
+                            </div>
+                          </div>
+                          <div className="d-flex">
+                            <div className="form-group mb-12 me-2 w-100">
+                              <Select
+                                label="เขต/อำเภอ"
+                                name="postOtherDistrictId"
+                                disabled={postOtherDistrictList?.length === 0}
+                                options={postOtherDistrictList}
+                                onChange={(value) => {
+                                  handleChange({ name: 'postOtherDistrictId', value })
+                                  setValues((prevValues: any) => ({
+                                    ...prevValues,
+                                    postOtherSubDistrictId: '',
+                                  }))
+                                  setPostOtherSubDistrictList(
+                                    postOtherAddressData?.province?.districts
+                                      ?.find((d: any) => d.districtId.toString() === value)
+                                      ?.subdistricts?.map((sd: any) => ({
+                                        label: sd.subdistrictName,
+                                        value: sd.subdistrictId,
+                                      })) || [],
+                                  )
+                                }}
+                                value={values?.postOtherDistrictId || ''}
+                                firstOptionLabel="เลือกเขต/อำเภอ"
+                                feedback={errors?.postOtherDistrictId}
+                              />
+                            </div>
+                            <div className="form-group mb-12 ms-2 w-100">
+                              <Select
+                                label="แขวง/ตำบล"
+                                name="postOtherSubDistrictId"
+                                disabled={postOtherSubDistrictList?.length === 0}
+                                options={postOtherSubDistrictList}
+                                onChange={(value) => handleChange({ name: 'postOtherSubDistrictId', value })}
+                                value={values?.postOtherSubDistrictId || ''}
+                                firstOptionLabel="เลือกแขวง/ตำบล"
+                                feedback={errors?.postOtherSubDistrictId}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </label>
 
                   <label

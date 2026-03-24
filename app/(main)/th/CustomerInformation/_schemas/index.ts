@@ -145,6 +145,54 @@ const customerInformationSchema = object({
     then: (schema) => schema.required('กรุณากรอกเบอร์โทรศัพท์').matches(/^\d{10}$/, 'กรุณากรอกเบอร์โทรศัพท์ 10 หลัก'),
     otherwise: (schema) => schema.notRequired(),
   }),
+  postOtherHouseNumber: string().when('isPostOther', {
+    is: (v: unknown) => v === true || v === 'true',
+    then: (schema) =>
+      schema
+        .required('กรุณากรอกที่อยู่')
+        .matches(/^(?!\s).*/, 'ไม่สามารถขึ้นต้นด้วยช่องว่างได้'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  postOtherVillageNo: string().when('isPostOther', {
+    is: (v: unknown) => v === true || v === 'true',
+    then: (schema) => schema.matches(/^\d*$/, 'กรุณากรอกเฉพาะตัวเลข'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  postOtherBuildingVillage: string().when('isPostOther', {
+    is: (v: unknown) => v === true || v === 'true',
+    then: (schema) => schema.matches(/^(?!\s).*/, 'ไม่สามารถขึ้นต้นด้วยช่องว่างได้'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  postOtherAlley: string().when('isPostOther', {
+    is: (v: unknown) => v === true || v === 'true',
+    then: (schema) => schema.matches(/^(?!\s).*/, 'ไม่สามารถขึ้นต้นด้วยช่องว่างได้'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  postOtherStreet: string().when('isPostOther', {
+    is: (v: unknown) => v === true || v === 'true',
+    then: (schema) => schema.matches(/^(?!\s).*/, 'ไม่สามารถขึ้นต้นด้วยช่องว่างได้'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  postOtherZipCode: string().when('isPostOther', {
+    is: (v: unknown) => v === true || v === 'true',
+    then: (schema) => schema.required('กรุณากรอกไปรษณีย์').length(5, 'กรุณากรอกไปรษณีย์ 5 หลัก'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  postOtherProvinceId: string().when('isPostOther', {
+    is: (v: unknown) => v === true || v === 'true',
+    then: (schema) => schema.required('กรุณาเลือกจังหวัด').notOneOf(['NO_VALUE'], 'กรุณาเลือกจังหวัด'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  postOtherDistrictId: string().when('isPostOther', {
+    is: (v: unknown) => v === true || v === 'true',
+    then: (schema) => schema.required('กรุณาเลือกอำเภอ').notOneOf(['NO_VALUE'], 'กรุณาเลือกอำเภอ'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  postOtherSubDistrictId: string().when('isPostOther', {
+    is: (v: unknown) => v === true || v === 'true',
+    then: (schema) => schema.required('กรุณาเลือกตำบล').notOneOf(['NO_VALUE'], 'กรุณาเลือกตำบล'),
+    otherwise: (schema) => schema.notRequired(),
+  }),
 }).test(
   'one-policy-delivery',
   'กรุณาเลือกช่องทางการจัดส่งกรมธรรม์',
