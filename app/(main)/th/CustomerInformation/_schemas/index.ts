@@ -66,7 +66,7 @@ const customerInformationSchema = object({
     otherwise: (schema) => schema.notRequired(),
   }),
 
-  //todo: personType = นิติบุคคล
+  //TODO: personType = นิติบุคคล
 
   juristicTitle: string().when('personType', {
     is: 'juristic-person',

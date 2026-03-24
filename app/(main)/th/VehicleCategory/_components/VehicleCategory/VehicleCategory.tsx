@@ -109,7 +109,7 @@ const VehicleCategoryComponent = () => {
 
 
       <div className="d-flex justify-content-center">
-        {/* //todo: car type key for "เลือกรถ เก๋ง, กระบะ 4 ประตู, รถไฟฟ้า หรือไม่?" */}
+        {/* //TODO: car type key for "เลือกรถ เก๋ง, กระบะ 4 ประตู, รถไฟฟ้า หรือไม่?" */}
         {prefillData?.productCmiDetail?.carTypeKey == '1' && (
           <Image
             alt="เลือกประเภทการใช้งาน"
@@ -119,7 +119,7 @@ const VehicleCategoryComponent = () => {
             priority
           />
         )}
-        {/* //todo: car type key for "รถกระบะ 2 ประตู, รถบรรทุกหรือไม่?" */}
+        {/* //TODO: car type key for "รถกระบะ 2 ประตู, รถบรรทุกหรือไม่?" */}
         {prefillData?.productCmiDetail?.carTypeKey == '2' && (
           <Image
             alt="เลือกประเภทการใช้งาน"
@@ -130,7 +130,7 @@ const VehicleCategoryComponent = () => {
           />
         )}
 
-        {/* //todo: car type key for "รถโดยสารมากกว่า 7 ที่นั่ง หรือไม่?" */}
+        {/* //TODO: car type key for "รถโดยสารมากกว่า 7 ที่นั่ง หรือไม่?" */}
         {prefillData?.productCmiDetail?.carTypeKey == '5' && (
           <Image
             alt="เลือกประเภทการใช้งาน"

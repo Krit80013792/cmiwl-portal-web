@@ -21,7 +21,7 @@ const Payment = () => {
     try {
       openLoading()
 
-      // todo: hardcoded payment methods for local viewing without backend
+      // TODO: hardcoded payment methods for local viewing without backend
       const mockData = [
         {
           paymentMethodId: 2,
@@ -29,19 +29,19 @@ const Payment = () => {
           payTypeCode: 'QRCS',
         },
         {
-          //todo: mock
+          //TODO: mock
           paymentMethodId: 1,
           paymentMethodTh: 'บัตรเครดิต',
           payTypeCode: 'MOCK1',
         },
         {
-          //todo: mock
+          //TODO: mock
           paymentMethodId: 98,
           paymentMethodTh: 'เงินสด',
           payTypeCode: 'MOCK2',
         },
         {
-          //todo: mock
+          //TODO: mock
           paymentMethodId: 99,
           paymentMethodTh: 'หักยอดสินเชื่อ ( CV/On Top)',
           payTypeCode: 'MOCK3',
@@ -49,7 +49,7 @@ const Payment = () => {
       ]
       setPaymentMethodList(mockData)
 
-      // todo: real implementation:
+      // TODO: real implementation:
       // const res = await getPaymentType()
       // const data = res.data.data
       // setPaymentMethodList(data ?? [])

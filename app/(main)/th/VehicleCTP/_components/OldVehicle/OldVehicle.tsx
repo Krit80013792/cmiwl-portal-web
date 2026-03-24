@@ -62,7 +62,7 @@ const OldVehicle = ({ channel }: { channel: any }) => {
   }
 
 
-  //todo: need to change productCmiDetail model as a list instead of object
+  //TODO: need to change productCmiDetail model as a list instead of object
   const [mockProductCmiDetail, setMockProductCmiDetail] = useState<any>([])
   const [selectedProduct, setSelectedProduct] = useState<any | null>(null)
   const [isLastItem, setIsLastItem] = useState<boolean>(false)

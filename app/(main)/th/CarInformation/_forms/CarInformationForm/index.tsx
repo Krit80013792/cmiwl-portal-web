@@ -327,7 +327,7 @@ const CarInformationForm = () => {
               }))}
               onChange={(value) => {
                 handleChange({ name: 'carModelName', value })
-                //todo: need to fetch new car color for the new car model
+                //TODO: need to fetch new car color for the new car model
                 handleChange({ name: 'carColorId', value: null })
               }}
               value={values?.carModelName || ''}

@@ -67,7 +67,7 @@ const CustomerInformationForm: React.FC = () => {
       districtId: prefillData?.customerAddress?.districtId || '',
       subDistrictId: prefillData?.customerAddress?.subDistrictId || '',
       paperless: true,
-      //todo: mock scenario juristic 
+      //TODO: mock scenario juristic 
       personType: 'normal-person',
       juristicTitle: prefillData?.juristic?.juristicTitle || '',
       juristicCompanyName: prefillData?.juristic?.juristicCompanyName || '',
@@ -75,7 +75,7 @@ const CustomerInformationForm: React.FC = () => {
       juristicRegistrationDate: prefillData?.juristic?.juristicRegistrationDate || '',
       juristicCertificateIssueDate: prefillData?.juristic?.juristicCertificateIssueDate || '',
       juristicTelephoneNo: prefillData?.juristic?.juristicTelephoneNo || '',
-      //todo: mock scenario document contact 
+      //TODO: mock scenario document contact 
       isEmail: !!prefillData?.deliveryType?.isEmail,
       isSms: !!prefillData?.deliveryType?.isSms,
       isPostCurrent: !!prefillData?.deliveryType?.isPostCurrent,

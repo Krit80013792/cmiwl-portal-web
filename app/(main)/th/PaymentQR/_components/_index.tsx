@@ -49,7 +49,7 @@ const PaymentQRComponents = () => {
 
         const now = dayjs()
         const isAfterElevenThirty = now.hour() > 23 || (now.hour() === 23 && now.minute() >= 30)
-        // todo: check this to true to test modal 
+        // TODO: check this to true to test modal 
         if (isAfterElevenThirty) {
           openModal({
             hasImg: false,

@@ -515,7 +515,7 @@ const PaymentCreditForm = () => {
   }, [openLoading, closeLoading, data, values, prefillData, dispatch, openModal, route])
 
   useEffect(() => {
-    //todo: for test each scenario
+    //TODO: for test each scenario
     // handleTransactionFailed()
     // handleExpiryDateInvalid()
     // handleInsufficientCardLimit()

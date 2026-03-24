@@ -28,7 +28,7 @@ export default async function RenewalErrorPage() {
                     <p className="text-center f-bd fs-18 mb-2">ไม่สามารถทำรายการได้</p>
                     <p style={{ marginBottom: '24px' }} className="text-center">เนื่องจากตรวจสอบไม่พบบัตรนายหน้า</p>
 
-                    {/* //todo: recheck redirect href path */}
+                    {/* //TODO: recheck redirect href path */}
                     <Link className="btn btn-primary fs-6 d-flex justify-content-center align-items-center mx-auto mb-0" href="/">
                         <strong className="f-bd">กลับสู่หน้าหลัก</strong>
                     </Link>

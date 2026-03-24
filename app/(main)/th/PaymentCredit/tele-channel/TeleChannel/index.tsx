@@ -15,7 +15,7 @@ const PaymentCreditTeleChannel = () => {
 
     const handleCheckPaymentStatus = useCallback(async () => {
         closeModal()
-        //todo: implement checkPaymentStatus API
+        //TODO: implement checkPaymentStatus API
         const paymentSuccess = false
         if (!paymentSuccess) {
             openModal({
@@ -126,7 +126,7 @@ const PaymentCreditTeleChannel = () => {
                     >
                         <p className="mb-1 fs-14" style={{ color: '#1E1E1F', fontWeight: 600 }}>
 
-                            {/* //todo: พ.ร.บ  */}
+                            {/* //TODO: พ.ร.บ  */}
                             พ.ร.บ. {'รถโดยสารไม่เกิน 7 ที่นั่ง'}
                         </p>
                         <p className="mb-2 fs-16 d-flex justify-content-between" style={{ color: '#616166' }}>
@@ -135,7 +135,7 @@ const PaymentCreditTeleChannel = () => {
                             </span>
                             <span style={{ fontWeight: 600, color: '#414243' }}>
 
-                                {/* // todo: licenseText */}
+                                {/* // TODO: licenseText */}
                                 {'2ขข2222'}</span>
                         </p>
                         <div
@@ -147,7 +147,7 @@ const PaymentCreditTeleChannel = () => {
                             </span>
                             <div>
                                 <span className="f-bd" style={{ fontSize: 24 }}>
-                                    {/* //todo: paymentTotal */}
+                                    {/* //TODO: paymentTotal */}
                                     {'645.21'}
                                 </span>
                                 <span className="fs-16 f-bd" style={{ marginLeft: 4 }}>บาท</span>
@@ -157,7 +157,7 @@ const PaymentCreditTeleChannel = () => {
 
                     <div className="mb-3 fs-14" style={{ color: '#1E1E1F' }}>
                         <span>ส่งลิงก์ชำระเงินผ่าน SMS ไปยังเบอร์ </span>
-                        {/* //todo: sms number */}
+                        {/* //TODO: sms number */}
                         <span style={{ fontWeight: 700 }}>
                             {'081-234-5678'}
                         </span>

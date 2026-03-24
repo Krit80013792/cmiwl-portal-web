@@ -21,8 +21,8 @@ const SelectInsurer = () => {
 
     useEffect(() => {
         const fetchInsurers = async () => {
-            //todo: fetch insurer here
-            //todo: sort price should sort in be
+            //TODO: fetch insurer here
+            //TODO: sort price should sort in be
             const insurers = [{
                 id: 'ergo',
                 name: 'เออร์โก',
@@ -58,7 +58,7 @@ const SelectInsurer = () => {
 
     const handleSelectInsurer = (insurer: any) => {
         setSelectedInsurerId(insurer.id)
-        //todo: displach state to redux to use in another page 
+        //TODO: displach state to redux to use in another page 
 
         router.push('/th/CarInformation')
     }

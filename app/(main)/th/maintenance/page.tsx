@@ -57,7 +57,7 @@ export default async function MaintenancePage() {
                         </div>
 
                         <div className="mt-3">
-                            {/* //todo: recheck redirect href path */}
+                            {/* //TODO: recheck redirect href path */}
                             <Link className="btn btn-primary fs-6 d-flex justify-content-center align-items-center w-100" href="/">
                                 <strong className="f-bd">ค้นหาสาขา</strong>
                             </Link>

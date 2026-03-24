@@ -17,7 +17,7 @@ const CoverageCondition = () => {
 
     useEffect(() => {
         const fetchCoverage = async () => {
-            //todo: fetch insurer here
+            //TODO: fetch insurer here
             setCoverage([{
                 id: 'ergo',
                 name: 'เออร์โกประกันภัย',

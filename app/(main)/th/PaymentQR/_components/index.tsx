@@ -70,7 +70,7 @@ const PaymentQRComponents = () => {
 
                 const now = dayjs()
                 const isAfterElevenThirty = now.hour() > 23 || (now.hour() === 23 && now.minute() >= 30)
-                // todo: check this to true to test modal 
+                // TODO: check this to true to test modal 
                 if (isAfterElevenThirty) {
                     openModal({
                         hasImg: false,
@@ -131,7 +131,7 @@ const PaymentQRComponents = () => {
                 dispatch(paymentSlice.actions.setPayment({ paymentNo: qrData?.paymentNo, paymentStatus: 'idle' }))
             }
 
-            //todo: uncomment this for qr code already invalid
+            //TODO: uncomment this for qr code already invalid
             // route.push('/th/PaymentQR/qr-invalid')
 
 
@@ -358,7 +358,7 @@ const PaymentQRComponents = () => {
                                 </span>
                             </div>
                             {true &&
-                                //todo: implement document delivery type , offline (print docs)  not show
+                                //TODO: implement document delivery type , offline (print docs)  not show
                                 <>
                                     <div style={{ borderTop: '1px solid #DDD', margin: '12px 0' }}></div>
                                     <p className="text-dark mb-2 fs-14" style={{ fontWeight: 600 }}>สิ่งที่คุณจะได้รับหลังจากชำระเงิน</p>
@@ -409,7 +409,7 @@ const PaymentQRComponents = () => {
                             height: '48px', borderRadius: '12px'
                         }}
                         onClick={() => {
-                            // todo: click download link
+                            // TODO: click download link
                             showSuccessToast()
                         }}
                     >
