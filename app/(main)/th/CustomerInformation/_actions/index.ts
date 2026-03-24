@@ -3,7 +3,7 @@
 import { getDataFromServer } from '@/helpers/functions/getDataFromServer'
 import { getDataFromSession } from '@/helpers/functions/getDataFromSession'
 
-export const getAdressByZipCode = async ({ zipCode }: { zipCode: string }) => {
+export const getAddressByZipCode = async ({ zipCode }: { zipCode: string }) => {
   const { token } = await getDataFromSession()
   return await getDataFromServer(`/api/master-data/v1/zipcode/${zipCode}`, {
     method: 'GET',

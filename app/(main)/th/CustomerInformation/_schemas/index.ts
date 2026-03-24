@@ -130,24 +130,39 @@ const customerInformationSchema = object({
   provinceId: string().required('กรุณาเลือกจังหวัด').notOneOf(['NO_VALUE'], 'กรุณาเลือกจังหวัด'),
   districtId: string().required('กรุณาเลือกอำเภอ').notOneOf(['NO_VALUE'], 'กรุณาเลือกอำเภอ'),
   subDistrictId: string().required('กรุณาเลือกตำบล').notOneOf(['NO_VALUE'], 'กรุณาเลือกตำบล'),
-  isEmail: boolean().test('at-least-one', 'กรุณาเลือกช่องทางการติดต่ออย่างน้อย 1 ช่องทาง', function (value) {
-    const { isSms } = this.parent
-    return value === true || isSms === true
-  }),
-  isSms: boolean().test('at-least-one', 'กรุณาเลือกช่องทางการติดต่ออย่างน้อย 1 ช่องทาง', function (value) {
-    const { isEmail } = this.parent
-    return value === true || isEmail === true
-  }),
+  isEmail: boolean(),
+  isSms: boolean(),
+  isPostCurrent: boolean(),
+  isPostOther: boolean(),
+  isPrintForCustomer: boolean(),
   policyEmail: string().when('isEmail', {
-    is: true,
+    is: (v: unknown) => v === true || v === 'true',
     then: (schema) => schema.required('กรุณากรอกอีเมล').email('กรุณากรอกอีเมลให้ถูกต้อง'),
     otherwise: (schema) => schema.notRequired(),
   }),
   policySms: string().when('isSms', {
-    is: true,
+    is: (v: unknown) => v === true || v === 'true',
     then: (schema) => schema.required('กรุณากรอกเบอร์โทรศัพท์').matches(/^\d{10}$/, 'กรุณากรอกเบอร์โทรศัพท์ 10 หลัก'),
     otherwise: (schema) => schema.notRequired(),
   }),
-})
+}).test(
+  'one-policy-delivery',
+  'กรุณาเลือกช่องทางการจัดส่งกรมธรรม์',
+  function (value) {
+    const t = (v: unknown) => v === true || v === 'true'
+    const selected = [
+      t(value?.isEmail),
+      t(value?.isSms),
+      t(value?.isPostCurrent),
+      t(value?.isPostOther),
+      t(value?.isPrintForCustomer),
+    ].filter(Boolean).length
+    if (selected === 1) return true
+    return this.createError({
+      path: 'isEmail',
+      message: 'กรุณาเลือกช่องทางการจัดส่งกรมธรรม์',
+    })
+  },
+)
 
 export default customerInformationSchema

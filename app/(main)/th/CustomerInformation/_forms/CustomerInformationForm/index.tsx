@@ -11,7 +11,7 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/th'
 import { prefillDataSlice } from '@/stores/redux/slices/prefillDataSlice'
 import { useRouter } from 'next/navigation'
-import { getAdressByZipCode } from '../../_actions'
+import { getAddressByZipCode } from '../../_actions'
 import useLoading from '@/helpers/hooks/useLoading'
 import { useDebounce } from '@/helpers/hooks/useDebounce'
 import { RadioButton } from 'primereact/radiobutton'
@@ -61,23 +61,27 @@ const CustomerInformationForm: React.FC = () => {
       provinceId: prefillData?.customerAddress?.provinceId || '',
       districtId: prefillData?.customerAddress?.districtId || '',
       subDistrictId: prefillData?.customerAddress?.subDistrictId || '',
-      isEmail: prefillData?.deliveryType?.isEmail || false,
-      isSms: prefillData?.deliveryType?.isSms || false,
-      policyEmail:
-        prefillData?.deliveryType?.policyEmail ||
-        (prefillData?.deliveryType?.isEmail ? prefillData?.personalInfo?.email : ''),
-      policySms:
-        prefillData?.deliveryType?.policySms ||
-        (prefillData?.deliveryType?.isSms ? prefillData?.personalInfo?.telephoneNo : ''),
-      //todo: mock new scenario
-      personType: 'normal-person',
       paperless: true,
+      //todo: mock scenario juristic 
+      personType: 'normal-person',
       juristicTitle: prefillData?.juristic?.juristicTitle || '',
       juristicCompanyName: prefillData?.juristic?.juristicCompanyName || '',
       juristicId: prefillData?.juristic?.juristicId || '',
       juristicRegistrationDate: prefillData?.juristic?.juristicRegistrationDate || '',
       juristicCertificateIssueDate: prefillData?.juristic?.juristicCertificateIssueDate || '',
       juristicTelephoneNo: prefillData?.juristic?.juristicTelephoneNo || '',
+      //todo: mock scenario document contact 
+      isEmail: true,
+      isSms: false,
+      isPostCurrent: false,
+      isPostOther: false,
+      isPrintForCustomer: false,
+      // policyEmail:
+      //   prefillData?.deliveryType?.policyEmail ||
+      //   (prefillData?.deliveryType?.isEmail) ? prefillData?.personalInfo?.email :),
+      // policySms:
+      //   prefillData?.deliveryType?.policySms ||
+      //   (toBool(prefillData?.deliveryType?.isSms) ? prefillData?.personalInfo?.telephoneNo : ''),
     })
   }, [prefillData, setValues])
 
@@ -99,7 +103,7 @@ const CustomerInformationForm: React.FC = () => {
   const fetchAddressByZipCode = useCallback(
     async (zipCode: string) => {
       try {
-        const res = await getAdressByZipCode({ zipCode })
+        const res = await getAddressByZipCode({ zipCode })
         const data = res?.data?.data[0] || null
         setAddressData(data)
         if (data) {
@@ -133,7 +137,27 @@ const CustomerInformationForm: React.FC = () => {
     }
   }, [fetchAddressByZipCode, zipCodeDebounced, values.zipCode])
 
+  const selectPolicyDelivery = (option: 'email' | 'sms' | 'postCurrent' | 'postOther' | 'print') => {
+    setValues((prev: any) => ({
+      ...prev,
+      isEmail: option === 'email',
+      isSms: option === 'sms',
+      isPostCurrent: option === 'postCurrent',
+      isPostOther: option === 'postOther',
+      isPrintForCustomer: option === 'print',
+      policyEmail: option === 'email' ? prev.policyEmail || prev.email || '' : prev.policyEmail,
+      policySms: option === 'sms' ? prev.policySms || prev.telephoneNo || '' : prev.policySms,
+    }))
+  }
+
   const handleSubmitForm = async () => {
+    const emailActive = values?.isEmail === true || values?.isEmail === 'true'
+    const smsActive = values?.isSms === true || values?.isSms === 'true'
+    const policyEmail = emailActive ? values.policyEmail : ''
+    const policySms = smsActive ? values.policySms?.replaceAll('-', '') : ''
+
+    const { policyDeliveryMethod: _legacyPolicyDeliveryMethod, ...deliveryTypeRest } = prefill.deliveryType || {}
+
     const data = {
       ...prefill,
       channel: {
@@ -154,8 +178,8 @@ const CustomerInformationForm: React.FC = () => {
         ...prefill.personalInfo,
         telephoneNo: values.telephoneNo,
         email: values.email,
-        policyEmail: values.policyEmail,
-        policySms: values.policySms,
+        policyEmail,
+        policySms,
       },
       customerAddress: {
         ...prefill.customerAddress,
@@ -174,11 +198,14 @@ const CustomerInformationForm: React.FC = () => {
         subDistrictId: values.subDistrictId,
       },
       deliveryType: {
-        ...prefill.deliveryType,
-        isEmail: values.isEmail,
-        isSms: values.isSms,
-        policyEmail: values.policyEmail,
-        policySms: values.policySms,
+        ...deliveryTypeRest,
+        isEmail: emailActive,
+        isSms: smsActive,
+        isPostCurrent: values.isPostCurrent === true || values.isPostCurrent === 'true',
+        isPostOther: values.isPostOther === true || values.isPostOther === 'true',
+        isPrintForCustomer: values.isPrintForCustomer === true || values.isPrintForCustomer === 'true',
+        policyEmail,
+        policySms,
       },
       juristic: values?.juristic || {},
     }
@@ -189,7 +216,6 @@ const CustomerInformationForm: React.FC = () => {
   useEffect(() => {
     setPrefill(prefillData)
   }, [prefillData])
-  console.log('errors', errors);
 
   return (
     <div>
@@ -674,6 +700,7 @@ const CustomerInformationForm: React.FC = () => {
 
             {prefill?.channel?.isPolicyEmail && prefill?.channel?.isPolicySms && (
               <>
+                {/* Replaced legacy checkbox delivery selection with radio-card options; SMS option restored as fifth card */}
                 <span
                   style={{
                     color: '#1E1E1F',
@@ -686,67 +713,122 @@ const CustomerInformationForm: React.FC = () => {
                 >
                   ช่องทางการจัดส่งกรมธรรม์
                 </span>
-                <div
-                  style={{ display: 'flex', width: '100%', alignItems: 'center', marginBottom: '12px', gap: '10px' }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={values?.isEmail}
-                    onChange={(e) => {
-                      handleChange({ name: 'isEmail', value: e.target.checked })
-                      if (!e.target.checked) {
-                        handleChange({ name: 'policyEmail', value: '' })
-                      } else {
-                        handleChange({ name: 'policyEmail', value: values?.email || '' })
-                      }
-                    }}
-                  />
-                  <Input
-                    label="อีเมล"
-                    name="policyEmail"
-                    type="text"
-                    maxLength={50}
-                    placeholder="กรอกอีเมล"
-                    onChange={({ target: { name, value } }) => handleChange({ name, value })}
-                    value={values?.policyEmail || ''}
-                    feedback={!values?.isEmail ? errors?.isEmail : ''}
-                    style={{ width: 'inherit' }}
-                    disabled={!values?.isEmail}
-                  />
+                <div className="policy-delivery-options mb-12">
+                  <label
+                    htmlFor="policy-delivery-email"
+                    className={`person-type-option policy-delivery-option ${values?.isEmail ? 'person-type-option--selected' : ''}`}
+                  >
+                    <div className="d-flex align-items-center gap-2">
+                      <RadioButton
+                        inputId="policy-delivery-email"
+                        name="policy-delivery-channel"
+                        value="email"
+                        onChange={() => selectPolicyDelivery('email')}
+                        checked={values?.isEmail}
+                      />
+                      <span>อีเมล</span>
+                    </div>
+                    {values?.isEmail && (
+                      <div className="mt-12">
+                        <Input
+                          label="อีเมล"
+                          name="policyEmail"
+                          type="text"
+                          maxLength={50}
+                          placeholder="กรอกอีเมล"
+                          onChange={({ target: { name, value } }) => handleChange({ name, value })}
+                          value={values?.policyEmail || ''}
+                          feedback={errors?.policyEmail}
+                          style={{ width: 'inherit' }}
+                        />
+                      </div>
+                    )}
+                  </label>
+
+                  <label
+                    htmlFor="policy-delivery-sms"
+                    className={`person-type-option policy-delivery-option ${values?.isSms ? 'person-type-option--selected' : ''}`}
+                  >
+                    <div className="d-flex align-items-center gap-2">
+                      <RadioButton
+                        inputId="policy-delivery-sms"
+                        name="policy-delivery-channel"
+                        value="sms"
+                        onChange={() => selectPolicyDelivery('sms')}
+                        checked={values?.isSms}
+                      />
+                      <span>SMS</span>
+                    </div>
+                    {values?.isSms && (
+                      <div className="mt-12">
+                        <Input
+                          label="เบอร์โทรศัพท์"
+                          name="policySms"
+                          type="text"
+                          maxLength={12}
+                          placeholder="กรอกเบอร์โทรศัพท์"
+                          onChange={({ target: { name, value } }) =>
+                            handleChange({ name, value: value?.replaceAll('-', '') })
+                          }
+                          value={convertStrToFormat(values?.policySms, 'phone_number') || ''}
+                          feedback={errors?.policySms}
+                          style={{ width: 'inherit' }}
+                        />
+                      </div>
+                    )}
+                  </label>
+
+                  <label
+                    htmlFor="policy-delivery-post-current"
+                    className={`person-type-option policy-delivery-option ${values?.isPostCurrent ? 'person-type-option--selected' : ''}`}
+                  >
+                    <div className="d-flex align-items-center gap-2">
+                      <RadioButton
+                        inputId="policy-delivery-post-current"
+                        name="policy-delivery-channel"
+                        value="post-current"
+                        onChange={() => selectPolicyDelivery('postCurrent')}
+                        checked={!!values?.isPostCurrent}
+                      />
+                      <span>ส่งไปรษณีย์ตามที่อยู่ปัจจุบัน</span>
+                    </div>
+                  </label>
+
+                  <label
+                    htmlFor="policy-delivery-post-other"
+                    className={`person-type-option policy-delivery-option ${values?.isPostOther ? 'person-type-option--selected' : ''}`}
+                  >
+                    <div className="d-flex align-items-center gap-2">
+                      <RadioButton
+                        inputId="policy-delivery-post-other"
+                        name="policy-delivery-channel"
+                        value="post-other"
+                        onChange={() => selectPolicyDelivery('postOther')}
+                        checked={!!values?.isPostOther}
+                      />
+                      <span>ส่งไปรษณีย์ตามที่อยู่อื่น</span>
+                    </div>
+                  </label>
+
+                  <label
+                    htmlFor="policy-delivery-print"
+                    className={`person-type-option policy-delivery-option ${values?.isPrintForCustomer ? 'person-type-option--selected' : ''}`}
+                  >
+                    <div className="d-flex align-items-center gap-2">
+                      <RadioButton
+                        inputId="policy-delivery-print"
+                        name="policy-delivery-channel"
+                        value="print"
+                        onChange={() => selectPolicyDelivery('print')}
+                        checked={!!values?.isPrintForCustomer}
+                      />
+                      <span>พิมพ์เอกสารให้ลูกค้า</span>
+                    </div>
+                  </label>
                 </div>
-                <div
-                  style={{ display: 'flex', width: '100%', alignItems: 'center', marginBottom: '12px', gap: '10px' }}
-                >
-                  <input
-                    type="checkbox"
-                    checked={values?.isSms}
-                    onChange={(e) => {
-                      handleChange({ name: 'isSms', value: e.target.checked })
-                      if (!e.target.checked) {
-                        handleChange({ name: 'policySms', value: '' })
-                      } else {
-                        handleChange({ name: 'policySms', value: values?.telephoneNo || '' })
-                      }
-                    }}
-                  />
-                  <Input
-                    name="policySms"
-                    type="text"
-                    maxLength={12}
-                    placeholder="กรอกเบอร์โทรศัพท์"
-                    onChange={({ target: { name, value } }) =>
-                      handleChange({ name, value: value?.replaceAll('-', '') })
-                    }
-                    value={convertStrToFormat(values?.policySms, 'phone_number') || ''}
-                    label="เบอร์โทรศัพท์"
-                    feedback={!values?.isSms ? errors?.isSms : ''}
-                    style={{ width: 'inherit' }}
-                    disabled={!values?.isSms}
-                  />
-                </div>
-                {!values?.isEmail && !values?.isSms && (errors?.isEmail || errors?.isSms) && (
+                {errors?.isEmail && typeof errors.isEmail === 'string' && (
                   <div className="feedback" style={{ color: 'red', marginTop: '-8px', marginBottom: '12px' }}>
-                    {errors?.isEmail || errors?.isSms}
+                    {errors.isEmail}
                   </div>
                 )}
               </>
