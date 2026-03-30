@@ -4,6 +4,7 @@ import './page.scss'
 import MainWithDynamicStyle from '@/cmi-layout/components/MainWithDynamicStyle'
 import { getDataFromSession } from '@/helpers/functions/getDataFromSession'
 import CarInformationForm from './_forms/CarInformationForm'
+import CarInformationDatePickerExample from './CarInformationDatePickerExample'
 
 export const dynamic = 'force-dynamic'
 
@@ -64,6 +65,7 @@ const Page = async () => {
               </h2>
             </div>
             <CarInformationForm />
+            <CarInformationDatePickerExample />
           </div>
         </div>
         <div

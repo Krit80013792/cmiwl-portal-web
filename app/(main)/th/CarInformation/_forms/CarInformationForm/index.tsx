@@ -113,8 +113,8 @@ const CarInformationForm = () => {
     const days = () => {
       const selectedMonth = values?.monthCoverage
         ? dayjs()
-          .year(values?.yearCoverage)
-          .month(values?.monthCoverage - 1)
+            .year(values?.yearCoverage)
+            .month(values?.monthCoverage - 1)
         : dayjs()
       const daysInMonth = selectedMonth.daysInMonth()
       const today = dayjs().startOf('day')
@@ -275,7 +275,18 @@ const CarInformationForm = () => {
                     fetchCarModelData(brand.carBrandId)
                   }}
                 >
-                  <div style={{ position: 'relative', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${errors.carBrandId ? '#EB5848' : '#F2F2F2'}`, borderRadius: '8px' }} className={`rounded-4 text-center js-listdata choice-card ${isActive ? ' active' : ''}`}>
+                  <div
+                    style={{
+                      position: 'relative',
+                      height: '64px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: `1px solid ${errors.carBrandId ? '#EB5848' : '#F2F2F2'}`,
+                      borderRadius: '8px',
+                    }}
+                    className={`rounded-4 text-center js-listdata choice-card ${isActive ? ' active' : ''}`}
+                  >
                     {isActive && (
                       <Image
                         src="/assets/icon/icon-success.png"
@@ -284,8 +295,7 @@ const CarInformationForm = () => {
                         height={16}
                         style={{ position: 'absolute', top: 3, right: 3 }}
                       />
-                    )
-                    }
+                    )}
                     <Image alt={brand?.carBrandName} width="48" height="48" src={brand?.carBrandImage} />
                   </div>
                 </button>
@@ -314,7 +324,7 @@ const CarInformationForm = () => {
             feedback={errors?.carBrandId}
           />
         </div>
-        <div className='car-model-color-container'>
+        <div className="car-model-color-container">
           <div style={{ width: '100%' }} className="form-group mb-12 carmodel">
             <Select
               label="รุ่นรถ"
@@ -347,7 +357,6 @@ const CarInformationForm = () => {
                 value: color?.carColorId,
               }))}
               feedback={values?.carBrandId && values?.carModelName && errors?.carColorId}
-
             />
           </div>
         </div>
@@ -379,7 +388,9 @@ const CarInformationForm = () => {
         </div>
         <ChassisDialog open={open} onClose={() => setOpen(false)} />
         <div style={{ marginTop: '24px' }} className="form-group mb-12 radio-list-horizontal">
-          <h2 className="text-black" style={{ fontSize: '16px', fontWeight: '700' }}>รถของคุณป้ายแดงหรือไม่ ?</h2>
+          <h2 className="text-black" style={{ fontSize: '16px', fontWeight: '700' }}>
+            รถของคุณป้ายแดงหรือไม่ ?
+          </h2>
           <div className="mt-2">
             <div style={{ display: 'flex', justifyContent: 'center' }}>
               <div className="gap-3" style={{ display: 'flex', width: '100%' }}>
@@ -395,9 +406,7 @@ const CarInformationForm = () => {
                     onChange={(e) => handleChange({ name: 'isRedLicense', value: e.value })}
                     checked={!values?.isRedLicense}
                   />
-                  <span className="ml-2">
-                    ไม่ใช่
-                  </span>
+                  <span className="ml-2">ไม่ใช่</span>
                 </label>
                 <label
                   htmlFor="isRedLicense"
@@ -416,9 +425,7 @@ const CarInformationForm = () => {
                     }}
                     checked={values?.isRedLicense}
                   />
-                  <span className="ml-2">
-                    ใช่ ป้ายแดง
-                  </span>
+                  <span className="ml-2">ใช่ ป้ายแดง</span>
                 </label>
               </div>
             </div>
@@ -489,20 +496,20 @@ const CarInformationForm = () => {
                   options={
                     mounted
                       ? (() => {
-                        const years = []
-                        const currentYear = dayjs().year()
-                        const maxDate = dayjs().add(90, 'day')
-                        const maxYear = maxDate.year()
+                          const years = []
+                          const currentYear = dayjs().year()
+                          const maxDate = dayjs().add(90, 'day')
+                          const maxYear = maxDate.year()
 
-                        // Add current year and next year if 90 days spans into it
-                        for (let year = currentYear; year <= maxYear; year++) {
-                          years.push({
-                            label: (year + 543).toString(),
-                            value: year.toString(),
-                          })
-                        }
-                        return years
-                      })()
+                          // Add current year and next year if 90 days spans into it
+                          for (let year = currentYear; year <= maxYear; year++) {
+                            years.push({
+                              label: (year + 543).toString(),
+                              value: year.toString(),
+                            })
+                          }
+                          return years
+                        })()
                       : []
                   }
                   feedback={errors?.yearCoverage}
@@ -531,19 +538,19 @@ const CarInformationForm = () => {
                   options={
                     mounted
                       ? (() => {
-                        const months = []
-                        const maxDate = dayjs().add(90, 'day')
-                        for (let i = 0; i < 4; i++) {
-                          const month = dayjs().add(i, 'month')
-                          if (month.isBefore(maxDate) || month.isSame(maxDate, 'month')) {
-                            months.push({
-                              label: month.format('MMMM'),
-                              value: (month.month() + 1).toString(),
-                            })
+                          const months = []
+                          const maxDate = dayjs().add(90, 'day')
+                          for (let i = 0; i < 4; i++) {
+                            const month = dayjs().add(i, 'month')
+                            if (month.isBefore(maxDate) || month.isSame(maxDate, 'month')) {
+                              months.push({
+                                label: month.format('MMMM'),
+                                value: (month.month() + 1).toString(),
+                              })
+                            }
                           }
-                        }
-                        return months
-                      })()
+                          return months
+                        })()
                       : []
                   }
                   feedback={errors?.monthCoverage}
