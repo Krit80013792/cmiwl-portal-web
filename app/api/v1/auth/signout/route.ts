@@ -34,8 +34,8 @@ export async function POST(poReq: NextRequest) {
         const token = (await rsaEncrypt('signout')) as string;
         response.cookies.set(`cmiwl_cms_me`, '', {
             httpOnly: false,
-            secure: false,
-            sameSite: 'strict',
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'none',
             expires: new Date(0),
             maxAge: 0,
             path: '/',
@@ -43,7 +43,7 @@ export async function POST(poReq: NextRequest) {
         response.cookies.set(`${process.env.APP_ENV}_cmiwl_cms_token`, token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            sameSite: 'none',
             expires: new Date(0),
             maxAge: 0,
             path: '/'

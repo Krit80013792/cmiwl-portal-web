@@ -121,8 +121,8 @@ export async function POST(oReq: NextRequest) {
     //* Set public cookie
     response.cookies.set(`cmiwl_cms_me`, base64PublicUserData, {
       httpOnly: false,
-      secure: false,
-      sameSite: 'strict',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'none',
       maxAge: 2 * 60 * 60,
       path: '/',
     })
@@ -130,7 +130,7 @@ export async function POST(oReq: NextRequest) {
     response.cookies.set(`${process.env.APP_ENV}_cmiwl_cms_token`, encryptedToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: 'none',
       maxAge: 2 * 60 * 60,
       path: '/',
     })
